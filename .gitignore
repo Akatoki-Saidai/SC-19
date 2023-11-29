@@ -15,7 +15,6 @@ _deps
 *.elf.map
 *.hex
 elf2uf2
-pico_sdk_import.cmake
 .vscode
 .cmake
 *.out

@@ -5,8 +5,7 @@
 
 #include <iostream>
 #include "stdio.h"
-#include "stdlib.h"
-//#include "Windows.h"
+#include "pico/stdlib.h"
 #include "hardware/gpio.h"
 #include "hardware/adc.h"//CMakeList.txtのtarget_link_librariesに追加
 
@@ -34,16 +33,16 @@ int main() {
         std::cout << "Carrier was open" << std::endl;
     }
 
-    /*if (carrier_open == 0) {
+    if (carrier_open == 0) {
         gpio_put( PICO_DEFAULT_LED_PIN, 0);
-        //Sleep(1000); 
-        //gpio_put( PICO_DEFAULT_LED_PIN, 0);
+        sleep_ms(1000); 
+        gpio_put( PICO_DEFAULT_LED_PIN, 0);
     }
     else{
         gpio_put( PICO_DEFAULT_LED_PIN, 1);
-        //Sleep(1000); 
-        //gpio_put( PICO_DEFAULT_LED_PIN, 0);
-    }*/
+        sleep_ms(1000); 
+        gpio_put( PICO_DEFAULT_LED_PIN, 0);
+    }
 
 
     //LED
@@ -53,13 +52,13 @@ int main() {
     gpio_set_dir(GPIO_GREEN_LED, GPIO_OUT);
 
     gpio_put(GPIO_RED_LED, 1);
-    //Sleep(1000);
-    //gpio_put(GPIO_RED_LED, 0);
+    sleep_ms(1000);
+    gpio_put(GPIO_RED_LED, 0);
     gpio_put(GPIO_GREEN_LED, 1);
-    //Sleep(1000);
-    //gpio_put(GPIO_GREEN_LED, 0);
+    sleep_ms(1000);
+    gpio_put(GPIO_GREEN_LED, 0);
     
-    //std::cout << "LED lighted" << std::endl;
+    std::cout << "LED lighted" << std::endl;
 
     
 

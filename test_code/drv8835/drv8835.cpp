@@ -72,13 +72,13 @@ void motor_init(void) {
 }    
 
 
-void back(double duty){
+void forward(double duty){
     //duty 50%
     pwm_set_gpio_level( PIN_PWM1_1, ( pwm1_1_slice_config.top * duty ) );
     pwm_set_gpio_level( PIN_PWM2_1, ( pwm2_1_slice_config.top * duty ) );
 }
 
-void forward(double duty){
+void back(double duty){
     pwm_set_gpio_level( PIN_PWM1_2, ( pwm1_2_slice_config.top * duty ) );
     pwm_set_gpio_level( PIN_PWM2_2, ( pwm2_2_slice_config.top * duty ) );
 }
@@ -93,14 +93,18 @@ void left(double duty){
     pwm_set_gpio_level( PIN_PWM2_2, ( pwm2_1_slice_config.top * duty ) );
 }
 
-//エラーと思ったらmain書いてなかった
+
 int main() {
     motor_init();
-    forward(0.20);
+    gpio_init(PICO_DEFAULT_LED_PIN);
+    gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+    gpio_put(PICO_DEFAULT_LED_PIN, 1);
+
+    forward(1.0);
     sleep_ms(2000);
     forward(0);
     sleep_ms(1000);
-    back(0.30);
+    back(1.0);
     sleep_ms(1000);
     back(0);
     //全部テスト

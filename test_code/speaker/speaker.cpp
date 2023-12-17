@@ -41,7 +41,9 @@ void speaker_init(){
 void play_starwars(){
 
     
-    //使用する音の周波数の宣言(低いラ～高いド)
+    //使用する音の周波数の宣言(低いラ～高いド) 0は無音(休符)
+    const double sound_rest = 0;
+    const double sound_G4 = 391.995;
     const double sound_A4 = 440; //ラ
     const double sound_B4 = 493.883;
     const double sound_C5 = 523.251;
@@ -59,10 +61,10 @@ void play_starwars(){
     // bps = 153.9 原曲153.9bpm / 60秒 = 2.565bps * 3連符 = 7.695
     // mspb = 0.12995... # 7.695bpsの逆数 = 0.12995...s　4部音符ひとつ分の音の長さ(音の間隔)
 
-    // メロディーを配列で作成 0は無音(休符)
-    const std::vector<double> starwars_melody = {sound_C5, sound_C5, sound_G5, sound_G5, sound_F5, sound_E5, sound_D5, sound_C6, sound_C6, sound_G5, sound_G5, sound_F5, sound_E5, sound_D5, sound_C6, sound_C6, sound_G5, sound_G5, sound_F5, sound_E5, sound_F5, sound_D5 };
+    // メロディーを配列で作成
+    const std::vector<double> starwars_melody = {sound_G4, sound_rest, sound_G4, sound_rest, sound_G4, sound_rest, sound_C5, sound_C5, sound_G5, sound_G5, sound_F5, sound_E5, sound_D5, sound_C6, sound_C6, sound_G5, sound_G5, sound_F5, sound_E5, sound_D5, sound_C6, sound_C6, sound_G5, sound_G5, sound_F5, sound_E5, sound_F5, sound_D5 };
 
-    //ドーソーファミレド(高)ーソーファミレド(高)ーソーファミファレー
+    // ソ(低) ソ(低) ソ(低) ドーソーファミレド(高)ーソーファミレド(高)ーソーファミファレー
 
 
     for(uint8_t melody_order = 0; melody_order <= starwars_melody.size(); melody_order++){

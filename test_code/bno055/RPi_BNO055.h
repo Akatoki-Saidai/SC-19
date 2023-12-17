@@ -23,8 +23,8 @@
 /* ピン番号はここでいじってね */
 constexpr i2c_inst_t *I2cChannel = i2c0;
 constexpr uint I2cBaudRate = 9600;
-constexpr uint SclPinGpio = 5;
-constexpr uint SdaPinGpio = 4;
+constexpr uint SclPinGpio = 21;
+constexpr uint SdaPinGpio = 20;
 
 typedef struct
 {

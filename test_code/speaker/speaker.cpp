@@ -4,16 +4,17 @@
 
 #include <iostream>
 #include "stdio.h"
-#include "vector"
+#include "list"
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
 #include "hardware/pwm.h"
 #include "chrono"
+#include "initializer_list"
 
-#define PIN_Speaker_PWM 12
+#define PIN_Speaker_PWM 22
 static pwm_config speaker_pwm_slice_config;
 static uint8_t speaker_pwm_slice_num = pwm_gpio_to_slice_num(PIN_Speaker_PWM);
-double speaker_pwm_clkdiv = 1.8;
+double speaker_pwm_clkdiv = 1.6;
 
 
 
@@ -23,7 +24,7 @@ void speaker_init(){
     //pwmの設定
     gpio_set_function(PIN_Speaker_PWM,GPIO_FUNC_PWM);
 
-    // uint16_t speaker_pwm_slice_num = pwm_gpio_to_slice_num(PIN_Speaker_PWM);
+    // uint8_t speaker_pwm_slice_num = pwm_gpio_to_slice_num(PIN_Speaker_PWM);
     speaker_pwm_slice_config = pwm_get_default_config();
     // 位相補正：なし
     // 分周：1分周
@@ -56,21 +57,25 @@ void play_starwars(){
     const double sound_C6 = 1046.502;
 
 
-    const double starwars_bps = 7.695;
-    const double starwars_mspb = 1 / starwars_bps;
-    // bps = 153.9 原曲153.9bpm / 60秒 = 2.565bps * 3連符 = 7.695
-    // mspb = 0.12995... # 7.695bpsの逆数 = 0.12995...s　4部音符ひとつ分の音の長さ(音の間隔)
+    const double starwars_bps = 153.9 / 60;
+    const double starwars_spb = 1 / starwars_bps;
+    // bpm = 153.9 原曲153.9bpm / 60秒 = 2.565bps
+    // spb = 0.38986  2.565bpsの逆数: 4部音符ひとつ分の音の長さ(音の間隔)
 
     // メロディーを配列で作成
-    const std::vector<double> starwars_melody = {sound_G4, sound_rest, sound_G4, sound_rest, sound_G4, sound_rest, sound_C5, sound_C5, sound_G5, sound_G5, sound_F5, sound_E5, sound_D5, sound_C6, sound_C6, sound_G5, sound_G5, sound_F5, sound_E5, sound_D5, sound_C6, sound_C6, sound_G5, sound_G5, sound_F5, sound_E5, sound_F5, sound_D5 };
+    const std::initializer_list<double> starwars_melody{sound_G4, sound_rest, sound_G4, sound_rest, sound_G4, sound_C5, sound_C5, sound_G5, sound_G5, sound_F5, sound_E5, sound_D5, sound_C6, sound_C6, sound_G5, sound_G5, sound_F5, sound_E5, sound_D5, sound_C6, sound_C6, sound_G5, sound_G5, sound_F5, sound_E5, sound_F5, sound_D5, sound_D5 };
+    // ソ(低) ソ(低) ソ(低)ドーソーファミレド(高)ーソーファミレド(高)ーソーファミファレー
+    auto starwars_melody_now_itr =starwars_melody.begin();
 
-    // ソ(低) ソ(低) ソ(低) ドーソーファミレド(高)ーソーファミレド(高)ーソーファミファレー
 
+    for(uint8_t starwars_melody_order = 0; starwars_melody_order <= starwars_melody.size(); starwars_melody_order++){
 
-    for(uint8_t melody_order = 0; melody_order <= starwars_melody.size(); melody_order++){
+        double sound_start_clock = clock();
+        
+        double starwars_melody_now = *starwars_melody_now_itr;
 
-        if(starwars_melody[melody_order] == 0){
-            
+        if(starwars_melody_now == sound_rest){
+            pwm_set_gpio_level( PIN_Speaker_PWM, ( sound_rest ) );
         }
 
         else{
@@ -87,22 +92,29 @@ void play_starwars(){
             // 出力周波数 = 125000000 / ((ラップ + 1) * 分周比)
             // ラップ  = (125000000 / (f * 分周比)) - 1
 
-            uint16_t speaker_pwm_wrap = (Raspberry_pi_clock / (starwars_melody[melody_order] * speaker_pwm_clkdiv)) - 1;
-            pwm_config_set_wrap( &speaker_pwm_slice_config, speaker_pwm_wrap );
+            uint16_t speaker_pwm_wrap = (Raspberry_pi_clock / (starwars_melody_now * speaker_pwm_clkdiv)) - 1;
 
+            pwm_config_set_wrap( &speaker_pwm_slice_config, speaker_pwm_wrap );
             pwm_init( speaker_pwm_slice_num, &speaker_pwm_slice_config, true );
 
             pwm_set_gpio_level( PIN_Speaker_PWM, ( speaker_pwm_wrap * speaker_duty ) );
-            
-            }
-
-        // 音の継続
-        double sound_start_clock = clock();
-        while(clock() - sound_start_clock >= starwars_mspb){
-
         }
+        
+        
+        // 次の音
+        starwars_melody_now_itr = ++starwars_melody_now_itr;
+        
+        // 音の継続
+        while( (clock() - sound_start_clock) / CLOCKS_PER_SEC <= starwars_spb){
+        
+        }
+        // std::cout << (clock() - sound_start_clock) / CLOCKS_PER_SEC << std::endl;
 
     }
+
+    // 演奏終了
+    pwm_set_gpio_level( PIN_Speaker_PWM, ( sound_rest ) );
+
 }
 
 

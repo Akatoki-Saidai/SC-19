@@ -14,7 +14,7 @@
 #define PIN_Speaker_PWM 22
 static pwm_config speaker_pwm_slice_config;
 static uint8_t speaker_pwm_slice_num = pwm_gpio_to_slice_num(PIN_Speaker_PWM);
-double speaker_pwm_clkdiv = 1.6;
+double speaker_pwm_clkdiv = 6.5;
 
 
 
@@ -63,7 +63,7 @@ void play_starwars(){
     // spb = 0.38986  2.565bpsの逆数: 4部音符ひとつ分の音の長さ(音の間隔)
 
     // メロディーを配列で作成
-    const std::initializer_list<double> starwars_melody{sound_G4, sound_rest, sound_G4, sound_rest, sound_G4, sound_C5, sound_C5, sound_G5, sound_G5, sound_F5, sound_E5, sound_D5, sound_C6, sound_C6, sound_G5, sound_G5, sound_F5, sound_E5, sound_D5, sound_C6, sound_C6, sound_G5, sound_G5, sound_F5, sound_E5, sound_F5, sound_D5, sound_D5 };
+    const std::initializer_list<double> starwars_melody{sound_G4, sound_rest, sound_G4, sound_rest, sound_G4, sound_rest, sound_C5, sound_C5, sound_G5, sound_G5, sound_F5, sound_E5, sound_D5, sound_C6, sound_C6, sound_G5, sound_G5, sound_F5, sound_E5, sound_D5, sound_C6, sound_C6, sound_G5, sound_G5, sound_F5, sound_E5, sound_F5, sound_D5, sound_D5 };
     // ソ(低) ソ(低) ソ(低)ドーソーファミレド(高)ーソーファミレド(高)ーソーファミファレー
     auto starwars_melody_now_itr =starwars_melody.begin();
 
@@ -105,9 +105,15 @@ void play_starwars(){
         starwars_melody_now_itr = ++starwars_melody_now_itr;
         
         // 音の継続
+        /*
+        if (starwars_melody_order == 2 || starwars_melody_order == 4){   
+            while( (clock() - sound_start_clock) / CLOCKS_PER_SEC <= starwars_spb / 8){
+            }
+        }*/
+        // else{
         while( (clock() - sound_start_clock) / CLOCKS_PER_SEC <= starwars_spb){
-        
         }
+
         // std::cout << (clock() - sound_start_clock) / CLOCKS_PER_SEC << std::endl;
 
     }

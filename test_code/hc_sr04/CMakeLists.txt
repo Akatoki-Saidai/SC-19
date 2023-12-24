@@ -5,7 +5,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 pico_sdk_init()
 add_executable(hcsr04
-  hcsr04.c
+  hcsr04.cpp
 )
 
 target_link_libraries(hcsr04 pico_stdlib hardware_gpio)

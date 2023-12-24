@@ -7,38 +7,49 @@
 // --------------------------------------------------------------------------
 #include "user.h"
 #include "pico/stdlib.h"
-#include "hardware/spi.h"
+#include "hardware/i2c.h"
+//ここを追加した    
+#include "bme280_defs.h"
 
 void user_delay_us(uint32_t period, void *intf_ptr) {
   sleep_us(period);
 }
 
-int8_t user_spi_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr) {
-  // note that spi_xxx_blocking return the correct number of bytes written
-  // (from the internal FIFO), even if no peripheral is connected.
-  // So it is pointless to check the results.
+
+int8_t user_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr) {
   int8_t rslt = 0;
   asm volatile("nop \n nop \n nop");
-  gpio_put(SPI_CS, 0);                        // Chip select is low
   asm volatile("nop \n nop \n nop");
-  spi_write_blocking(SPI_PORT,&reg_addr,1);
+  i2c_write_blocking(I2C_PORT,BME280_I2C_ADDR_PRIM,&reg_addr,1,true);
   sleep_ms(10);
-  spi_read_blocking(SPI_PORT,0,reg_data,len);
+  i2c_read_blocking(I2C_PORT,BME280_I2C_ADDR_PRIM,reg_data,len,false);
   asm volatile("nop \n nop \n nop");
-  gpio_put(SPI_CS, 1);                        // Chip de-select is high
   asm volatile("nop \n nop \n nop");
   return rslt;
 }
 
-int8_t user_spi_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr) {
+int8_t user_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr) {
   int8_t rslt = 0;
   asm volatile("nop \n nop \n nop");
-  gpio_put(SPI_CS, 0);                        // Chip select is low
   asm volatile("nop \n nop \n nop");
-  spi_write_blocking(SPI_PORT,&reg_addr,1);
-  spi_write_blocking(SPI_PORT,reg_data,len);
+  uint8_t data_with_reg_addr[len + 1];  // レジスタアドレスとデータを含む配列を作成
+  data_with_reg_addr[0] = reg_addr;  // 先頭にレジスタアドレスを配置
+  for (int i = 0; i < len; i++) {
+    data_with_reg_addr[i + 1] = reg_data[i];  // 残りのデータを配置
+  }
+  i2c_write_blocking(I2C_PORT, BME280_I2C_ADDR_PRIM, data_with_reg_addr, len + 1, false);  // レジスタアドレスとデータを一度に送信
   asm volatile("nop \n nop \n nop");
-  gpio_put(SPI_CS, 1);                        // Chip de-select is high
   asm volatile("nop \n nop \n nop");
   return rslt;
 }
+
+// int8_t user_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr) {
+//   int8_t rslt = 0;
+//   asm volatile("nop \n nop \n nop");
+//   asm volatile("nop \n nop \n nop");
+//   i2c_write_blocking(I2C_PORT,BME280_I2C_ADDR_PRIM,&reg_addr,1,true);
+//   i2c_write_blocking(I2C_PORT,BME280_I2C_ADDR_PRIM,reg_data,len,false);
+//   asm volatile("nop \n nop \n nop");
+//   asm volatile("nop \n nop \n nop");
+//   return rslt;
+// }

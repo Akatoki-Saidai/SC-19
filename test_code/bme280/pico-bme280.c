@@ -9,27 +9,21 @@
 #include <stdio.h>
 #include <math.h>
 #include "pico/stdlib.h"
-#include "hardware/spi.h"
+#include "hardware/i2c.h"
 
 #include "user.h"
 #include "bme280.h"
 
-// ---------------------------------------------------------------------------
-// hardware-specific intialization
-// SPI_* constants from CMakeLists.txt or user.h
-
-void init_hw() {
+//I2Cに書き換えた
+void init_hw(){
   stdio_init_all();
-  spi_init(SPI_PORT, 1000000);                // SPI with 1Mhz
-  gpio_set_function(SPI_RX, GPIO_FUNC_SPI);
-  gpio_set_function(SPI_SCK,GPIO_FUNC_SPI);
-  gpio_set_function(SPI_TX, GPIO_FUNC_SPI);
+  i2c_init(I2C_PORT,100000);
+  gpio_set_function(I2C_SDA,GPIO_FUNC_I2C);
+  gpio_set_function(I2C_SCL,GPIO_FUNC_I2C);
 
-  gpio_init(SPI_CS);
-  gpio_set_dir(SPI_CS, GPIO_OUT);
-  gpio_put(SPI_CS, 1);                        // Chip select is active-low
+  gpio_pull_up(I2C_SDA);
+  gpio_pull_up(I2C_SCL);
 }
-
 // ---------------------------------------------------------------------------
 // initialize sensor
 
@@ -40,13 +34,14 @@ int8_t init_sensor(struct bme280_dev *dev, uint32_t *delay) {
   // give sensor time to startup
   sleep_ms(5);                    // datasheet: 2ms
 
-  // basic initialization
-  dev->intf_ptr = SPI_PORT;       // SPI_PORT is an address
-  dev->intf     = BME280_SPI_INTF;
-  dev->read     = user_spi_read;
-  dev->write    = user_spi_write;
+  //ここを追加した.user_の関数は別のファイルで定義してある
+  dev->intf_ptr = I2C_PORT;
+  dev->intf     = BME280_I2C_INTF;
+  dev->read     = user_i2c_read;
+  dev->write    = user_i2c_write;
   dev->delay_us = user_delay_us;
   rslt = bme280_init(dev);
+
 #ifdef DEBUG
   printf("[DEBUG] chip-id: 0x%x\n",dev->chip_id);
 #endif

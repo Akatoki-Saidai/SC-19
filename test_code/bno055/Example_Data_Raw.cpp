@@ -43,7 +43,8 @@ int main(void)
 	i2c_init(I2cChannel, I2cBaudRate);
 	gpio_set_function(SclPinGpio, GPIO_FUNC_I2C);
 	gpio_set_function(SdaPinGpio, GPIO_FUNC_I2C);
-	
+	gpio_pull_up(SdaPinGpio);
+  	gpio_pull_up(SclPinGpio);
 	std::cout << "Orientation Sensor Raw Data Test" << std::endl;
 
 	/* Initialise the sensor */

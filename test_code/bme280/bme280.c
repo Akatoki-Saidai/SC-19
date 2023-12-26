@@ -463,10 +463,10 @@ int8_t bme280_get_regs(uint8_t reg_addr, uint8_t *reg_data, uint16_t len, struct
     if ((rslt == BME280_OK) && (reg_data != NULL))
     {
         /* If interface selected is SPI */
-        if (dev->intf != BME280_I2C_INTF)
-        {
-            reg_addr = reg_addr | 0x80;
-        }
+        // if (dev->intf != BME280_I2C_INTF)
+        // {
+        //     reg_addr = reg_addr | 0x80;
+        // }
 
         /* Read the data  */
         dev->intf_rslt = dev->read(reg_addr, reg_data, len, dev->intf_ptr);
@@ -513,13 +513,13 @@ int8_t bme280_set_regs(uint8_t *reg_addr, const uint8_t *reg_data, uint8_t len, 
             temp_buff[0] = reg_data[0];
 
             /* If interface selected is SPI */
-            if (dev->intf != BME280_I2C_INTF)
-            {
-                for (reg_addr_cnt = 0; reg_addr_cnt < len; reg_addr_cnt++)
-                {
-                    reg_addr[reg_addr_cnt] = reg_addr[reg_addr_cnt] & 0x7F;
-                }
-            }
+            // if (dev->intf != BME280_I2C_INTF)
+            // {
+            //     for (reg_addr_cnt = 0; reg_addr_cnt < len; reg_addr_cnt++)
+            //     {
+            //         reg_addr[reg_addr_cnt] = reg_addr[reg_addr_cnt] & 0x7F;
+            //     }
+            // }
 
             /* Burst write mode */
             if (len > 1)

@@ -30,11 +30,10 @@ pico_sdk_init()
 
 add_executable(pico-bme280 pico-bme280.c bme280.c user.c)
 
-add_compile_definitions(SPI_PORT=spi1)
-add_compile_definitions(SPI_RX=12)
-add_compile_definitions(SPI_CS=13)
-add_compile_definitions(SPI_SCK=14)
-add_compile_definitions(SPI_TX=15)
+#I2Cに書き換えた
+add_compile_definitions(I2C_PORT=i2c1)
+add_compile_definitions(I2C_SDA=18)
+add_compile_definitions(I2C_SCL=19)
 add_compile_definitions(ALTITUDE_AT_LOC=520)
 
 add_compile_definitions(BME280_32BIT_ENABLE)
@@ -58,7 +57,7 @@ target_link_libraries(pico-bme280 pico_stdlib)
 
 # Add any user requested libraries
 target_link_libraries(pico-bme280
-        hardware_spi
+        hardware_i2c
         )
 
 pico_add_extra_outputs(pico-bme280)

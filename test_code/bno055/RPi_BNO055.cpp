@@ -573,7 +573,10 @@ uint8_t Adafruit_BNO055::read8(adafruit_bno055_reg_t reg )
   uint8_t value = 0;
   uint8_t reg_uint = static_cast<uint8_t>(reg);
   i2c_write_blocking(I2cChannel, BNO055_ADDRESS_A, &reg_uint, 1, true);
+  sleep_ms(10);
   i2c_read_blocking(I2cChannel, BNO055_ADDRESS_A, &value, 1, false);
+
+  std::cout << "Value: " << static_cast<int>(value) << ", Register: " << static_cast<int>(reg_uint) << std::endl;
 
   return value;
 }

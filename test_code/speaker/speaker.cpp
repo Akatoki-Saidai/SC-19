@@ -123,6 +123,55 @@ void play_starwars(){
 
 }
 
+void play_windows7(){
+    // 使用する音
+    const double sound_B4 = 493.883;
+    const double sound_E5 = 659.255;
+    const double sound_Fs5 = 761.672;
+    const double sound_B5 = 987.767;
+
+    const double windows7_bps = 120 / 60;
+    const double windows7_spb = 1 / windows7_bps;
+
+    const std::initializer_list<double> windows7_melody{sound_B4, sound_E5, sound_Fs5, sound_Fs5};
+    auto windows7_melody_now_itr =windows7_melody.begin();
+
+
+    for(uint8_t windows7_melody_order = 0; windows7_melody_order <= windows7_melody.size(); windows7_melody_order++){
+
+        double sound_start_clock = clock();
+        
+        double windows7_melody_now = *windows7_melody_now_itr;
+
+        static const uint32_t Raspberry_pi_clock = 125000000;
+        static double speaker_duty = 0.50;
+
+        uint16_t speaker_pwm_wrap = (Raspberry_pi_clock / (windows7_melody_now * speaker_pwm_clkdiv)) - 1;
+
+        pwm_config_set_wrap( &speaker_pwm_slice_config, speaker_pwm_wrap );
+        pwm_init( speaker_pwm_slice_num, &speaker_pwm_slice_config, true );
+
+        pwm_set_gpio_level( PIN_Speaker_PWM, ( speaker_pwm_wrap * speaker_duty ) );
+        
+        // 次の音
+        windows7_melody_now_itr = ++windows7_melody_now_itr;
+        
+        // 音の継続
+        if (windows7_melody_order == 1 || windows7_melody_order == 3){   
+            while( (clock() - sound_start_clock) / CLOCKS_PER_SEC <= windows7_spb / 2){
+            }
+        }
+        else{
+            while( (clock() - sound_start_clock) / CLOCKS_PER_SEC <= windows7_spb){
+            }
+        }
+
+    // 演奏終了
+    pwm_set_gpio_level( PIN_Speaker_PWM, 0 );
+    }
+
+}
+
 
 int main(){
     speaker_init();

@@ -4,7 +4,7 @@
 #include <inttypes.h>
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
-#include "pico/test.h" //追加した
+//#include "pico/test.h" //追加した
 //-------------------------------------------------------------------------
 //define
 //-------------------------------------------------------------------------
@@ -13,13 +13,13 @@
 //-------------------------------------------------------------------------
 //prototype
 //-------------------------------------------------------------------------
-void hcsr_callback(uint8_t gpio,uint32_t emask);
+void hcsr_callback(uint gpio,uint32_t emask);
 
 //-------------------------------------------------------------------------
 //global variable
 //-------------------------------------------------------------------------
-absolute_time_t up_edge_time=0;
-absolute_time_t dn_edge_time=0;
+absolute_time_t up_edge_time;
+absolute_time_t dn_edge_time;
 uint64_t dtime=0;
 
 //-------------------------------------------------------------------------
@@ -36,7 +36,8 @@ int main() {
 
     gpio_init(6);
     gpio_set_dir(6,GPIO_IN);
-    gpio_set_irq_enabled_with_callback(6,GPIO_IRQ_EDGE_RISE = 0x8u + GPIO_IRQ_EDGE_FALL = 0x4u,true,&hcsr_callback);
+    gpio_set_irq_enabled_with_callback(6,GPIO_IRQ_EDGE_RISE + GPIO_IRQ_EDGE_FALL ,true,&hcsr_callback);
+    // gpio_set_irq_enabled_with_callback(6, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &hcsr_callback);
 
     //main loop
     while(1)
@@ -65,7 +66,7 @@ int main() {
 //ref           : https://raspberrypi.github.io/pico-sdk-
 //                doxygen/group__hardware__gpio.html
 //-------------------------------------------------------------------------
-void hcsr_callback(uint8_t gpio,uint32_t emask)
+void hcsr_callback(uint gpio,uint32_t emask)
 {
     //irq disable
     gpio_set_irq_enabled(gpio,(GPIO_IRQ_EDGE_RISE+GPIO_IRQ_EDGE_FALL),false);

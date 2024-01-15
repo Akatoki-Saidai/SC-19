@@ -1,5 +1,7 @@
 // https://tsunelab-programming.com/raspipico-hcsr04
 
+
+
 #include <stdio.h>
 #include <inttypes.h>
 #include "pico/stdlib.h"
@@ -36,6 +38,7 @@ int main() {
 
     gpio_init(6);
     gpio_set_dir(6,GPIO_IN);
+
     gpio_set_irq_enabled_with_callback(6,GPIO_IRQ_EDGE_RISE + GPIO_IRQ_EDGE_FALL ,true,&hcsr_callback);
     // gpio_set_irq_enabled_with_callback(6, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &hcsr_callback);
 

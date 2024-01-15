@@ -7,8 +7,8 @@
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
 #include "hardware/pwm.h"
-#define PIN_PWM1_1 18//モーター1の+
-#define PIN_PWM1_2 19
+#define PIN_PWM1_1 11//モーター1の+
+#define PIN_PWM1_2 10
 #define PIN_PWM2_1 20//モーター2の+
 #define PIN_PWM2_2 21
 

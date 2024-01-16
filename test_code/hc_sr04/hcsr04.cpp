@@ -56,8 +56,9 @@ int main() {
         //10[cm] echo pulse width[us] = 580 = 10 * 58
         if( dtime < 580 )
         {
-            printf("%", PRIu64, "\n",dtime, "distance(mm): ", dtime / 58 * 10);
-            busy_wait_ms(1000); 
+            //printf("%", PRIu64, "\n",dtime, "distance(mm): ", dtime / 58 * 10);
+            printf("%" PRIu64 "\n", dtime);
+            //busy_wait_ms(1000); 
         }
     }    
 }

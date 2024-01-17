@@ -36,8 +36,14 @@ int main() {
         busy_wait_ms(100);
 
         // 10[cm] echo pulse width[us] = 580 = 10 * 58
-        if (dtime < 580) {
-            printf("%llu \n", dtime);
+        // if (dtime < 580) {
+        //     printf("%llu \n", dtime);
+        //     busy_wait_ms(500);
+        // }
+
+        // 4.5[m] echo pulsw width[us] = 26100 = 4.5 * 100 * 58
+        if (dtime < 26100) {
+            printf("%llu us\n", dtime);
             busy_wait_ms(500);
         }
     }

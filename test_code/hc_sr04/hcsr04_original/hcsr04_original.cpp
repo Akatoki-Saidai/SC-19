@@ -9,8 +9,8 @@
 void hcsr_callback(uint gpio, uint32_t emask);
 
 // global variable ...
-absolute_time_t up_edge_time = 0;
-absolute_time_t dn_edge_time = 0;
+absolute_time_t up_edge_time;
+absolute_time_t dn_edge_time;
 uint64_t dtime = 0;
 
 // function: main
@@ -37,8 +37,8 @@ int main() {
 
         // 10[cm] echo pulse width[us] = 580 = 10 * 58
         if (dtime < 580) {
-            printf("%" PRIu64 "\n", dtime);
-            busy_wait_ms(5000);
+            printf("%llu \n", dtime);
+            busy_wait_ms(500);
         }
     }
 }

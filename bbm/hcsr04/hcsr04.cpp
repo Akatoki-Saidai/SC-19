@@ -1,7 +1,5 @@
 #include "hcsr04.hpp" //クラス定義
 
-// define ...
-
 // prototype ...
 void hcsr_callback(uint gpio, uint32_t emask);
 
@@ -20,7 +18,7 @@ HCSR04::HCSR04(){
     gpio_set_irq_enabled_with_callback(6, GPIO_IRQ_EDGE_RISE + GPIO_IRQ_EDGE_FALL, true, &hcsr_callback);
 }
 
-int HCSR04::gettingTime()  //クラスのために書き加えた
+int HCSR04::gettingTime()
 {
     // trigger
     gpio_put(28, 1);

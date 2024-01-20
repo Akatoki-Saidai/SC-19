@@ -1,4 +1,4 @@
-#include "hcsr04.hpp" //クラスのために書き加えた
+#include "hcsr04.hpp" //クラス定義
 
 #include <cstdio>
 #include <cstdint>
@@ -15,10 +15,7 @@ absolute_time_t up_edge_time;
 absolute_time_t dn_edge_time;
 uint64_t dtime = 0;
 
-// function: main
-int main() {
-    stdio_init_all();
-
+void HCSR04(){
     gpio_init(28);
     gpio_set_dir(28, GPIO_OUT);
     gpio_pull_down(28);
@@ -26,34 +23,18 @@ int main() {
     gpio_init(6);
     gpio_set_dir(6, GPIO_IN);
     gpio_set_irq_enabled_with_callback(6, GPIO_IRQ_EDGE_RISE + GPIO_IRQ_EDGE_FALL, true, &hcsr_callback);
-
-    // main loop
-    while (1) {
-        // trigger
-        gpio_put(28, 1);
-        busy_wait_us(12);
-        gpio_put(28, 0);
-
-        // wait
-        busy_wait_ms(100);
-
-        // 10[cm] echo pulse width[us] = 580 = 10 * 58
-        // if (dtime < 580) {
-        //     printf("%llu \n", dtime);
-        //     busy_wait_ms(500);
-        // }
-
-        // 4.5[m] echo pulsw width[us] = 26100 = 4.5 * 100 * 58
-        if (dtime < 26100) {
-            printf("%llu us\n", dtime);
-
-            busy_wait_ms(500);
-        }
-    }
 }
 
 int HCSR04::gettingTime()　　//クラスのために書き加えた
             {
+                // trigger
+                gpio_put(28, 1);
+                busy_wait_us(12);
+                gpio_put(28, 0);
+
+                // wait
+                busy_wait_ms(100);
+                
                 return dtime;
             }
 

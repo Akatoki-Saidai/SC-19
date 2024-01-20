@@ -4,6 +4,7 @@
 // Class declaration
 class HCSR04 {
 public:
+    HCSR04();
     int gettingTime();          
     int gotTime;
 };

@@ -7,8 +7,8 @@ int main()
 {
 /***** setup *****/
 
-    I2C i2c(SDA(0), SCL(1));
-    // BME280 bme(i2c);  // <== こんなかんじでセットアップしたい
+    uint8_t sda_pin = 5, scl_pin = 6;
+    // BME280 bme(sda_pin, scl_pin);  // <== こんなかんじでセットアップしたい
 
 /***** loop *****/
     while (true)

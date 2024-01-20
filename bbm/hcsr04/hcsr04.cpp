@@ -1,21 +1,16 @@
 #include "hcsr04.hpp" //クラス定義
 
-#include <cstdio>
-#include <cstdint>
-#include "pico/stdlib.h"
-#include "hardware/gpio.h"
-
 // define ...
 
 // prototype ...
 void hcsr_callback(uint gpio, uint32_t emask);
 
 // global variable ...
-absolute_time_t up_edge_time;
-absolute_time_t dn_edge_time;
-uint64_t dtime = 0;
+static absolute_time_t up_edge_time;
+static absolute_time_t dn_edge_time;
+static uint64_t dtime = 0;
 
-void HCSR04(){
+HCSR04::HCSR04(){
     gpio_init(28);
     gpio_set_dir(28, GPIO_OUT);
     gpio_pull_down(28);
@@ -25,18 +20,18 @@ void HCSR04(){
     gpio_set_irq_enabled_with_callback(6, GPIO_IRQ_EDGE_RISE + GPIO_IRQ_EDGE_FALL, true, &hcsr_callback);
 }
 
-int HCSR04::gettingTime()　　//クラスのために書き加えた
-            {
-                // trigger
-                gpio_put(28, 1);
-                busy_wait_us(12);
-                gpio_put(28, 0);
+int HCSR04::gettingTime()  //クラスのために書き加えた
+{
+    // trigger
+    gpio_put(28, 1);
+    busy_wait_us(12);
+    gpio_put(28, 0);
 
-                // wait
-                busy_wait_ms(100);
-                
-                return dtime;
-            }
+    // wait
+    busy_wait_ms(100);
+    
+    return dtime;
+}
 
 // function: callback of hcsr04 echo signal intrrupt
 void hcsr_callback(uint gpio, uint32_t emask) {

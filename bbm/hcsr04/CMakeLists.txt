@@ -2,7 +2,7 @@
 
 # ビルドを実行するファイルを追加
 add_library(HCSR04 STATIC
-    ${CMAKE_CURRENT_LIST_DIR}/hcsr04_original.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/hcsr04.cpp
 )
 # 以下の資料を参考にしました
 # https://qiita.com/kikochan/items/732e46e92e7f29c18ce9

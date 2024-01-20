@@ -132,7 +132,6 @@ public:
 private:
     static bool IsUse[2];  // 既にI2C0とI2C1を使用しているか
 };
-bool I2C::IsUse[2] = {false, false};
 
 }
 

@@ -173,8 +173,8 @@ void play_windows7(){
 }
 
 
-int main(){
-    speaker_init();
-    play_starwars();
-}
+// int main(){
+//     speaker_init();
+//     play_starwars();
+// }
 

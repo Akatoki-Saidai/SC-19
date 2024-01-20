@@ -161,4 +161,6 @@ Binary I2C::read_memory(size_t size, SlaveAddr slave_addr, MemoryAddr memory_add
     return Binary(input_data);
 }
 
+bool I2C::IsUse[2] = {false, false};
+
 }

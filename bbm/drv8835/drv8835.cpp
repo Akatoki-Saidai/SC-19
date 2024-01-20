@@ -94,19 +94,19 @@ void left(double duty){
 }
 
 
-int main() {
-    motor_init();
-    gpio_init(PICO_DEFAULT_LED_PIN);
-    gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
-    gpio_put(PICO_DEFAULT_LED_PIN, 1);
+// int main() {
+//     motor_init();
+//     gpio_init(PICO_DEFAULT_LED_PIN);
+//     gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+//     gpio_put(PICO_DEFAULT_LED_PIN, 1);
 
-    forward(1.0);
-    sleep_ms(2000);
-    forward(0);
-    sleep_ms(1000);
-    back(1.0);
-    sleep_ms(1000);
-    back(0);
-    //全部テスト
+//     forward(1.0);
+//     sleep_ms(2000);
+//     forward(0);
+//     sleep_ms(1000);
+//     back(1.0);
+//     sleep_ms(1000);
+//     back(0);
+//     //全部テスト
 
-}
+// }

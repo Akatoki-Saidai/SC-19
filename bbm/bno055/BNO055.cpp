@@ -62,79 +62,79 @@ void accel_init(void){
     sleep_ms(100);
 }
 
-int main(void){
-    stdio_init_all(); // Initialise STD I/O for printing over serial
+// int main(void){
+//     stdio_init_all(); // Initialise STD I/O for printing over serial
 
-    // Configure the I2C Communication
-    i2c_init(I2C_PORT, 400 * 1000);
-    gpio_set_function(6, GPIO_FUNC_I2C);
-    gpio_set_function(7, GPIO_FUNC_I2C);
-    gpio_pull_up(6);
-    gpio_pull_up(7);
+//     // Configure the I2C Communication
+//     i2c_init(I2C_PORT, 400 * 1000);
+//     gpio_set_function(6, GPIO_FUNC_I2C);
+//     gpio_set_function(7, GPIO_FUNC_I2C);
+//     gpio_pull_up(6);
+//     gpio_pull_up(7);
 
-    // Call accelerometer initialisation function
-    accel_init();
+//     // Call accelerometer initialisation function
+//     accel_init();
 
-    //加速度
-    uint8_t accel[6]; // Store data from the 6 acceleration registers
-    int16_t accelX, accelY, accelZ; // Combined 3 axis data
-    float f_accelX, f_accelY, f_accelZ; // Float type of acceleration data
-    uint8_t accel_val = 0x08; // Start register address
-    //磁気
-    uint8_t mag[6];   // magnetometer registers
-    int16_t magX, magY, magZ;
-    float f_magX, f_magY, f_magZ;
-    uint8_t mag_val = 0x0E;
-    //ジャイロセンサ
-    uint8_t gyro[6];
-    int16_t gyroX, gyroY, gyroZ;
-    float f_gyroX, f_gyroY, f_gyroZ;
-    uint8_t gyro_val = 0x14;
-    // Infinite Loop
-    while(1){
-        //read acceleration data
-        i2c_write_blocking(I2C_PORT, addr, &accel_val, 1, true);
-        i2c_read_blocking(I2C_PORT, addr, accel, 6, false);
+//     //加速度
+//     uint8_t accel[6]; // Store data from the 6 acceleration registers
+//     int16_t accelX, accelY, accelZ; // Combined 3 axis data
+//     float f_accelX, f_accelY, f_accelZ; // Float type of acceleration data
+//     uint8_t accel_val = 0x08; // Start register address
+//     //磁気
+//     uint8_t mag[6];   // magnetometer registers
+//     int16_t magX, magY, magZ;
+//     float f_magX, f_magY, f_magZ;
+//     uint8_t mag_val = 0x0E;
+//     //ジャイロセンサ
+//     uint8_t gyro[6];
+//     int16_t gyroX, gyroY, gyroZ;
+//     float f_gyroX, f_gyroY, f_gyroZ;
+//     uint8_t gyro_val = 0x14;
+//     // Infinite Loop
+//     while(1){
+//         //read acceleration data
+//         i2c_write_blocking(I2C_PORT, addr, &accel_val, 1, true);
+//         i2c_read_blocking(I2C_PORT, addr, accel, 6, false);
 
-        accelX = ((accel[1]<<8) | accel[0]);
-        accelY = ((accel[3]<<8) | accel[2]);
-        accelZ = ((accel[5]<<8) | accel[4]);
+//         accelX = ((accel[1]<<8) | accel[0]);
+//         accelY = ((accel[3]<<8) | accel[2]);
+//         accelZ = ((accel[5]<<8) | accel[4]);
 
-        f_accelX = accelX / 100.00;
-        f_accelY = accelY / 100.00;
-        f_accelZ = accelZ / 100.00;
+//         f_accelX = accelX / 100.00;
+//         f_accelY = accelY / 100.00;
+//         f_accelZ = accelZ / 100.00;
 
-            // Read magnetometer data
-        i2c_write_blocking(I2C_PORT, addr, &mag_val, 1, true);
-        i2c_read_blocking(I2C_PORT, addr, mag, 6, false);
-        magX = ((mag[1] << 8) | mag[0]);
-        magY = ((mag[3] << 8) | mag[2]);
-        magZ = ((mag[5] << 8) | mag[4]);
+//             // Read magnetometer data
+//         i2c_write_blocking(I2C_PORT, addr, &mag_val, 1, true);
+//         i2c_read_blocking(I2C_PORT, addr, mag, 6, false);
+//         magX = ((mag[1] << 8) | mag[0]);
+//         magY = ((mag[3] << 8) | mag[2]);
+//         magZ = ((mag[5] << 8) | mag[4]);
 
-        f_magX = magX / 16.00;
-        f_magY = magY / 16.00;
-        f_magZ = magZ / 16.00;
+//         f_magX = magX / 16.00;
+//         f_magY = magY / 16.00;
+//         f_magZ = magZ / 16.00;
 
-            // Read gyro data
-        i2c_write_blocking(I2C_PORT, addr, &gyro_val, 1, true);
-        i2c_read_blocking(I2C_PORT, addr, gyro, 6, false);
-        gyroX = ((gyro[1] << 8) | gyro[0]);
-        gyroY = ((gyro[3] << 8) | gyro[2]);
-        gyroZ = ((gyro[5] << 8) | gyro[4]);
+//             // Read gyro data
+//         i2c_write_blocking(I2C_PORT, addr, &gyro_val, 1, true);
+//         i2c_read_blocking(I2C_PORT, addr, gyro, 6, false);
+//         gyroX = ((gyro[1] << 8) | gyro[0]);
+//         gyroY = ((gyro[3] << 8) | gyro[2]);
+//         gyroZ = ((gyro[5] << 8) | gyro[4]);
 
-        f_gyroX = gyroX / 900.00;
-        f_gyroY = gyroY / 900.00;
-        f_gyroZ = gyroZ / 900.00;
+//         f_gyroX = gyroX / 900.00;
+//         f_gyroY = gyroY / 900.00;
+//         f_gyroZ = gyroZ / 900.00;
 
-        // Print to serial monitor
-        printf("accel");
-        printf("X: %6.2f    Y: %6.2f    Z: %6.2f\n", f_accelX, f_accelY, f_accelZ);
-        printf("mag  ");
-        printf("X: %6.2f    Y: %6.2f    Z: %6.2f\n", f_magX, f_magY, f_magZ);
-        printf("gyro ");
-        printf("X: %6.2f    Y: %6.2f    Z: %6.2f\n", f_gyroX, f_gyroY, f_gyroZ);
-        printf("\n\n");
-        sleep_ms(500);
+//         // Print to serial monitor
+//         printf("accel");
+//         printf("X: %6.2f    Y: %6.2f    Z: %6.2f\n", f_accelX, f_accelY, f_accelZ);
+//         printf("mag  ");
+//         printf("X: %6.2f    Y: %6.2f    Z: %6.2f\n", f_magX, f_magY, f_magZ);
+//         printf("gyro ");
+//         printf("X: %6.2f    Y: %6.2f    Z: %6.2f\n", f_gyroX, f_gyroY, f_gyroZ);
+//         printf("\n\n");
+//         sleep_ms(500);
         
-    }
-}
+//     }
+// }

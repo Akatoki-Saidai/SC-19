@@ -96,31 +96,31 @@ void print_data(struct bme280_data *data) {
 // ---------------------------------------------------------------------------
 // main loop: read data and print data to console
 
-int main() {
-  // try
-  // {
-    struct bme280_dev dev;
-    struct bme280_data sensor_data;
-    int8_t rslt;
-    uint32_t delay;               // calculated delay between measurements
-    init_hw();
-    rslt = init_sensor(&dev,&delay);
-    if (rslt != BME280_OK) {
-      printf("could not initialize sensor. RC: %d\n", rslt);
-    } else {
-      printf("Temperature, Pressure, Humidity\n");
-      while (read_sensor(&dev,&delay,&sensor_data) == BME280_OK) {
-        print_data(&sensor_data);
-        sleep_ms(1000*UPDATE_INTERVAL);
-      }
-      printf("error while reading sensor: RC: %d", rslt);
-    }
-    return 0;
-   //}
-  // catch (const std::exception& e)
-  // {
-  //   printf("error");
-  //   sleep_ms(5000);
-  //   printf("error");
-  // }
-}
+// int main() {
+//   // try
+//   // {
+//     struct bme280_dev dev;
+//     struct bme280_data sensor_data;
+//     int8_t rslt;
+//     uint32_t delay;               // calculated delay between measurements
+//     init_hw();
+//     rslt = init_sensor(&dev,&delay);
+//     if (rslt != BME280_OK) {
+//       printf("could not initialize sensor. RC: %d\n", rslt);
+//     } else {
+//       printf("Temperature, Pressure, Humidity\n");
+//       while (read_sensor(&dev,&delay,&sensor_data) == BME280_OK) {
+//         print_data(&sensor_data);
+//         sleep_ms(1000*UPDATE_INTERVAL);
+//       }
+//       printf("error while reading sensor: RC: %d", rslt);
+//     }
+//     return 0;
+//    //}
+//   // catch (const std::exception& e)
+//   // {
+//   //   printf("error");
+//   //   sleep_ms(5000);
+//   //   printf("error");
+//   // }
+// }

@@ -34,6 +34,12 @@ pico_sdk_init()
 
 # フォルダを追加する
 add_subdirectory(sc)
+add_subdirectory(bme280)
+add_subdirectory(bno055)
+add_subdirectory(drv8835)
+add_subdirectory(hcsr04)
+add_subdirectory(njl5513r)
+add_subdirectory(speaker)
 
 # ビルドを実行するファイルを追加
 add_executable(BBM
@@ -44,6 +50,12 @@ add_executable(BBM
 target_link_libraries(BBM
     pico_stdlib
     SC
+    BME280
+    BNO055
+    DRV8835
+    HCSR04
+    NJL5513R
+    SPEAKER
 )
 
 # USB出力を有効にし，UART出力を無効にする

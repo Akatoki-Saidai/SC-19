@@ -200,4 +200,7 @@ Binary SPI::read_memory(size_t size, CS cs_pin, MemoryAddr memory_addr) const
     return Binary(input_data);
 }
 
+
+bool SPI::IsUse[2] = {false, false};
+
 }

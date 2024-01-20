@@ -47,15 +47,15 @@ int main() {
         if (dtime < 26100) {
             printf("%llu us\n", dtime);
 
-            int HCSR04::gettingTime()　　//クラスのために書き加えた
-            {
-                return dtime;
-            }
-
             busy_wait_ms(500);
         }
     }
 }
+
+int HCSR04::gettingTime()　　//クラスのために書き加えた
+            {
+                return dtime;
+            }
 
 // function: callback of hcsr04 echo signal intrrupt
 void hcsr_callback(uint gpio, uint32_t emask) {

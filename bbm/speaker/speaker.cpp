@@ -2,6 +2,8 @@
 スピーカーを鳴らす
  */
 
+#include "speaker.hpp"
+
 #define PIN_Speaker_PWM 22
 static pwm_config speaker_pwm_slice_config;
 static uint8_t speaker_pwm_slice_num = pwm_gpio_to_slice_num(PIN_Speaker_PWM);

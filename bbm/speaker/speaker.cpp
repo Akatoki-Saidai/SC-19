@@ -2,14 +2,7 @@
 スピーカーを鳴らす
  */
 
-#include <iostream>
-#include "stdio.h"
-#include "list"
-#include "pico/stdlib.h"
-#include "hardware/gpio.h"
-#include "hardware/pwm.h"
-#include "chrono"
-#include "initializer_list"
+#include "speaker.hpp"
 
 #define PIN_Speaker_PWM 22
 static pwm_config speaker_pwm_slice_config;
@@ -17,9 +10,7 @@ static uint8_t speaker_pwm_slice_num = pwm_gpio_to_slice_num(PIN_Speaker_PWM);
 double speaker_pwm_clkdiv = 6.5;
 
 
-
-
-void speaker_init(){
+void SPEAKER::speaker_init(){
 
     //pwmの設定
     gpio_set_function(PIN_Speaker_PWM,GPIO_FUNC_PWM);
@@ -39,7 +30,7 @@ void speaker_init(){
 
 }
 
-void play_starwars(){
+void SPEAKER::play_starwars(){
 
     
     //使用する音の周波数の宣言(低いラ～高いド) 0は無音(休符)
@@ -123,7 +114,7 @@ void play_starwars(){
 
 }
 
-void play_windows7(){
+void SPEAKER::play_windows7(){
     // 使用する音
     const double sound_B4 = 493.883;
     const double sound_E5 = 659.255;
@@ -173,8 +164,7 @@ void play_windows7(){
 }
 
 
-// int main(){
-//     speaker_init();
-//     play_starwars();
-// }
-
+int  SPEAKER::speaker_function(){
+    speaker_init();
+    play_starwars();
+}

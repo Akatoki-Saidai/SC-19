@@ -218,6 +218,69 @@ void sendImageToSerial (CamImage img) {
     Serial.println("#End");
 }
 
+
+float CaluculateHue(float red, float green, float blue, float rgbmax, float rgbmin) {
+  float hue;
+
+  if (rgbmax == rgbmin){
+    hue = 0;
+  }
+  else if (rgbmax == red){
+    hue = 60 * ((green - red) / (rgbmax - rgbmin));
+  }
+  else if (rgbmax == green){
+    hue = 60 * ((blue - green) / (rgbmax - rgbmin)) + 120;
+  }
+  else if (rgbmax == blue){
+    hue = 60 * ((red - blue) / rgbmax - rgbmin) + 240;
+  }
+  else{
+    Serial.println("Unexpected error occured while caluculate HSV");
+  }
+
+  return hue;
+}
+
+void red_detect(CamImage img) {
+  // HSVに変換 -> 数える
+  // 領域分け
+  uint16_t x_now, y_now =0;
+  uint16_t img_height = img.getHeight();
+  uint16_t img_width = img.getWidth();
+  const uint8_t right_end = img_width / 2 - (img_width / 4);
+  const uint8_t left_end = img_width / 2 + (img_width / 4);;
+  
+  //右領域
+  for (uint16_t pixel_num = 1; pixel_num <= right_end * img_height; pixel_num++){
+    uint16_t rgb565 = img.getImgBuff()[y_now * img_width + x_now];
+    uint8_t red565 = (rgb565 >> 8) & 0xF8;   // 上位5ビット
+    uint8_t green565 = (rgb565 >> 3) & 0xFC;   // 中間6ビット
+    uint8_t blue565 = (rgb565 << 3) & 0xF8;   // 下位5ビット
+    // uint16_t pixelColor = img.getPixel(x_now, y_now);
+    
+    // RGB565からRGB888
+    uint8_t red888 = ((rgb565 >> 8) & 0xF8) >> 3;
+    uint8_t green888 = ((rgb565 >> 3) & 0xFC) >> 2;
+    uint8_t blue888 = (rgb565 & 0x1F) << 3;
+
+    // RGBからHSV
+    
+    float red_treat = red888 / 255.0;
+    float green_treat = green888 / 255.0;
+    float blue_treat = blue888 / 255.0;
+    float rgbmax = max(max(red_treat, green_treat), blue_treat);
+    float rgbmin = min(min(red_treat, green_treat), blue_treat);
+
+    float hue = CaluculateHue(red_treat, green_treat, blue_treat, rgbmax, rgbmin);
+    float sat = (rgbmax - rgbmin) / rgbmax;
+    float val = rgbmax;
+    
+  // ピクセルを数える
+  
+  }
+}
+
+
 void setup(){
   Serial.begin(BAUDRATE);
   while (!Serial);

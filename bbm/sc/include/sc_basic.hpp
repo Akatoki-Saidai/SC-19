@@ -210,4 +210,29 @@ return false;
     return true;
 }
 
+
+//! @brief 配列やコンテナであるかを調べる
+template <typename T>
+class IsIterable
+{
+private:
+    template <typename U>  // カンマ演算子を利用している
+    static constexpr auto check1(U&& u) -> decltype(&U::begin, &U::end, std::true_type());  // メンバ関数begin()とend()を持つか
+    static constexpr std::false_type check1(...);
+
+    template <typename U>
+    static constexpr auto check2(U&& u) -> decltype(std::begin(u), std::end(u), std::true_type());
+    static constexpr std::false_type check2(...);
+    
+    template <typename U>
+    static constexpr auto check3(U&& u) -> decltype(begin(u), end(u), std::true_type());
+    static constexpr std::false_type check3(...);
+public:
+    //! @brief beginとendを持っていたらtrue，持っていなかったらfalse
+    static constexpr bool value = (decltype(check1(std::declval<T>()))::value || decltype(check2(std::declval<T>()))::value || decltype(check3(std::declval<T>()))::value);
+};
+// このクラスは以下の資料を参考にし作成しました
+// https://qiita.com/terukazu/items/e257c05a7b191d32c577
+// https://zenn.dev/ymd_h/articles/e90ad8ad40a6dd
+
 #endif  // SC19_PICO_SC_SC_BASIC_HPP_

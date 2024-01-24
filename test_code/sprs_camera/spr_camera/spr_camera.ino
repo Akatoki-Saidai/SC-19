@@ -241,50 +241,6 @@ float CaluculateHue(float red, float green, float blue, float rgbmax, float rgbm
   return hue;
 }
 
-uint8_t red_detect(CamImage img) {
-  // HSVに変換 -> 数える
-
-  // 領域分け
-  uint16_t img_width = img.getWidth();
-  uint8_t right_end = img_width / 2 - (img_width / 4);
-  uint8_t left_begin = img_width / 2 + (img_width / 4);
-
-  // 分けた領域中の赤ピクセルのカウント
-  uint16_t right_red = CountRedPixel(img, 1, right_end);
-  uint16_t center_red = CountRedPixel(img, ++right_end, --left_begin);
-  uint16_t left_red = CountRedPixel(img, left_begin, img_width);
-  uint8_t result = 0;
-  Serial.println("Right: ");
-  Serial.println("right_red");
-  Serial.println("Center: ");
-  Serial.println(center_red);
-  Serial.println("Left: ");
-  Serial.println(left_red);
-
-
-  Serial.println("Red object: ");
-  if (right_red == max(max(right_red, center_red), left_red)){
-    Serial.println("Right");
-    result = 1;
-  }
-  if ((right_red + center_red + left_red) <= 10){
-    Serial.println("Center");
-    result = 2;
-  }
-  if ((right_red + center_red + left_red) <= 10){
-    Serial.println("Left");
-    result = 3;
-  }
-  else{
-    Serial.println("CountRedPixel didn't success");
-  }
-
-  // result: 1 -> 右 2 -> 中央 3 -> 左
-  // Serial.println(result);
-
-  return result;
-
-}
 
 uint16_t CountRedPixel(CamImage img, uint8_t zone_begin, uint8_t zone_end){
   Serial.println("Start red count...");
@@ -297,7 +253,7 @@ uint16_t CountRedPixel(CamImage img, uint8_t zone_begin, uint8_t zone_end){
 
   uint16_t red_count = 0;
 
-  while (y_coordinate < ++img_height){
+  while (y_coordinate <= img_height){
     uint16_t rgb565 = img.getImgBuff()[y_coordinate * img_width + x_coordinate];
     uint8_t red565 = (rgb565 >> 8) & 0xF8;
     uint8_t green565 = (rgb565 >> 3) & 0xFC;
@@ -356,6 +312,52 @@ uint16_t CountRedPixel(CamImage img, uint8_t zone_begin, uint8_t zone_end){
   Serial.println(millis() - start_time);
 
   return red_count;
+
+}
+
+
+uint8_t red_detect(CamImage img) {
+  // HSVに変換 -> 数える
+
+  // 領域分け
+  uint16_t img_width = img.getWidth();
+  uint8_t right_end = img_width / 2 - (img_width / 4);
+  uint8_t left_begin = img_width / 2 + (img_width / 4);
+
+  // 分けた領域中の赤ピクセルのカウント
+  uint16_t right_red = CountRedPixel(img, 1, right_end);
+  uint16_t center_red = CountRedPixel(img, ++right_end, --left_begin);
+  uint16_t left_red = CountRedPixel(img, left_begin, img_width);
+  uint8_t result = 0;
+  Serial.println("Right: ");
+  Serial.println("right_red");
+  Serial.println("Center: ");
+  Serial.println(center_red);
+  Serial.println("Left: ");
+  Serial.println(left_red);
+
+
+  Serial.println("Red object: ");
+  if (right_red == max(max(right_red, center_red), left_red)){
+    Serial.println("Right");
+    result = 1;
+  }
+  if ((right_red + center_red + left_red) <= 10){
+    Serial.println("Center");
+    result = 2;
+  }
+  if ((right_red + center_red + left_red) <= 10){
+    Serial.println("Left");
+    result = 3;
+  }
+  else{
+    Serial.println("CountRedPixel didn't success");
+  }
+
+  // result: 1 -> 右 2 -> 中央 3 -> 左
+  // Serial.println(result);
+
+  return result;
 
 }
 

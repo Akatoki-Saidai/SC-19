@@ -32,7 +32,7 @@ endif()
 # SDKを初期化
 pico_sdk_init()
 
-# フォルダを追加する
+# サブディレクトリを登録
 add_subdirectory(sc)
 add_subdirectory(bme280)
 add_subdirectory(bno055)
@@ -41,12 +41,12 @@ add_subdirectory(hcsr04)
 add_subdirectory(njl5513r)
 add_subdirectory(speaker)
 
-# ビルドを実行するファイルを追加
+# 実行ファイルを作成
 add_executable(BBM
     bbm.cpp
 )
 
-# ライブラリの読み込み
+# コンパイルする際にライブラリをリンク
 target_link_libraries(BBM
     pico_stdlib
     SC

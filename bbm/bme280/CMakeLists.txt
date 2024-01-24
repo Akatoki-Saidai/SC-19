@@ -2,6 +2,8 @@
 
 # ビルドを実行するファイルを追加
 add_library(BME280 STATIC
+    ${CMAKE_CURRENT_LIST_DIR}/BME280_BBM.cpp
+    #BBM用のファイルを追記
     ${CMAKE_CURRENT_LIST_DIR}/pico-bme280.c
     ${CMAKE_CURRENT_LIST_DIR}/bme280.c
     ${CMAKE_CURRENT_LIST_DIR}/user.c

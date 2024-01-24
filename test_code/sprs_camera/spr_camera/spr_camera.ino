@@ -241,22 +241,68 @@ float CaluculateHue(float red, float green, float blue, float rgbmax, float rgbm
   return hue;
 }
 
-void red_detect(CamImage img) {
+uint8_t red_detect(CamImage img) {
   // HSVに変換 -> 数える
+
   // 領域分け
-  uint16_t x_now, y_now =0;
+  uint16_t img_width = img.getWidth();
+  uint8_t right_end = img_width / 2 - (img_width / 4);
+  uint8_t left_begin = img_width / 2 + (img_width / 4);
+
+  // 分けた領域中の赤ピクセルのカウント
+  uint16_t right_red = CountRedPixel(img, 1, right_end);
+  uint16_t center_red = CountRedPixel(img, ++right_end, --left_begin);
+  uint16_t left_red = CountRedPixel(img, left_begin, img_width);
+  uint8_t result = 0;
+  Serial.println("Right: ");
+  Serial.println("right_red");
+  Serial.println("Center: ");
+  Serial.println(center_red);
+  Serial.println("Left: ");
+  Serial.println(left_red);
+
+
+  Serial.println("Red object: ");
+  if (right_red == max(max(right_red, center_red), left_red)){
+    Serial.println("Right");
+    result = 1;
+  }
+  if ((right_red + center_red + left_red) <= 10){
+    Serial.println("Center");
+    result = 2;
+  }
+  if ((right_red + center_red + left_red) <= 10){
+    Serial.println("Left");
+    result = 3;
+  }
+  else{
+    Serial.println("CountRedPixel didn't success");
+  }
+
+  // result: 1 -> 右 2 -> 中央 3 -> 左
+  // Serial.println(result);
+
+  return result;
+
+}
+
+uint16_t CountRedPixel(CamImage img, uint8_t zone_begin, uint8_t zone_end){
+  Serial.println("Start red count...");
+  uint16_t start_time = millis();
+
   uint16_t img_height = img.getHeight();
   uint16_t img_width = img.getWidth();
-  const uint8_t right_end = img_width / 2 - (img_width / 4);
-  const uint8_t left_end = img_width / 2 + (img_width / 4);;
-  
-  //右領域
-  for (uint16_t pixel_num = 1; pixel_num <= right_end * img_height; pixel_num++){
-    uint16_t rgb565 = img.getImgBuff()[y_now * img_width + x_now];
-    uint8_t red565 = (rgb565 >> 8) & 0xF8;   // 上位5ビット
-    uint8_t green565 = (rgb565 >> 3) & 0xFC;   // 中間6ビット
-    uint8_t blue565 = (rgb565 << 3) & 0xF8;   // 下位5ビット
-    // uint16_t pixelColor = img.getPixel(x_now, y_now);
+  uint16_t x_coordinate = zone_begin;
+  uint16_t y_coordinate = 1;
+
+  uint16_t red_count = 0;
+
+  while (y_coordinate < ++img_height){
+    uint16_t rgb565 = img.getImgBuff()[y_coordinate * img_width + x_coordinate];
+    uint8_t red565 = (rgb565 >> 8) & 0xF8;
+    uint8_t green565 = (rgb565 >> 3) & 0xFC;
+    uint8_t blue565 = (rgb565 << 3) & 0xF8;
+    // uint16_t pixelColor = img.getPixel(x_coordinate, y_coordinate);
     
     // RGB565からRGB888
     uint8_t red888 = ((rgb565 >> 8) & 0xF8) >> 3;
@@ -275,9 +321,42 @@ void red_detect(CamImage img) {
     float sat = (rgbmax - rgbmin) / rgbmax;
     float val = rgbmax;
     
-  // ピクセルを数える
-  
+    // 赤色の定義(HSV)
+    float hue_min = 338.0;
+    float hue_max = 22.0;
+    float sat_min = 0.46;
+    float val_min = 0.41;
+
+    if ((hue <= hue_max) && (sat >= sat_min) && (val >= val_min)){
+      red_count++;
+    }
+    else if ((hue >= hue_min) && (sat >= sat_min) && (val >= val_min)){
+      red_count++;
+    }
+    /*
+    SC-18
+    hsv_min = np.array([0, 117, 104])
+    hsv_max = np.array([11, 255, 255])
+    
+    hsv_min = np.array([169, 117, 104])
+    hsv_max = np.array([179, 255, 255])
+    */
+    
+    if (x_coordinate == zone_end){
+      x_coordinate = zone_begin;
+      y_coordinate++;
+    }
+    else{
+      x_coordinate++;
+    }
+
   }
+
+  Serial.print("Count time: ");
+  Serial.println(millis() - start_time);
+
+  return red_count;
+
 }
 
 
@@ -304,9 +383,14 @@ void loop(){
     // Serial.print(hdr);
     Serial.println();
 
-    // 画像の転送
+    uint8_t red_result = red_detect(img);
+    Serial.println(red_result);
+
+
+    // 画像の転送(USB)
     digitalWrite(LED0, HIGH);
     sendImageToSerial(img);
     digitalWrite(LED0, LOW);
+
   }
 }

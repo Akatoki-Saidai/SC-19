@@ -44,7 +44,6 @@ public:
     //! @return spi0かspi1か
     SPI_ID get_spi_id() const;
 };
-using RX = MISO;
 
 //! @brief CSピンを指定
 class CS
@@ -105,7 +104,6 @@ public:
     //! @return spi0かspi1か
     SPI_ID get_spi_id() const;
 };
-using TX = MOSI;
 
 
 //! @brief SPI通信
@@ -176,6 +174,9 @@ public:
     //! @param memory_addr 通信先のデバイスのメモリの何番地からデータを読み込むか
     //! @return Binary型のバイト列
     Binary read_memory(size_t size, CS cs_pin, MemoryAddr memory_addr) const;
+
+    using TX = MOSI;
+    using RX = MISO;
 private:
     static bool IsUse[2];  // 既にSPI0とSPI1を使用しているか
 };

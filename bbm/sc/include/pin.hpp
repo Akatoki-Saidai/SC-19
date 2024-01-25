@@ -23,13 +23,17 @@ namespace sc
 enum class PinStatus
 {
     NoUse,
+    Other,
     Gpio,
     I2cSda,
     I2cScl,
     SpiMiso,
     SpiCs,
     SpiSck,
-    SpiMosi
+    SpiMosi,
+    UartTx,
+    UartRx,
+    Pwm
 };
 
 //! @brief ピンのプルアップ・プルダウン

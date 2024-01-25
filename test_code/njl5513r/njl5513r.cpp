@@ -11,7 +11,7 @@
 
 #define ADC_Lux_Sensor 26 // 照度用GPIO
 #define GPIO_RED_LED 27 // 赤LED用GPIO
-#define GPIO_GREEN_LED 28 // 緑LED用GPIO
+#define GPIO_GREEN_LED 8 // 緑LED用GPIO
 
 void bio_adc_init(){
     adc_init();

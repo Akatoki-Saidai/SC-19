@@ -38,7 +38,7 @@ class _pure : _unit
     const double _pure_value;
 public:
     //! @brief 無次元量のセット
-    _pure(double pure_value):
+    constexpr _pure(double pure_value):
         _pure_value(pure_value) {}
     
     //! @brief 無次元量をdouble型に変換
@@ -51,7 +51,7 @@ class _cd : _unit
     const double _cd_value;
 public:
     //! @brief 光度(cd)のセット
-    explicit _cd(double cd_value):
+    constexpr explicit _cd(double cd_value):
         _cd_value(cd_value) {}
     
     //! @brief 光度(cd)をdouble型に変換
@@ -69,7 +69,7 @@ class _degC : _unit
 public:
     //! @brief 温度(℃)のセット
     explicit _degC(double degC_value);
-    
+
     //! @brief 温度(℃)をdouble型に変換
     explicit operator double() const noexcept override {return _degC_value;}
 };
@@ -86,7 +86,7 @@ class _hz : _unit
 public:
     //! @brief 周波数(Hz)のセット
     explicit _hz(double hz_value);
-    
+
     //! @brief 周波数(Hz)をdouble型に変換
     explicit operator double() const noexcept override {return _hz_value;}
 };
@@ -107,7 +107,7 @@ class _m : _unit
 public:
     //! @brief 長さ(m)のセット
     explicit _m(double m_value);
-    
+
     //! @brief 長さ(m)をdouble型に変換
     explicit operator double() const noexcept override {return _m_value;}
 
@@ -126,7 +126,7 @@ class _km : _unit
 public:
     //! @brief 長さ(km)のセット
     explicit _km(double km_value);
-    
+
     //! @brief 長さ(km)をdouble型に変換
     explicit operator double() const noexcept override {return _km_value;}
 
@@ -143,7 +143,7 @@ class _m_s2 : _unit
     const double _m_s2_value;
 public:
     //! @brief 加速度(m/s²)のセット
-    explicit _m_s2(double m_s2_value):
+    constexpr explicit _m_s2(double m_s2_value):
         _m_s2_value(m_s2_value) {}
     
     //! @brief 加速度(m/s²)をdouble型に変換
@@ -159,7 +159,7 @@ class _pa : _unit
     const double _pa_value;
 public:
     //! @brief 圧力(Pa)のセット
-    explicit _pa(double pa_value):
+    constexpr explicit _pa(double pa_value):
         _pa_value(pa_value) {}
     
     //! @brief 圧力(Pa)をdouble型に変換
@@ -175,7 +175,7 @@ class _hPa : _unit
     const double _hPa_value;
 public:
     //! @brief 圧力(hPa)のセット
-    explicit _hPa(double hPa_value):
+    constexpr explicit _hPa(double hPa_value):
         _hPa_value(hPa_value) {}
     
     //! @brief 圧力(hPa)をdouble型に変換
@@ -194,7 +194,7 @@ class _px : _unit
     const double _px_value;
 public:
     //! @brief 画素数(px)のセット
-    explicit _px(double px_value):
+    constexpr explicit _px(double px_value):
         _px_value(px_value) {}
     
     //! @brief 画素数(px)をdouble型に変換
@@ -209,7 +209,7 @@ class _rad : _unit
     const double _rad_value;
 public:
     //! @brief 角度(rad)のセット
-    explicit _rad(double rad_value):
+    constexpr explicit _rad(double rad_value):
         _rad_value(rad_value) {}
     
     //! @brief 角度(rad)をdouble型に変換
@@ -225,11 +225,11 @@ class _deg : _unit
     const double _deg_value;
 public:
     //! @brief 角度(°)のセット
-    explicit _deg(double deg_value):
+    constexpr explicit _deg(double deg_value):
         _deg_value(deg_value) {}
     
     //! @brief 度分秒での角度(°)のセット
-    _deg(double deg, double min, double s = 0.0):
+    constexpr _deg(double deg, double min, double s = 0.0):
         _deg_value(deg + (min / 60.0) + (s / 60.0 / 60.0)) {}
     
     //! @brief 角度(°)をdouble型に変換
@@ -250,7 +250,7 @@ class _rad_s : _unit
     const double _rad_s_value;
 public:
     //! @brief 角速度(rad/s)のセット
-    explicit _rad_s(double rad_s_value):
+    constexpr explicit _rad_s(double rad_s_value):
         _rad_s_value(rad_s_value) {}
     
     //! @brief 角速度(rad/s)をdouble型に変換
@@ -266,7 +266,7 @@ class _deg_s : _unit
     const double _deg_s_value;
 public:
     //! @brief 角速度(deg/s)のセット
-    explicit _deg_s(double deg_s_value):
+    constexpr explicit _deg_s(double deg_s_value):
         _deg_s_value(deg_s_value) {}
     
     //! @brief 角速度(deg/s)をdouble型に変換
@@ -289,7 +289,7 @@ class _us : _unit
     const double _us_value;
 public:
     //! @brief マイクロ秒(μs)のセット
-    explicit _us(double us_value):
+    constexpr explicit _us(double us_value):
         _us_value(us_value) {}
     
     //! @brief マイクロ秒(μs)をdouble型に変換
@@ -309,7 +309,7 @@ class _ms : _unit
     const double _ms_value;
 public:
     //! @brief ミリ秒(ms)のセット
-    explicit _ms(double ms_value):
+    constexpr explicit _ms(double ms_value):
         _ms_value(ms_value) {}
     
     //! @brief ミリ秒(ms)をdouble型に変換
@@ -329,7 +329,7 @@ class _s : _unit
     const double _s_value;
 public:
     //! @brief 秒(s)のセット
-    explicit _s(double s_value):
+    constexpr explicit _s(double s_value):
         _s_value(s_value) {}
     
     //! @brief 秒(s)をdouble型に変換
@@ -349,7 +349,7 @@ class _min : _unit
     const double _min_value;
 public:
     //! @brief 分(min)のセット
-    explicit _min(double min_value):
+    constexpr explicit _min(double min_value):
         _min_value(min_value) {}
     
     //! @brief 分(min)をdouble型に変換
@@ -384,7 +384,7 @@ class _mT : _unit
     const double _mT_value;
 public:
     //! @brief 磁束密度(mT)のセット
-    explicit _mT(double mT_value):
+    constexpr explicit _mT(double mT_value):
         _mT_value(mT_value) {}
     
     //! @brief 磁束密度(mT)をdouble型に変換
@@ -472,6 +472,7 @@ inline _hz operator/ (_pure dimensionless, _s second)
 
 //! @brief 無次元量
 inline sc::_pure operator"" _pure(const char* m_chars) {return sc::_pure(std::stod(m_chars, nullptr));}
+inline sc::_pure operator"" _pure(long double m_value) {return sc::_pure(m_value);}
 
 //! @brief 光度(cd)
 inline sc::_cd operator"" _cd(const char* cd_chars) {return sc::_cd(std::stod(cd_chars, nullptr));}

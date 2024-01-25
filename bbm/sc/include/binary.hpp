@@ -35,22 +35,29 @@ class Binary
     const std::basic_string<uint8_t> _binary_data;  // バイト列のデータ
     friend std::ostream& operator<<(std::ostream& os, const Binary& binary);  // coutで出力できるように，<<演算子から_binary_dataへのアクセスを許可している
 public:
-    //! @brief バイト列を作成
-    //! @param text string型のデータ
-    Binary(std::string text):
-        _binary_data(text.begin(), text.end()) {}
 
-    //! @brief 配列への参照からバイト列を作成
-    //! @param array_ref 長さの情報を持った配列
-    template<class UINT8, std::size_t Size>
-    Binary(const UINT8 (&array_ref)[Size]):
-        _binary_data(array_ref, array_ref + Size) {}
+    //! @brief 配列やvectorなどのコンテナからバイト列を作成
+    //! @param data コンテナ形式のデータ
+    template<typename Iterable, typename std::enable_if<IsIterable<Iterable>::value, std::nullptr_t>::type = nullptr>  // コンテナ形式の型でなければエラーになる
+    Binary(const Iterable& data):
+        _binary_data(std::begin(data), std::end(data)) {}
 
-    //! @brief コンテナからバイト列を作成
-    //! @param input_itr vectorやarrayなど
-    template<class InputItr>
-    Binary(InputItr input_itr):
-        _binary_data(input_itr.begin(), input_itr.end()) {}
+    // //! @brief バイト列を作成
+    // //! @param text string型のデータ
+    // Binary(std::string text):
+    //     _binary_data(text.begin(), text.end()) {}
+
+    // //! @brief 配列への参照からバイト列を作成
+    // //! @param array_ref 長さの情報を持った配列
+    // template<class UINT8, std::size_t Size>
+    // Binary(const UINT8 (&array_ref)[Size]):
+    //     _binary_data(array_ref, array_ref + Size) {}
+
+    // //! @brief コンテナからバイト列を作成
+    // //! @param input_itr vectorやarrayなど
+    // template<class InputItr>
+    // Binary(InputItr input_itr):
+    //     _binary_data(input_itr.begin(), input_itr.end()) {}
 
     //! @brief { }からバイト列を作成
     //! @param init_list {1, 2, 3}などのデータ

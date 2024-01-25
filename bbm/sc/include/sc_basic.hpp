@@ -110,21 +110,21 @@ inline void sleep(_ms time)
 //! @brief ゼロ除算防止のため，0であるかを判定し0でない数を返す
 //! @param value 0かもしれない数
 //! @return 0ではない数
-template<typename T> inline T not0(T value) {return (value ? value : 1);}
+template<typename T> constexpr inline T not0(const T& value) {return (value ? value : 1);}
 
 //! @brief ゼロ除算防止のため，0であるかを判定し0でない数を返す．floatバージョン
 //! @param value 0かもしれない数
-template<> inline float not0(float value) {return (value ? value : FLT_TRUE_MIN);}
+template<> constexpr inline float not0(const float& value) {return (value ? value : FLT_TRUE_MIN);}
 
 //! @brief ゼロ除算防止のため，0であるかを判定し0でない数を返す．doubleバージョン
 //! @param value 0かもしれない数
 //! @return 0ではない数
-template<> inline double not0(double value) {return (value ? value : DBL_TRUE_MIN);}
+template<> constexpr inline double not0(const double& value) {return (value ? value : DBL_TRUE_MIN);}
 
 //! @brief ゼロ除算防止のため，0であるかを判定し0でない数を返す．long doubleバージョン
 //! @param value 0かもしれない数
 //! @return 0ではない数
-template<> inline long double not0(long double value) {return (value ? value : LDBL_TRUE_MIN);}
+template<> constexpr inline long double not0(const long double& value) {return (value ? value : LDBL_TRUE_MIN);}
 
 
 //! @brief コピーを禁止するための親クラス
@@ -139,23 +139,35 @@ protected:
 // Noncopyableクラスは以下の資料を参考にして作成しました
 // https://cpp.aquariuscode.com/uncopyable-mixin
 
-}
 
 
-// //! @brief 配列がある値を含んでいるかを調べる
-// //! @param one 比較する値
-// //! @param list 中身を調べる配列
-// //! @return 配列listの要素が一つでもoneと等しかったらtrue，いずれも等しくなかったらfalse
-// template<typename T, typename U>
-// constexpr bool any_of(T&& one, U&& list)
-// {
-//     for (auto element : list)
-//     {
-//         if (one == element)
-// return true;
-//     }
-//     return false;
-// }
+
+
+
+//! @brief 配列やコンテナであるかを調べる
+template <typename T>
+class IsIterable
+{
+private:
+    template <typename U>  // カンマ演算子を利用している
+    static constexpr auto check1(U&& u) -> decltype(&U::begin, &U::end, std::true_type());  // メンバ関数begin()とend()を持つならtrue
+    static constexpr std::false_type check1(...);
+
+    template <typename U>
+    static constexpr auto check2(U&& u) -> decltype(std::begin(u), std::end(u), std::true_type());  // std::begin(u)とstd::end(u)が存在するならtrue
+    static constexpr std::false_type check2(...);
+    
+    template <typename U>
+    static constexpr auto check3(U&& u) -> decltype(begin(u), end(u), std::true_type());  // begin(u)とend(u)が存在するならtrue
+    static constexpr std::false_type check3(...);
+public:
+    //! @brief beginとendを持っていたらtrue，持っていなかったらfalse
+    static constexpr bool value = (decltype(check1(std::declval<T>()))::value || decltype(check2(std::declval<T>()))::value || decltype(check3(std::declval<T>()))::value);
+};
+// このクラスは以下の資料を参考にし作成しました
+// https://qiita.com/terukazu/items/e257c05a7b191d32c577
+// https://zenn.dev/ymd_h/articles/e90ad8ad40a6dd
+
 
 //! @brief 配列がある値を含んでいるかを調べる
 template<typename T>
@@ -165,9 +177,14 @@ struct any_of
 
     //! @brief 配列がある値を含んでいるかを調べる
     //! @param list 中身を比べる配列
-    constexpr any_of(const T& list):
+    template<typename Iterable>
+    constexpr any_of(const Iterable& list):
         _compare_list(list) {}
 };
+// 推論補助宣言
+template<typename Iterable>
+any_of(const Iterable&)
+    -> any_of<typename std::enable_if<IsIterable<Iterable>::value, Iterable>::type >;  // コンテナ以外が引数に渡されたらエラーになる
 
 //! @brief 配列がある値を含んでいるかを調べる
 //! @param one 比較する値
@@ -192,9 +209,14 @@ struct all_of
 
     //! @brief 配列がある値を含んでいないことを調べる
     //! @param list 中身を比べる配列
-    constexpr all_of(const T& list):
+    template<typename Iterable>
+    constexpr all_of(const Iterable& list):
         _compare_list(list) {}
 };
+// 推論補助宣言
+template<typename Iterable>
+all_of(const Iterable&)
+    -> all_of<typename std::enable_if<IsIterable<Iterable>::value, Iterable>::type >;  // コンテナ以外が引数に渡されたらエラーになる
 
 //! @brief 配列がある値を含んでいないことを調べる
 //! @param one 比較する値
@@ -211,28 +233,6 @@ return false;
 }
 
 
-//! @brief 配列やコンテナであるかを調べる
-template <typename T>
-class IsIterable
-{
-private:
-    template <typename U>  // カンマ演算子を利用している
-    static constexpr auto check1(U&& u) -> decltype(&U::begin, &U::end, std::true_type());  // メンバ関数begin()とend()を持つか
-    static constexpr std::false_type check1(...);
-
-    template <typename U>
-    static constexpr auto check2(U&& u) -> decltype(std::begin(u), std::end(u), std::true_type());
-    static constexpr std::false_type check2(...);
-    
-    template <typename U>
-    static constexpr auto check3(U&& u) -> decltype(begin(u), end(u), std::true_type());
-    static constexpr std::false_type check3(...);
-public:
-    //! @brief beginとendを持っていたらtrue，持っていなかったらfalse
-    static constexpr bool value = (decltype(check1(std::declval<T>()))::value || decltype(check2(std::declval<T>()))::value || decltype(check3(std::declval<T>()))::value);
-};
-// このクラスは以下の資料を参考にし作成しました
-// https://qiita.com/terukazu/items/e257c05a7b191d32c577
-// https://zenn.dev/ymd_h/articles/e90ad8ad40a6dd
+}
 
 #endif  // SC19_PICO_SC_SC_BASIC_HPP_

@@ -13,9 +13,9 @@ HCSR04::HCSR04(){
     gpio_set_dir(28, GPIO_OUT);
     gpio_pull_down(28);
 
-    gpio_init(6);
-    gpio_set_dir(6, GPIO_IN);
-    gpio_set_irq_enabled_with_callback(6, GPIO_IRQ_EDGE_RISE + GPIO_IRQ_EDGE_FALL, true, &hcsr_callback);
+    gpio_init(3);
+    gpio_set_dir(3, GPIO_IN);
+    gpio_set_irq_enabled_with_callback(3, GPIO_IRQ_EDGE_RISE + GPIO_IRQ_EDGE_FALL, true, &hcsr_callback);
 }
 
 int HCSR04::gettingTime()

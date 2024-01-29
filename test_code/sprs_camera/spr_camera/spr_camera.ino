@@ -224,6 +224,7 @@ float CaluculateHue(float red, float green, float blue, float rgbmax, float rgbm
 
   if (rgbmax == rgbmin){
     hue = 0;
+    Serial.println("rgbmax = rgbmin");
   }
   else if (rgbmax == red){
     hue = 60 * ((green - red) / (rgbmax - rgbmin));
@@ -255,18 +256,21 @@ uint16_t CountRedPixel(CamImage img, uint8_t zone_begin, uint8_t zone_end){
 
   while (y_coordinate <= img_height){
     uint16_t rgb565 = img.getImgBuff()[y_coordinate * img_width + x_coordinate];
+    
+    /*
     uint8_t red565 = (rgb565 >> 8) & 0xF8;
     uint8_t green565 = (rgb565 >> 3) & 0xFC;
     uint8_t blue565 = (rgb565 << 3) & 0xF8;
+    */
     // uint16_t pixelColor = img.getPixel(x_coordinate, y_coordinate);
     
     // RGB565からRGB888
     uint8_t red888 = ((rgb565 >> 8) & 0xF8) >> 3;
     uint8_t green888 = ((rgb565 >> 3) & 0xFC) >> 2;
     uint8_t blue888 = (rgb565 & 0x1F) << 3;
+    // ↑おそらくこの辺がおかしい
 
     // RGBからHSV
-    
     float red_treat = red888 / 255.0;
     float green_treat = green888 / 255.0;
     float blue_treat = blue888 / 255.0;
@@ -298,6 +302,19 @@ uint16_t CountRedPixel(CamImage img, uint8_t zone_begin, uint8_t zone_end){
     hsv_max = np.array([179, 255, 255])
     */
     
+    Serial.print("rgb565: ");
+    Serial.println(rgb565);
+    Serial.print("rgbmax: ");
+    Serial.println(rgbmax);
+    Serial.print("rgbmin: ");
+    Serial.println(rgbmin);
+    Serial.print("hue: ");
+    Serial.println(hue);
+    Serial.print("sat: ");
+    Serial.println(sat);
+    Serial.print("val: ");
+    Serial.println(val);
+    
     if (x_coordinate == zone_end){
       x_coordinate = zone_begin;
       y_coordinate++;
@@ -320,41 +337,49 @@ uint8_t red_detect(CamImage img) {
   // HSVに変換 -> 数える
 
   // 領域分け
-  uint16_t img_width = img.getWidth();
-  uint8_t right_end = img_width / 2 - (img_width / 4);
-  uint8_t left_begin = img_width / 2 + (img_width / 4);
+  uint8_t img_width = img.getWidth();
+  uint8_t left_end = img_width / 2 - (img_width / 4);
+  uint8_t right_begin = img_width / 2 + (img_width / 4);
 
   // 分けた領域中の赤ピクセルのカウント
-  uint16_t right_red = CountRedPixel(img, 1, right_end);
-  uint16_t center_red = CountRedPixel(img, ++right_end, --left_begin);
-  uint16_t left_red = CountRedPixel(img, left_begin, img_width);
   uint8_t result = 0;
-  Serial.println("Right: ");
-  Serial.println("right_red");
-  Serial.println("Center: ");
-  Serial.println(center_red);
-  Serial.println("Left: ");
+  uint16_t left_red = CountRedPixel(img, 1, left_end);
+  Serial.print("Left: ");
   Serial.println(left_red);
+  uint16_t center_red = CountRedPixel(img, left_end + 1, right_begin - 1);
+  Serial.print("Center: ");
+  Serial.println(center_red);
+  uint16_t right_red = CountRedPixel(img, right_begin, img_width);
+  Serial.print("Right: ");
+  Serial.println(right_red);
 
 
-  Serial.println("Red object: ");
-  if (right_red == max(max(right_red, center_red), left_red)){
-    Serial.println("Right");
+  Serial.print("Red object: ");
+  if (right_red == left_red || right_red == center_red || left_red == center_red){
+    Serial.println("Failed judgement");
+    result = 4;
+  }
+  else if ((left_red + center_red + right_red) <= 10){
+    Serial.println("Not found");
+    result = 4;
+  }
+  else if (left_red == max(max(left_red, center_red), right_red)){
+    Serial.println("Left");
     result = 1;
   }
-  if ((right_red + center_red + left_red) <= 10){
+  else if (center_red == max(max(left_red, center_red), right_red)){
     Serial.println("Center");
     result = 2;
   }
-  if ((right_red + center_red + left_red) <= 10){
-    Serial.println("Left");
+  else if (right_red == max(max(left_red, center_red), right_red)){
+    Serial.println("Right");
     result = 3;
   }
   else{
     Serial.println("CountRedPixel didn't success");
   }
 
-  // result: 1 -> 右 2 -> 中央 3 -> 左
+  // result: 1 -> 左 2 -> 中央 3 -> 右
   // Serial.println(result);
 
   return result;
@@ -377,10 +402,10 @@ void loop(){
     int iso = theCamera.getISOSensitivity();
     int exposure = theCamera.getAbsoluteExposure();
     // int hdr = theCamera.getHDR();
-    Serial.print("ISO ");
-    Serial.print(iso);
-    Serial.print(",Exposure ");
-    Serial.print(exposure);
+    // Serial.print("ISO ");
+    // Serial.print(iso);
+    // Serial.print(",Exposure ");
+    // Serial.print(exposure);
     // Serial.print(",HDR ");
     // Serial.print(hdr);
     Serial.println();
@@ -391,7 +416,9 @@ void loop(){
 
     // 画像の転送(USB)
     digitalWrite(LED0, HIGH);
+    Serial.fludh();
     sendImageToSerial(img);
+    Serial.flush();
     digitalWrite(LED0, LOW);
 
   }

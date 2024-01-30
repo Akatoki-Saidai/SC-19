@@ -265,10 +265,30 @@ uint16_t CountRedPixel(CamImage img, uint8_t zone_begin, uint8_t zone_end){
     // uint16_t pixelColor = img.getPixel(x_coordinate, y_coordinate);
     
     // RGB565からRGB888
+    /* 旧
     uint8_t red888 = ((rgb565 >> 8) & 0xF8) >> 3;
     uint8_t green888 = ((rgb565 >> 3) & 0xFC) >> 2;
     uint8_t blue888 = (rgb565 & 0x1F) << 3;
-    // ↑おそらくこの辺がおかしい
+    */
+
+    // 候補1
+    uint8_t red888 = ((rgb565 >> 11) & 0x1F) << 3;
+    uint8_t green888 = ((rgb565 >> 5) & 0x3F) << 2;
+    uint8_t blue888 = (rgb565 & 0x1F);
+
+    // 候補2
+    /*
+    uint8_t red888 = rgb565 & 0x1F;
+    uint8_t green888 = (rgb565 >> 5) & 0x3F;
+    uint8_t blue888 = (rgb565 >> 11) & 0x1F;
+
+    // 正規化
+    red888 = (red << 3) | (red >> 2);
+    green888 = (green << 2) | (green >> 4);
+    blue888 = (blue << 3) | (blue >> 2);
+    */
+
+    // ↑おそらくRGB888取得がおかしい
 
     // RGBからHSV
     float red_treat = red888 / 255.0;

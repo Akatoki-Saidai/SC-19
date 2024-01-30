@@ -1,4 +1,4 @@
-#include "BME280.hpp" //クラス定義
+#include "BME280_BBM.hpp" //クラス定義
 
 
 BME280::BME280(){
@@ -27,7 +27,7 @@ int BME280::get_BME280(){
       printf("Temperature, Pressure, Humidity\n");
       if (read_sensor(&dev,&delay,&sensor_data) == BME280_OK) {
         print_data(&sensor_data);
-        sleep_ms(1000*UPDATE_INTERVAL);
+        sleep_ms(1000*UPDATE_INTERVAL);//UPDATE_INTERVALはCMakeListにあるよ
       }
       else{
       throw Error(__FILE__, __LINE__, "The value could not be read properly.");  // 正常に値が読み取れませんでした

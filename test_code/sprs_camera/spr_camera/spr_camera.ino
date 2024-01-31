@@ -206,6 +206,7 @@ void initCamera(){
 void sendImageToSerial (CamImage img) {
     int inputLen = img.getImgSize();
     uint8_t* p = img.getImgBuff();
+    Serial.flush();
     Serial.println("#Image");
     while(inputLen > 0)
     {
@@ -239,6 +240,10 @@ float CaluculateHue(float red, float green, float blue, float rgbmax, float rgbm
     Serial.println("Unexpected error occured while caluculate HSV");
   }
 
+  if (hue < 0) {
+    hue = hue + 360.0;
+  }
+
   return hue;
 }
 
@@ -256,39 +261,23 @@ uint16_t CountRedPixel(CamImage img, uint8_t zone_begin, uint8_t zone_end){
 
   while (y_coordinate <= img_height){
     uint16_t rgb565 = img.getImgBuff()[y_coordinate * img_width + x_coordinate];
-    
-    /*
-    uint8_t red565 = (rgb565 >> 8) & 0xF8;
-    uint8_t green565 = (rgb565 >> 3) & 0xFC;
-    uint8_t blue565 = (rgb565 << 3) & 0xF8;
-    */
-    // uint16_t pixelColor = img.getPixel(x_coordinate, y_coordinate);
-    
+    // img.getImgBuff()で取得できるアドレスとその数は8bit(uint8_t)　<- img.getImgBuff()がuint8_t, 取得したrgb888に202があった->8bit
+    // RGB565には16bit必要 -> アドレス2つ
+
     // RGB565からRGB888
-    /* 旧
-    uint8_t red888 = ((rgb565 >> 8) & 0xF8) >> 3;
-    uint8_t green888 = ((rgb565 >> 3) & 0xFC) >> 2;
-    uint8_t blue888 = (rgb565 & 0x1F) << 3;
-    */
-
-    // 候補1
-    uint8_t red888 = ((rgb565 >> 11) & 0x1F) << 3;
-    uint8_t green888 = ((rgb565 >> 5) & 0x3F) << 2;
-    uint8_t blue888 = (rgb565 & 0x1F);
-
-    // 候補2
-    /*
+    // uint16_t pixelColor = img.getPixel(x_coordinate, y_coordinate);
     uint8_t red888 = rgb565 & 0x1F;
     uint8_t green888 = (rgb565 >> 5) & 0x3F;
     uint8_t blue888 = (rgb565 >> 11) & 0x1F;
 
     // 正規化
-    red888 = (red << 3) | (red >> 2);
-    green888 = (green << 2) | (green >> 4);
-    blue888 = (blue << 3) | (blue >> 2);
-    */
+    red888 = (red888 << 3) | (red888 >> 2);
+    green888 = (green888 << 2) | (green888 >> 4);
+    blue888 = (blue888 << 3) | (blue888 >> 2);
 
     // ↑おそらくRGB888取得がおかしい
+    // アドレス数の見直し
+    // 6144Byte -> 16bitで1ピクセルとする -> 64 * 48 ピクセル?
 
     // RGBからHSV
     float red_treat = red888 / 255.0;
@@ -322,8 +311,17 @@ uint16_t CountRedPixel(CamImage img, uint8_t zone_begin, uint8_t zone_end){
     hsv_max = np.array([179, 255, 255])
     */
     
+    Serial.print("size: ");
+    Serial.println(img.getImgSize());
     Serial.print("rgb565: ");
     Serial.println(rgb565);
+    Serial.print("red888: ");
+    Serial.println(red888);
+    Serial.print("green888: ");
+    Serial.println(green888);
+    Serial.print("blue888: ");
+    Serial.println(blue888);
+
     Serial.print("rgbmax: ");
     Serial.println(rgbmax);
     Serial.print("rgbmin: ");
@@ -334,6 +332,7 @@ uint16_t CountRedPixel(CamImage img, uint8_t zone_begin, uint8_t zone_end){
     Serial.println(sat);
     Serial.print("val: ");
     Serial.println(val);
+    Serial.flush();
     
     if (x_coordinate == zone_end){
       x_coordinate = zone_begin;
@@ -436,7 +435,7 @@ void loop(){
 
     // 画像の転送(USB)
     digitalWrite(LED0, HIGH);
-    Serial.fludh();
+    Serial.flush();
     sendImageToSerial(img);
     Serial.flush();
     digitalWrite(LED0, LOW);

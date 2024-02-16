@@ -91,7 +91,7 @@ public:
 private:
     const SDA _sda;  // I2Cで使用するSDAピン
     const SCL _scl;  // I2Cで使用するSCLピン
-    const Freq _freq;  // I2Cの通信速度
+    const Frequency<Unit::Hz> _freq;  // I2Cの通信速度
     const I2C_ID _i2c_id;  // I2C0かI2C1か
 
 public:
@@ -104,7 +104,7 @@ public:
     //! @param sda I2Cで使用するSDAピン
     //! @param scl I2Cで使用するSCLピン
     //! @param freq I2Cの通信速度 (10000_hz のように入力)
-    I2C(SDA sda, SCL scl, Freq freq);
+    I2C(SDA sda, SCL scl, Frequency<Unit::Hz> freq);
 
     //! @brief I2Cによる送信
     //! @param output_data 送信するデータ
@@ -115,7 +115,7 @@ public:
     //! @param size 受信するバイト数
     //! @param slave_addr 通信先のデバイスのスレーブアドレス (誰から受信するか)
     //! @return Binary型のバイト列
-    Binary read(size_t size, SlaveAddr slave_addr) const;
+    Binary read(std::size_t size, SlaveAddr slave_addr) const;
 
     //! @brief I2Cによるメモリへの送信
     //! @param output_data 送信するデータ
@@ -128,9 +128,9 @@ public:
     //! @param slave_addr 通信先のデバイスのスレーブアドレス
     //! @param memory_addr 通信先のデバイスのメモリの何番地からデータを読み込むか
     //! @return Binary型のバイト列
-    Binary read_memory(size_t size, SlaveAddr slave_addr, MemoryAddr memory_addr) const;
+    Binary read_memory(std::size_t size, SlaveAddr slave_addr, MemoryAddr memory_addr) const;
 private:
-    static bool IsUse[2];  // 既にI2C0とI2C1を使用しているか
+    static inline bool IsUse[2] = {false, false};  // 既にI2C0とI2C1を使用しているか
 };
 
 }

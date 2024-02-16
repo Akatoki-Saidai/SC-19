@@ -22,7 +22,7 @@ namespace sc
 MISO::MISO(int miso_gpio):
     Pin(miso_gpio)
 {
-    if (get_gpio() != all_of(EnableSPI0_MISO) && get_gpio() != all_of(EnableSPI1_MISO))
+    if (gpio() != all_of(EnableSPI0_MISO) && gpio() != all_of(EnableSPI1_MISO))
     {
 throw Error(__FILE__, __LINE__, "An incorrect MISO pin number was entered");  // 正しくないMISOピンの番号が入力されました
     }
@@ -30,10 +30,10 @@ throw Error(__FILE__, __LINE__, "An incorrect MISO pin number was entered");  //
 
 SPI_ID MISO::get_spi_id() const
 {
-    if (get_gpio() == any_of(EnableSPI0_MISO))
+    if (gpio() == any_of(EnableSPI0_MISO))
     {
 return SPI_ID::spi_0;
-    } else if (get_gpio() == any_of(EnableSPI1_MISO)) {
+    } else if (gpio() == any_of(EnableSPI1_MISO)) {
 return SPI_ID::spi_1;
     } else {
 throw Error(__FILE__, __LINE__, "An incorrect MISO pin number was entered");  // 正しくないMISOピンの番号が入力されました
@@ -46,7 +46,7 @@ bool CS::no_use() const
 {
     for (Pin pin : _cs_pins)
     {
-        if (Pin::Status.at(pin.get_gpio()) != PinStatus::NoUse)
+        if (Pin::Status.at(pin.gpio()) != PinStatus::NoUse)
         {
 return false;
         }
@@ -59,7 +59,7 @@ return false;
 SCK::SCK(int sck_gpio):
     Pin(sck_gpio)
 {
-    if (get_gpio() != all_of(EnableSPI0_SCK) && get_gpio() != all_of(EnableSPI1_SCK))
+    if (gpio() != all_of(EnableSPI0_SCK) && gpio() != all_of(EnableSPI1_SCK))
     {
 throw Error(__FILE__, __LINE__, "An incorrect SCK pin number was entered");  // 正しくないSCKピンの番号が入力されました
     }
@@ -67,10 +67,10 @@ throw Error(__FILE__, __LINE__, "An incorrect SCK pin number was entered");  // 
 
 SPI_ID SCK::get_spi_id() const
 {
-    if (get_gpio() == any_of(EnableSPI0_SCK))
+    if (gpio() == any_of(EnableSPI0_SCK))
     {
 return SPI_ID::spi_0;
-    } else if (get_gpio() == any_of(EnableSPI1_SCK)) {
+    } else if (gpio() == any_of(EnableSPI1_SCK)) {
 return SPI_ID::spi_1;
     } else {
 throw Error(__FILE__, __LINE__, "An incorrect SCK pin number was entered");  // 正しくないSCKピンの番号が入力されました
@@ -82,7 +82,7 @@ throw Error(__FILE__, __LINE__, "An incorrect SCK pin number was entered");  // 
 MOSI::MOSI(int miso_gpio):
     Pin(miso_gpio)
 {
-    if (get_gpio() != all_of(EnableSPI0_MOSI) && get_gpio() != all_of(EnableSPI1_MOSI))
+    if (gpio() != all_of(EnableSPI0_MOSI) && gpio() != all_of(EnableSPI1_MOSI))
     {
 throw Error(__FILE__, __LINE__, "An incorrect MOSI pin number was entered");  // 正しくないMOSIピンの番号が入力されました
     }
@@ -90,10 +90,10 @@ throw Error(__FILE__, __LINE__, "An incorrect MOSI pin number was entered");  //
 
 SPI_ID MOSI::get_spi_id() const
 {
-    if (get_gpio() == any_of(EnableSPI0_MOSI))
+    if (gpio() == any_of(EnableSPI0_MOSI))
     {
 return SPI_ID::spi_0;
-    } else if (get_gpio() == any_of(EnableSPI1_MOSI)) {
+    } else if (gpio() == any_of(EnableSPI1_MOSI)) {
 return SPI_ID::spi_1;
     } else {
 throw Error(__FILE__, __LINE__, "An incorrect MOSI pin number was entered");  // 正しくないMOSIピンの番号が入力されました
@@ -121,33 +121,33 @@ SPI::MemoryAddr::operator uint8_t() const
 SPI::SPI(MISO miso, CS cs, SCK sck, MOSI mosi):
     SPI(miso, cs, sck, mosi, 10'000_hz) {}
 
-SPI::SPI(MISO miso, CS cs, SCK sck, MOSI mosi, Freq freq):
+SPI::SPI(MISO miso, CS cs, SCK sck, MOSI mosi, Frequency<Unit::Hz>  freq):
     _miso(miso), _sck(sck), _mosi(mosi), _freq(freq), _spi_id(miso.get_spi_id())
 {
     if (!(miso.get_spi_id() == sck.get_spi_id() && sck.get_spi_id() == mosi.get_spi_id()))
     {
 throw Error(__FILE__, __LINE__, "An incorrect SPI pin number was entered");  // 正しくないSPIのピン番号が入力されました
-    } else if (Pin::Status.at(_miso.get_gpio()) != PinStatus::NoUse || Pin::Status.at(_sck.get_gpio()) != PinStatus::NoUse || Pin::Status.at(_mosi.get_gpio()) != PinStatus::NoUse || !cs.no_use()) {
+    } else if (Pin::Status.at(_miso.gpio()) != PinStatus::NoUse || Pin::Status.at(_sck.gpio()) != PinStatus::NoUse || Pin::Status.at(_mosi.gpio()) != PinStatus::NoUse || !cs.no_use()) {
 throw Error(__FILE__, __LINE__, "This pin is already in use");  // このピンは既に使用されています
     } else if (SPI::IsUse[_spi_id]) {
 throw Error(__FILE__, __LINE__, "SPI cannot be reinitialized");  // SPIを再度初期化することはできません
     }
 
-    Pin::Status.at(_miso.get_gpio()) = PinStatus::SpiMiso;
-    Pin::Status.at(_sck.get_gpio()) = PinStatus::SpiSck;
-    Pin::Status.at(_mosi.get_gpio()) = PinStatus::SpiMosi;
+    Pin::Status.at(_miso.gpio()) = PinStatus::SpiMiso;
+    Pin::Status.at(_sck.gpio()) = PinStatus::SpiSck;
+    Pin::Status.at(_mosi.gpio()) = PinStatus::SpiMosi;
     for (Pin cs_pin : cs.get())
     {
-        Pin::Status.at(cs_pin.get_gpio()) = PinStatus::SpiCs;
+        Pin::Status.at(cs_pin.gpio()) = PinStatus::SpiCs;
     }
 
     SPI::IsUse[_spi_id] = true;
 
     ::spi_init((_spi_id ? spi1 : spi0), static_cast<double>(_freq));  // pico-SDKの関数  SPIを初期化する
 
-    ::gpio_set_function(_miso.get_gpio(), GPIO_FUNC_SPI);  // pico-SDKの関数  ピンの機能をSPIモードにする
-    ::gpio_set_function(_sck.get_gpio(), GPIO_FUNC_SPI);  // pico-SDKの関数  ピンの機能をSPIモードにする
-    ::gpio_set_function(_mosi.get_gpio(), GPIO_FUNC_SPI);  // pico-SDKの関数  ピンの機能をSPIモードにする
+    ::gpio_set_function(_miso.gpio(), GPIO_FUNC_SPI);  // pico-SDKの関数  ピンの機能をSPIモードにする
+    ::gpio_set_function(_sck.gpio(), GPIO_FUNC_SPI);  // pico-SDKの関数  ピンの機能をSPIモードにする
+    ::gpio_set_function(_mosi.gpio(), GPIO_FUNC_SPI);  // pico-SDKの関数  ピンの機能をSPIモードにする
     for (Pin cs_pin : cs.get())
     {
         _cs_pins.push_back(GPIO<Out>(cs_pin));  // CSピンをGPIO出力用のピンとしてセットアップ
@@ -166,14 +166,14 @@ throw Error(__FILE__, __LINE__, "Cannot communicate with multiple devices at the
     _cs_pins.at(cs_pin.get().at(0)).write(1);  // 通信先のデバイスにつながるCSピンをオンにして，通信の終了を伝える
 }
 
-Binary SPI::read(size_t size, CS cs_pin) const
+Binary SPI::read(std::size_t size, CS cs_pin) const
 {
     if (cs_pin.size() > 1)
     {
 throw Error(__FILE__, __LINE__, "Cannot communicate with multiple devices at the same time");  // 複数のデバイスと同時に通信することはできません
     }
     std::vector<uint8_t> input_data(size);
-    size_t input_size = 0;  // 実際には何バイト受信したか
+    std::size_t input_size = 0;  // 実際には何バイト受信したか
     _cs_pins.at(cs_pin.get().at(0)).write(0);  // 通信先のデバイスにつながるCSピンをオフにして，通信の開始を伝える
     input_size = ::spi_read_blocking((_spi_id ? spi1 : spi0), 0, input_data.data(), size);  // pico-SDKの関数  SPIで受信
     _cs_pins.at(cs_pin.get().at(0)).write(1);  // 通信先のデバイスにつながるCSピンをオンにして，通信の終了を伝える
@@ -193,7 +193,7 @@ throw Error(__FILE__, __LINE__, "Cannot communicate with multiple devices at the
     _cs_pins.at(cs_pin.get().at(0)).write(1);  // 通信先のデバイスにつながるCSピンをオンにして，通信の終了を伝える
 }
 
-Binary SPI::read_memory(size_t size, CS cs_pin, MemoryAddr memory_addr) const
+Binary SPI::read_memory(std::size_t size, CS cs_pin, MemoryAddr memory_addr) const
 {
     if (cs_pin.size() > 1)
     {
@@ -201,7 +201,7 @@ throw Error(__FILE__, __LINE__, "Cannot communicate with multiple devices at the
     }
     std::vector<uint8_t> input_data(size);
     uint8_t write_memory_addr = memory_addr | 0b10000000;
-    size_t input_size = 0;  // 実際には何バイト受信したか
+    std::size_t input_size = 0;  // 実際には何バイト受信したか
     _cs_pins.at(cs_pin.get().at(0)).write(0);  // 通信先のデバイスにつながるCSピンをオフにして，通信の開始を伝える
     ::spi_write_blocking((_spi_id ? spi1 : spi0), &write_memory_addr, 1);  // まず，メモリアドレスを送信
     input_size = ::spi_read_blocking((_spi_id ? spi1 : spi0), 0, input_data.data(), size);  // pico-SDKの関数  SPIで受信
@@ -209,8 +209,5 @@ throw Error(__FILE__, __LINE__, "Cannot communicate with multiple devices at the
     input_data.resize(input_size);
     return Binary(input_data);
 }
-
-
-bool SPI::IsUse[2] = {false, false};
 
 }

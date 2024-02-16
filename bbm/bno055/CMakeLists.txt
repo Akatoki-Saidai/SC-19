@@ -2,7 +2,7 @@
 
 # ビルドを実行するファイルを追加
 add_library(BNO055 STATIC
-    ${CMAKE_CURRENT_LIST_DIR}/BNO055.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/BNO055_BBM.cpp
 )
 # 以下の資料を参考にしました
 # https://qiita.com/kikochan/items/732e46e92e7f29c18ce9
@@ -12,6 +12,7 @@ add_library(BNO055 STATIC
 target_link_libraries(BNO055
     pico_stdlib
     hardware_i2c
+    SC
 )
 
 ##################################################

@@ -29,15 +29,15 @@ throw Error(__FILE__, __LINE__, "An incorrect Duty value was entered");  // 正�
 
 /***** class PWM *****/
 
-PWM::PWM(Pin pin, Freq freq):
-    _pin(pin), _slice(::pwm_gpio_to_slice_num(pin.get_gpio())), _channel(::pwm_gpio_to_channel(pin.get_gpio()) == 1 ? Channel::B : Channel::A), _wrap(to_wrap(freq)), _clk_div(to_clk_div(freq, to_wrap(freq)))
+PWM::PWM(Pin pin, Frequency<Unit::Hz> freq):
+    _pin(pin), _slice(::pwm_gpio_to_slice_num(pin.gpio())), _channel(::pwm_gpio_to_channel(pin.gpio()) == 1 ? Channel::B : Channel::A), _wrap(to_wrap(freq)), _clk_div(to_clk_div(freq, to_wrap(freq)))
 {
-    if (Pin::Status.at(_pin.get_gpio()) != PinStatus::NoUse)
+    if (Pin::Status.at(_pin.gpio()) != PinStatus::NoUse)
     {
 throw Error(__FILE__, __LINE__, "This pin is already in use");  // このピンは既に使用されています
     }
 
-    ::gpio_set_function(_pin.get_gpio(), GPIO_FUNC_PWM);  // pico-SDKの関数  ピンの機能をPWMにする
+    ::gpio_set_function(_pin.gpio(), GPIO_FUNC_PWM);  // pico-SDKの関数  ピンの機能をPWMにする
 
     // 周波数を設定 (実際に設定される周波数は入力した値から最大で6.25%ずれる)
     ::pwm_set_wrap(_slice, _wrap);  // pico-SDKの関数  分解能を設定 (詳しくは下記の資料へ)
@@ -51,17 +51,17 @@ throw Error(__FILE__, __LINE__, "This pin is already in use");  // このピン�
 
 void PWM::write(Duty duty) const
 {
-    ::pwm_set_gpio_level(_pin.get_gpio(), _wrap * duty);  // pico-SDKの関数  あるGPIOピンのPWMの出力レベルを設定する
+    ::pwm_set_gpio_level(_pin.gpio(), _wrap * duty);  // pico-SDKの関数  あるGPIOピンのPWMの出力レベルを設定する
     // ::pwm_set_chan_level(_slice, (_channel==Channel::A ? PWM_CHAN_A : PWM_CHAN_B), _wrap * duty);  // pico-SDKの関数  sliceとchannelで指定したGPIOピンのPWMの出力レベルを設定する
 }
 
-void PWM::write(_ms high_time) const
+void PWM::write(Time<Unit::s> high_time) const
 {
-    ::pwm_set_gpio_level(_pin.get_gpio(), static_cast<double>(static_cast<_s>(high_time))*SysClock*SysClock/(_clk_div*_clk_div*(_wrap+1)));  // pico-SDKの関数  あるGPIOピンのPWMの出力レベルを設定する
+    ::pwm_set_gpio_level(_pin.gpio(), static_cast<double>(high_time)*SysClock*SysClock/(_clk_div*_clk_div*(_wrap+1)));  // pico-SDKの関数  あるGPIOピンのPWMの出力レベルを設定する
     // ::pwm_set_chan_level(_slice, (_channel==Channel::A ? PWM_CHAN_A : PWM_CHAN_B), static_cast<double>(static_cast<_s>(high_time))*SysClock*SysClock/(_clk_div*_clk_div*(_wrap+1)));  // pico-SDKの関数  sliceとchannelで指定したGPIOピンのPWMの出力レベルを設定する
 }
 
-uint16_t PWM::to_wrap(Freq freq)
+uint16_t PWM::to_wrap(Frequency<Unit::Hz> freq)
 {
     if (freq < MinFreq || MaxFreq < freq)
     {
@@ -76,7 +76,7 @@ return (SysClock / not0(static_cast<double>(freq))) - 1;
     }
 }
 
-float PWM::to_clk_div(Freq freq, uint16_t wrap)
+float PWM::to_clk_div(Frequency<Unit::Hz> freq, uint16_t wrap)
 {
     if (freq < MinFreq || MaxFreq < freq)
     {

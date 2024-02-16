@@ -71,7 +71,7 @@ public:
     bool no_use() const;
 
     //! @brief 保存されているCSピンの数を取得
-    size_t size() const
+    std::size_t size() const
         {return _cs_pins.size();}
 };
 
@@ -131,7 +131,7 @@ private:
     const MISO _miso;  // SPIで使用するMISOピン
     const SCK _sck;  // SPIで使用するSCKピン
     const MOSI _mosi;  // SPIで使用するMOSIピン
-    const Freq _freq;  // SPIの通信速度
+    const Frequency<Unit::Hz>  _freq;  // SPIの通信速度
     const SPI_ID _spi_id;  // SPI0かSPI1か
     std::vector<GPIO<Out>> _cs_pins;  // SPIで使用する全てのCSピン
 
@@ -149,7 +149,7 @@ public:
     //! @param sck SPIで使用するSCKピン
     //! @param mosi SPIで使用するMOSIピン
     //! @param freq SPIの通信速度 (10000_hz のように入力)
-    SPI(MISO miso, CS cs, SCK sck, MOSI mosi, Freq freq);
+    SPI(MISO miso, CS cs, SCK sck, MOSI mosi, Frequency<Unit::Hz>  freq);
 
     //! @brief SPIによる送信
     //! @param output_data 送信するデータ
@@ -160,7 +160,7 @@ public:
     //! @param size 受信するバイト数
     //! @param cs_pin 通信先のデバイスのチップセレクトピンの番号
     //! @return Binary型のバイト列
-    Binary read(size_t size, CS cs_pin) const;
+    Binary read(std::size_t size, CS cs_pin) const;
 
     //! @brief SPIによるメモリへの送信
     //! @param output_data 送信するデータ
@@ -173,12 +173,12 @@ public:
     //! @param cs_pin 通信先のデバイスのチップセレクトピンの番号
     //! @param memory_addr 通信先のデバイスのメモリの何番地からデータを読み込むか
     //! @return Binary型のバイト列
-    Binary read_memory(size_t size, CS cs_pin, MemoryAddr memory_addr) const;
+    Binary read_memory(std::size_t size, CS cs_pin, MemoryAddr memory_addr) const;
 
     using TX = MOSI;
     using RX = MISO;
 private:
-    static bool IsUse[2];  // 既にSPI0とSPI1を使用しているか
+    static inline bool IsUse[2] = {false, false};  // 既にSPI0とSPI1を使用しているか
 };
 
 }

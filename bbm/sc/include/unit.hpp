@@ -13,519 +13,780 @@
 
 // #include "sc_basic.hpp"
 
-#include <cfloat>
-#include <cmath>
-#include <string>
-
-#ifndef M_PI  // もし，円周率(M_PI)が定義されていなかったら，円周率を定義する
-    #define M_PI 3.14159265358979323846
-#endif
 
 namespace sc
 {
 
-//! @brief 単位の親クラス
-class _unit
-{
-    //! @brief double型への変換を強制する仮想関数
-    //! @note _Unit型を継承したクラスでは，以下のdouble型に変換する関数を定義しないとエラーになります．
-    virtual operator double() const = 0;
-};
+static constexpr double PI = 3.14159265358979323846;  // 円周率π
 
-//! @brief 無次元量
-class _pure : _unit
+// べき乗の計算の内部処理用
+template<int N, class Now, class Start>
+static constexpr inline auto pow_calc(Now now, Start start)
 {
-    const double _pure_value;
-public:
-    //! @brief 無次元量のセット
-    constexpr _pure(double pure_value):
-        _pure_value(pure_value) {}
+    if constexpr (N==0)
+        {return now;}
+    else if constexpr (N>0)
+        {return pow_calc<N-1>(now*start, start);}
+    else
+        {return pow_calc<N+1>(now/start, start);}
+}
+
+//! @brief べき乗を計算
+//! @param num べき乗したい数
+//! @note pow<2>(3.4);  で3.4の2乗を計算する
+template<int N, class T>
+constexpr inline auto pow(T num)
+{
+    return pow_calc<N>(num/num, num);
+}
+
+
+/***** 単位と次元 *****/
+
+
+// SI単位の定義
+// 秒（記号は s）は、時間の SI 単位であり、セシウム周波数 ∆νCs、すなわち、セシウム 133 原子の摂動を受けない基底状態の超微細構造遷移周波数を単位Hz（s−1 に等しい）で表したときに、その数値を 9 192 631 770 と定めることによって定義される。
+// メートル（記号は m）は長さの SI 単位であり、真空中の光の速さ c を単位m s−1 で表したときに、その数値を 299 792 458 と定めることによって定義される。ここで、秒はセシウム周波数 ∆νCs によって定義される。
+// キログラム（記号は kg）は質量の SI 単位であり、プランク定数 h を単位 J s（kg m2 s−1 に等しい）で表したときに、その数値を 6.626 070 15 × 10−34 と定めることによって定義される。ここで、メートルおよび秒は c および ∆νCs に関連して定義される。
+// アンペア（記号は A）は、電流の SI 単位であり、電気素量 e を単位 C（A s に等しい）で表したときに、その数値を 1.602 176 634 × 10−19 と定めることによって定義される。ここで、秒は ∆νCs によって定義される。
+// ケ ル ビ ン（ 記 号 は K） は、 熱 力 学 温 度 の SI 単 位 で あ り、 ボ ル ツ マ ン 定数 k を 単 位 J K−1（kg m2 s−2 K−1 に 等 し い ） で 表 し た と き に、 そ の 数 値 を1.380 649 × 10−23 と定めることによって定義される。ここで、キログラム、メートルおよび秒は h、c および ∆νCs に関連して定義される。
+// モ ル（ 記 号 は mol） は、 物 質 量 の SI 単 位 で あ り、1 モ ル に は、 厳 密 に6.022 140 76 × 1023 の要素粒子が含まれる。この数は、アボガドロ定数 NA を単位 mol−1 で表したときの数値であり、アボガドロ数と呼ばれる。
+// 系の物質量（記号は n）は、特定された要素粒子の数の尺度である。要素粒子は、原子、分子、イオン、電子、その他の粒子、あるいは、粒子の集合体のいずれであってもよい。
+// カンデラ（記号は cd）は、所定の方向における光度の SI 単位であり、周波数 540 × 10 12 Hz の単色放射の視感効果度 Kcd を単位 lm W−1（cd sr W−1 あるいは cd sr kg−1 m−2 s3 に等しい）で表したときに、その数値を 683 と定めることによって定義される。ここで、キログラム、メートルおよび秒は h、c および∆νCs に関連して定義される。
+// https://unit.aist.go.jp/nmij/public/report/si-brochure/pdf/SI_9th_%E6%97%A5%E6%9C%AC%E8%AA%9E%E7%89%88_r.pdf より引用
+
+//! @brief 物理量の次元を表すクラス
+//! @param T 時間(s)
+//! @param L 長さ(m)
+//! @param M 質量(kg)
+//! @param I 電流(A)
+//! @param Th 温度(K)
+//! @param N 物質量(mol)
+//! @param J 光度(cd)
+template<int T, int L, int M, int I, int Th, int N, int J>
+class Dimension 
+{
+    const double _number;  // 数値
     
-    //! @brief 無次元量をdouble型に変換
-    operator double() const override {return _pure_value;}
-};
-
-//! @brief 光度(cd)
-class _cd : _unit
-{
-    const double _cd_value;
 public:
-    //! @brief 光度(cd)のセット
-    constexpr explicit _cd(double cd_value):
-        _cd_value(cd_value) {}
+    //! @brief 次元を持った量を，同じ次元型から構築
+    constexpr Dimension(const Dimension<T, L, M, I, Th, N, J>& dim) = default;
+
+    //! @brief 次元を持った，単位量を構築
+    constexpr Dimension():
+        _number(1.0) {}
+
+    //! @brief 次元を持った量を構築
+    explicit constexpr Dimension(const double& num):
+        _number(num) {}
     
-    //! @brief 光度(cd)をdouble型に変換
-    explicit operator double() const noexcept override {return _cd_value;}
+    explicit constexpr operator double() const
+        {return _number;}
+
+    constexpr double number() const
+        {return _number;}    
 };
 
-//! @brief 温度(℃)
-class _degC : _unit
+// 定義定数
+namespace constant 
 {
-    const double _degC_value;
+    constexpr Dimension<-1, 0, 0, 0, 0, 0, 0> dNuCs{9'192'631'770.0};  // Δνcs．セシウム133原子の摂動を受けない基底状態の超微細構造遷移周波数
+    constexpr Dimension<-1, 1, 0, 0, 0, 0, 0> c{299'792'458.0};  // c．真空中の光の速さ
+    constexpr Dimension<-1, 2, 1, 0, 0, 0, 0> h{6.626'070'15E-34};  // h．プランク定数
+    constexpr Dimension<1, 0, 0, 1, 0, 0, 0> e{1.602'176'634E-19};  // e．電気素量
+    constexpr Dimension<-2, 2, 1, 0, -1, 0, 0> k{1.380'649E-23};  // k．ボルツマン定数   
+    constexpr Dimension<0, 0, 0, 0, 0, -1, 0> NA{6.022'140'76E23};  // NA．アボガドロ定数
+}
 
-    static constexpr double MinDegC = -20.0;  // 最小の温度(℃)
-    static constexpr double MaxDegC = 50.0;  // 最大の温度(℃)
 
-public:
-    //! @brief 温度(℃)のセット
-    explicit _degC(double degC_value);
+// 演算子
 
-    //! @brief 温度(℃)をdouble型に変換
-    explicit operator double() const noexcept override {return _degC_value;}
+template<int T, int L, int M, int I, int Th, int N, int J>
+Dimension<T, L, M, I, Th, N, J> constexpr operator+(const Dimension<T, L, M, I, Th, N, J>& scalar)
+{
+    return scalar;
+}
+
+template<int T, int L, int M, int I, int Th, int N, int J>
+Dimension<T, L, M, I, Th, N, J> constexpr operator-(const Dimension<T, L, M, I, Th, N, J>& scalar)
+{
+    return Dimension<T, L, M, I, Th, N, J>{-static_cast<double>(scalar)};
+}
+
+template<int T, int L, int M, int I, int Th, int N, int J>
+Dimension<T, L, M, I, Th, N, J> constexpr operator+(const Dimension<T, L, M, I, Th, N, J>& scalar1, const Dimension<T, L, M, I, Th, N, J>& scalar2)
+{
+    return Dimension<T, L, M, I, Th, N, J>{static_cast<double>(scalar1) + static_cast<double>(scalar2)};
+}
+
+template<int T, int L, int M, int I, int Th, int N, int J>
+Dimension<T, L, M, I, Th, N, J> constexpr operator-(const Dimension<T, L, M, I, Th, N, J>& scalar1, const Dimension<T, L, M, I, Th, N, J>& scalar2)
+{
+    return Dimension<T, L, M, I, Th, N, J>{static_cast<double>(scalar1) - static_cast<double>(scalar2)};
+}
+
+template<int T, int L, int M, int I, int Th, int N, int J>
+Dimension<T, L, M, I, Th, N, J> constexpr operator*(const Dimension<T, L, M, I, Th, N, J>& scalar1, const double& scalar2)
+{
+    return Dimension<T, L, M, I, Th, N, J>{static_cast<double>(scalar1) * scalar2};
+}
+
+template<int T, int L, int M, int I, int Th, int N, int J>
+Dimension<T, L, M, I, Th, N, J> constexpr operator*(const double& scalar1, const Dimension<T, L, M, I, Th, N, J>& scalar2)
+{
+    return Dimension<T, L, M, I, Th, N, J>{scalar1 * static_cast<double>(scalar2)};
+}
+
+template<int T1, int L1, int M1, int I1, int Th1, int N1, int J1, int T2, int L2, int M2, int I2, int Th2, int N2, int J2>
+Dimension<T1+T2, L1+L2, M1+M2, I1+I2, Th1+Th2, N1+N2, J1+J2> constexpr operator*(const Dimension<T1, L1, M1, I1, Th1, N1, J1>& scalar1, const Dimension<T2, L2, M2, I2, Th2, N2, J2>& scalar2)
+{
+    return Dimension<T1+T2, L1+L2, M1+M2, I1+I2, Th1+Th2, N1+N2, J1+J2>{static_cast<double>(scalar1) * static_cast<double>(scalar2)};
+}
+
+template<int T, int L, int M, int I, int Th, int N, int J>
+Dimension<T, L, M, I, Th, N, J> constexpr operator/(const Dimension<T, L, M, I, Th, N, J>& scalar1, const double& scalar2)
+{
+    return Dimension<T, L, M, I, Th, N, J>{static_cast<double>(scalar1) / scalar2};
+}
+
+template<int T, int L, int M, int I, int Th, int N, int J>
+Dimension<-T, -L, -M, -I, -Th, -N, -J> constexpr operator/(const double& scalar1, const Dimension<T, L, M, I, Th, N, J>& scalar2)
+{
+    return Dimension<-T, -L, -M, -I, -Th, -N, -J>{scalar1 / static_cast<double>(scalar2)};
+}
+
+template<int T1, int L1, int M1, int I1, int Th1, int N1, int J1, int T2, int L2, int M2, int I2, int Th2, int N2, int J2>
+Dimension<T1-T2, L1-L2, M1-M2, I1-I2, Th1-Th2, N1-N2, J1-J2> constexpr operator/(const Dimension<T1, L1, M1, I1, Th1, N1, J1>& scalar1, const Dimension<T2, L2, M2, I2, Th2, N2, J2>& scalar2)
+{
+    return Dimension<T1-T2, L1-L2, M1-M2, I1-I2, Th1-Th2, N1-N2, J1-J2>{static_cast<double>(scalar1) / static_cast<double>(scalar2)};
+}
+
+template<int T, int L, int M, int I, int Th, int N, int J>
+bool constexpr operator==(const Dimension<T, L, M, I, Th, N, J>& scalar1, const Dimension<T, L, M, I, Th, N, J>& scalar2)
+{
+    return (static_cast<double>(scalar1) == static_cast<double>(scalar2));
+}
+
+template<int T, int L, int M, int I, int Th, int N, int J>
+bool constexpr operator!=(const Dimension<T, L, M, I, Th, N, J>& scalar1, const Dimension<T, L, M, I, Th, N, J>& scalar2)
+{
+    return (static_cast<double>(scalar1) != static_cast<double>(scalar2));
+}
+
+template<int T, int L, int M, int I, int Th, int N, int J>
+bool constexpr operator<(const Dimension<T, L, M, I, Th, N, J>& scalar1, const Dimension<T, L, M, I, Th, N, J>& scalar2)
+{
+    return (static_cast<double>(scalar1) < static_cast<double>(scalar2));
+}
+
+template<int T, int L, int M, int I, int Th, int N, int J>
+bool constexpr operator<=(const Dimension<T, L, M, I, Th, N, J>& scalar1, const Dimension<T, L, M, I, Th, N, J>& scalar2)
+{
+    return (static_cast<double>(scalar1) <= static_cast<double>(scalar2));
+}
+
+template<int T, int L, int M, int I, int Th, int N, int J>
+bool constexpr operator>(const Dimension<T, L, M, I, Th, N, J>& scalar1, const Dimension<T, L, M, I, Th, N, J>& scalar2)
+{
+    return (static_cast<double>(scalar1) > static_cast<double>(scalar2));
+}
+
+template<int T, int L, int M, int I, int Th, int N, int J>
+bool constexpr operator>=(const Dimension<T, L, M, I, Th, N, J>& scalar1, const Dimension<T, L, M, I, Th, N, J>& scalar2)
+{
+    return (static_cast<double>(scalar1) >= static_cast<double>(scalar2));
+}
+
+
+// 単位
+enum class Unit 
+{
+    // SI単位
+    s, m, kg, A, K, mol, cd,
+
+    // 固有の名称と記号を持つSI単位
+    rad, sr, Hz, N, Pa, J, W, C, V, F, Ohm, S, Wb, T, H, degC, lm, lx, Bq, Gy, Sv, kat,
+
+    // その他のSI組立単位
+    m_s, m_s2, rad_s,
+
+    // 非SI単位
+    deg, h, min, eV, px
 };
 
-//! @brief 周波数(Hz)
-//! @note 正確な単位はHzですが，'_'の後に大文字を置くことができないためhzとしています
-class _hz : _unit
+// 単位の次元
+namespace dimension
 {
-    const double _hz_value;
+    // 無次元量
+    using pure = Dimension<0, 0, 0, 0, 0, 0, 0>;
     
-    static constexpr double MinHz = 0.001;  // 最小の周波数(Hz)
-    static constexpr double MaxHz = 1'000'000.0;  // 最大の周波数(Hz)
+    // SI基本単位の次元
+    using s = Dimension<1, 0, 0, 0, 0, 0, 0>;
+    using m = Dimension<0, 1, 0, 0, 0, 0, 0>;
+    using kg = Dimension<0, 0, 1, 0, 0, 0, 0>;
+    using A = Dimension<0, 0, 0, 1, 0, 0 ,0>;
+    using K = Dimension<0, 0, 0, 0, 1, 0, 0>;
+    using mol = Dimension<0, 0, 0, 0, 0, 1, 0>;
+    using cd = Dimension<0, 0, 0, 0, 0, 0, 1>;
 
-public:
-    //! @brief 周波数(Hz)のセット
-    explicit _hz(double hz_value);
+    // 固有の名称と記号を持つSI単位の次元
+    using rad = decltype(m{} / m{});
+    using sr = decltype(m{}*m{} / (m{}*m{}));
+    using Hz = decltype(1 / s{});
+    using N = decltype(kg{} * m{} / (s{}*s{}));
+    using Pa = decltype(kg{} / (m{} * s{}*s{}));
+    using J = decltype(kg{} * m{}*m{} / (s{}*s{}));
+    using W = decltype(kg{} * m{}*m{} / (s{}*s{}*s{}));
+    using C = decltype(A{} * s{});
+    using V = decltype(kg{} * m{}*m{} / (s{}*s{}*s{} * A{}));
+    using F = decltype(s{}*s{}*s{}*s{} * A{}*A{} / (kg{} * m{}*m{}));
+    using Ohm = decltype(kg{} * m{}*m{} / (s{}*s{}*s{} * A{}*A{}));
+    using S = decltype(s{}*s{}*s{} * A{}*A{} / (kg{} * m{}*m{}));
+    using Wb = decltype(kg{} * m{}*m{} / (s{}*s{} * A{}));
+    using T = decltype(kg{} / (s{}*s{} *A{}));
+    using H = decltype(kg{} * m{}*m{} / (s{}*s{} * A{}*A{}));
+    using degC = K;
+    using lm = decltype(cd{} * sr{});
+    using lx = decltype(cd{} * sr{} / (m{}*m{}));
+    using Bq = decltype(1 / s{});
+    using Gy = decltype(m{}*m{} / (s{}*s{}));
+    using Sv = decltype(m{}*m{} / (s{}*s{}));
+    using kat = decltype(mol{} / s{});
 
-    //! @brief 周波数(Hz)をdouble型に変換
-    explicit operator double() const noexcept override {return _hz_value;}
-};
+    // その他のSI組立単位の次元
+    using m_s = decltype(m{} / s{});
+    using m_s2 = decltype(m{} / (s{}*s{}));
+    using rad_s = decltype(rad{} / s{});
 
-// Freqを_hzの別名とする
-using Freq = _hz;  // 周波数(Hz)
+    // 非SI単位の次元
+    using deg = rad;
+    using h = s;
+    using min = s;
+    using eV = J;
+    using px = pure;
+}
+// 以下の資料を参考にしました
+// https://unit.aist.go.jp/nmij/public/report/si-brochure/pdf/SI_9th_%E6%97%A5%E6%9C%AC%E8%AA%9E%E7%89%88_r.pdf
 
-class _km;
+
+/***** SI接頭語 *****/
+
+constexpr double Quetta = 1E30;
+constexpr double Ronna = 1E27;
+constexpr double Yotta = 1E24;
+constexpr double Zetta = 1E21;
+constexpr double Exa = 1E18;
+constexpr double Peta = 1E15;
+constexpr double Tera = 1E12;
+constexpr double Giga = 1E9;
+constexpr double Mega = 1E6;
+constexpr double kiro = 1E3;
+constexpr double hecto = 1E2;
+constexpr double deca = 1E1;
+constexpr double deci = 1E-1;
+constexpr double centi = 1E-2;
+constexpr double milli = 1E-3;
+constexpr double micro = 1E-6;
+constexpr double nano = 1E-9;
+constexpr double pico = 1E-12;
+constexpr double femto = 1E-15;
+constexpr double atto = 1E-18;
+constexpr double zepto = 1E-21;
+constexpr double yocto = 1E-24;
+constexpr double ronto = 1E-27;
+constexpr double quecto = 1E-30;
+
+
+/***** 物理量 *****/
+
+template<Unit> class Length;  // 長さ
+template<class T> Length(const T& t) -> Length<Unit::m>;  // デフォルトをmにする
 
 //! @brief 長さ(m)
-class _m : _unit
+template<>
+class Length<Unit::m> : public dimension::m 
 {
-    const double _m_value;
-
-    static constexpr double Min_m = 0.0;  // 最小の長さ(m)
-    static constexpr double Max_m = 50'000'000.0;  // 最大の周波数長さ(m)
-
 public:
-    //! @brief 長さ(m)のセット
-    explicit _m(double m_value);
+    //! @brief 長さ(m)
+    explicit constexpr Length(const double& num):
+        dimension::m(num) {}
 
-    //! @brief 長さ(m)をdouble型に変換
-    explicit operator double() const noexcept override {return _m_value;}
+    //! @brief 長さ(m)
+    constexpr Length(const dimension::m& num):
+        dimension::m(num) {}
 
-    //! @brief 長さ(m)をkmに変換
-    operator _km() const;
+    //! @brief 長さをdoubleに変換
+    explicit constexpr operator double() const
+        {return number();}
 };
 
-//! @brief 長さ(km)
-class _km : _unit
-{
-    const double _km_value;
 
-    static constexpr double Min_km = 0.0;  // 最小の長さ(km)
-    static constexpr double Max_km = 50'000.0;  // 最大の周波数長さ(km)
-
-public:
-    //! @brief 長さ(km)のセット
-    explicit _km(double km_value);
-
-    //! @brief 長さ(km)をdouble型に変換
-    explicit operator double() const noexcept override {return _km_value;}
-
-    //! @brief 長さ(km)をmに変換
-    operator _m() const;
-};
-
-inline _m::operator _km() const {return _km(_m_value / 1000.0);}
-inline _km::operator _m() const {return _m(_km_value * 1000.0);}
-
-//! @brief 加速度(m/s²)
-class _m_s2 : _unit
-{
-    const double _m_s2_value;
-public:
-    //! @brief 加速度(m/s²)のセット
-    constexpr explicit _m_s2(double m_s2_value):
-        _m_s2_value(m_s2_value) {}
-    
-    //! @brief 加速度(m/s²)をdouble型に変換
-    explicit operator double() const noexcept override {return _m_s2_value;}
-};
-
-class _hPa;
-
-//! @brief 圧力(Pa)
-//! @note 正確な単位はPaですが，'_'の後に大文字を置くことができないためpaとしています
-class _pa : _unit
-{
-    const double _pa_value;
-public:
-    //! @brief 圧力(Pa)のセット
-    constexpr explicit _pa(double pa_value):
-        _pa_value(pa_value) {}
-    
-    //! @brief 圧力(Pa)をdouble型に変換
-    explicit operator double() const noexcept override {return _pa_value;}
-
-    //! @brief 圧力(Pa)をhPaに変換
-    operator _hPa() const;
-};
-
-//! @brief 圧力(hPa)
-class _hPa : _unit
-{
-    const double _hPa_value;
-public:
-    //! @brief 圧力(hPa)のセット
-    constexpr explicit _hPa(double hPa_value):
-        _hPa_value(hPa_value) {}
-    
-    //! @brief 圧力(hPa)をdouble型に変換
-    explicit operator double() const noexcept override {return _hPa_value;}
-
-    //! @brief 圧力(hPa)をPaに変換
-    operator _pa() const;
-};
-
-inline _pa::operator _hPa() const {return _hPa(_pa_value / 100.0);}
-inline _hPa::operator _pa() const {return _pa(_hPa_value * 100.0);}
-
-//! @brief 画素数(px)
-class _px : _unit
-{
-    const double _px_value;
-public:
-    //! @brief 画素数(px)のセット
-    constexpr explicit _px(double px_value):
-        _px_value(px_value) {}
-    
-    //! @brief 画素数(px)をdouble型に変換
-    explicit operator double() const noexcept override {return _px_value;}
-};
-
-class _deg;
+template<Unit> class Angle;  // 角度
+template<class T> Angle(const T& t) -> Angle<Unit::rad>;  // デフォルトをradにする
 
 //! @brief 角度(rad)
-class _rad : _unit
+template<>
+class Angle<Unit::rad> : public dimension::rad
 {
-    const double _rad_value;
 public:
-    //! @brief 角度(rad)のセット
-    constexpr explicit _rad(double rad_value):
-        _rad_value(rad_value) {}
-    
-    //! @brief 角度(rad)をdouble型に変換
-    explicit operator double() const noexcept override {return _rad_value;}
+    //! @brief 角度(rad)
+    explicit constexpr Angle(const double& num):
+        dimension::rad(num) {}
 
-    //! @brief 角度(rad)をdegに変換
-    operator _deg() const;
+    //! @brief 角度(rad)
+    constexpr Angle(const dimension::rad& num):
+        dimension::rad(num) {}
+
+    //! @brief 角度(rad)をdoubleに変換
+    explicit constexpr operator double() const
+        {return number();}
 };
 
-//! @brief 角度(°)
-class _deg : _unit
+// 角度(deg)
+template<>
+class Angle<Unit::deg> : public Angle<Unit::rad> 
 {
-    const double _deg_value;
+    //! @brief 角度(deg)を角度(rad)に変換
+    static constexpr double deg_to_rad(const double& num)
+        {return num * PI / 180.0;}
+
+    //! @brief 角度(rad)を角度(deg)に変換
+    static constexpr double rad_to_deg(const double& num)
+        {return num * 180.0 / PI;}
 public:
-    //! @brief 角度(°)のセット
-    constexpr explicit _deg(double deg_value):
-        _deg_value(deg_value) {}
+    //! @brief 角度(deg)
+    explicit constexpr Angle(const double& num):
+        Angle<Unit::rad>(deg_to_rad(num)) {}
+
+    //! @brief 角度(deg)
+    constexpr Angle(const Angle<Unit::rad>& time):
+        Angle<Unit::rad>(time) {}
     
-    //! @brief 度分秒での角度(°)のセット
-    constexpr _deg(double deg, double min, double s = 0.0):
-        _deg_value(deg + (min / 60.0) + (s / 60.0 / 60.0)) {}
-    
-    //! @brief 角度(°)をdouble型に変換
-    explicit operator double() const noexcept override {return _deg_value;}
-
-    //! @brief 角度(°)をradに変換
-    operator _rad() const;
-};
-
-inline _rad::operator _deg() const {return _deg(_rad_value * 180.0 / M_PI);}
-inline _deg::operator _rad() const {return _rad(_deg_value * M_PI / 180.0);}
-
-class _deg_s;
-
-//! @brief 角速度(rad/s)
-class _rad_s : _unit
-{
-    const double _rad_s_value;
-public:
-    //! @brief 角速度(rad/s)のセット
-    constexpr explicit _rad_s(double rad_s_value):
-        _rad_s_value(rad_s_value) {}
-    
-    //! @brief 角速度(rad/s)をdouble型に変換
-    explicit operator double() const noexcept override {return _rad_s_value;}
-
-    //! @brief 角速度(rad/s)をdeg/sに変換
-    operator _deg_s() const;
-};
-
-//! @brief 角速度(°/s)
-class _deg_s : _unit
-{
-    const double _deg_s_value;
-public:
-    //! @brief 角速度(deg/s)のセット
-    constexpr explicit _deg_s(double deg_s_value):
-        _deg_s_value(deg_s_value) {}
-    
-    //! @brief 角速度(deg/s)をdouble型に変換
-    explicit operator double() const noexcept override {return _deg_s_value;}
-
-    //! @brief 角速度(deg/s)をrad/sに変換
-    operator _rad_s() const;
-};
-
-inline _rad_s::operator _deg_s() const {return _deg_s(_rad_s_value * 180.0 / M_PI);}
-inline _deg_s::operator _rad_s() const {return _rad_s(_deg_s_value * M_PI / 180.0);}
-
-class _ms;
-class _s;
-class _min;
-
-//! @brief マイクロ秒(μs)
-class _us : _unit
-{
-    const double _us_value;
-public:
-    //! @brief マイクロ秒(μs)のセット
-    constexpr explicit _us(double us_value):
-        _us_value(us_value) {}
-    
-    //! @brief マイクロ秒(μs)をdouble型に変換
-    explicit operator double() const noexcept override {return _us_value;}
-
-    //! @brief マイクロ秒(μs)をミリ秒(ms)に変換
-    operator _ms() const;
-    //! @brief マイクロ秒(μs)を秒(s)に変換
-    operator _s() const;
-    //! @brief マイクロ秒(μs)を分(min)に変換
-    operator _min() const;
-};
-
-//! @brief ミリ秒(ms)
-class _ms : _unit
-{
-    const double _ms_value;
-public:
-    //! @brief ミリ秒(ms)のセット
-    constexpr explicit _ms(double ms_value):
-        _ms_value(ms_value) {}
-    
-    //! @brief ミリ秒(ms)をdouble型に変換
-    explicit operator double() const noexcept override {return _ms_value;}
-
-    //! @brief ミリ秒(ms)をマイクロ秒(μs)に変換
-    operator _us() const;
-    //! @brief ミリ秒(ms)を秒(s)に変換
-    operator _s() const;
-    //! @brief ミリ秒(ms)を分(min)に変換
-    operator _min() const;
-};
-
-//! @brief 秒(s)
-class _s : _unit
-{
-    const double _s_value;
-public:
-    //! @brief 秒(s)のセット
-    constexpr explicit _s(double s_value):
-        _s_value(s_value) {}
-    
-    //! @brief 秒(s)をdouble型に変換
-    explicit operator double() const noexcept override {return _s_value;}
-
-    //! @brief 秒(s)をマイクロ秒(μs)に変換
-    operator _us() const;
-    //! @brief 秒(s)をミリ秒(ms)に変換
-    operator _ms() const;
-    //! @brief 秒(s)を分(min)に変換
-    operator _min() const;
-};
-
-//! @brief 分(min)
-class _min : _unit
-{
-    const double _min_value;
-public:
-    //! @brief 分(min)のセット
-    constexpr explicit _min(double min_value):
-        _min_value(min_value) {}
-    
-    //! @brief 分(min)をdouble型に変換
-    explicit operator double() const noexcept override {return _min_value;}
-
-    //! @brief 分(min)をマイクロ秒(μs)に変換
-    operator _us() const;
-    //! @brief 分(min)をミリ秒(ms)に変換
-    operator _ms() const;
-    //! @brief 分(min)をミリ秒(ms)に変換
-    operator _s() const;
-};
-
-inline _us::operator _ms() const {return _ms(_us_value / 1000.0);}
-inline _ms::operator _s() const {return _s(_ms_value / 1000.0);}
-inline _s::operator _min() const {return _min(_s_value / 60.0);}
-
-inline _min::operator _s() const {return _s(_min_value * 60.0);}
-inline _s::operator _ms() const {return _ms(_s_value * 1000.0);}
-inline _ms::operator _us() const {return _us(_ms_value * 1000.0);}
-
-inline _us::operator _s() const {return _s(_ms(*this));}
-inline _us::operator _min() const {return _min(_s(_ms(*this)));}
-inline _ms::operator _min() const {return _min(_s(*this));}
-inline _s::operator _us() const {return _us(_ms(*this));}
-inline _min::operator _us() const {return _us(_ms(_s(*this)));}
-inline _min::operator _ms() const {return _ms(_s(*this));}
-
-//! @brief 磁束密度(mT)
-class _mT : _unit
-{
-    const double _mT_value;
-public:
-    //! @brief 磁束密度(mT)のセット
-    constexpr explicit _mT(double mT_value):
-        _mT_value(mT_value) {}
-    
-    //! @brief 磁束密度(mT)をdouble型に変換
-    explicit operator double() const noexcept override {return _mT_value;}
+    //! @brief 角度(rad)をdoubleに変換
+    explicit constexpr operator double() const
+        {return rad_to_deg(number());}
 };
 
 
-/***** 単位同士の計算や比較 *****/
+template<Unit> class Time;  // 時間
+template<class T> Time(const T& t) -> Time<Unit::s>;  // デフォルトを秒にする
 
-//! @brief 単位同士の比較
-template<class Unit, class Unit2>
-auto operator<  (const Unit& left_param, const Unit2& right_param) -> typename std::enable_if<std::conjunction<std::is_base_of<_unit, Unit>,std::is_base_of<_unit, Unit2>>::value, bool>::type
+// 秒(s)
+template<>
+class Time<Unit::s> : public dimension::s
 {
-    return static_cast<double>(left_param) <  static_cast<double>(static_cast<Unit>(right_param));
-}
-//! @brief 単位同士の比較
-template<class Unit, class Unit2>
-auto operator<= (const Unit& left_param, const Unit2& right_param) -> typename std::enable_if<std::conjunction<std::is_base_of<_unit, Unit>,std::is_base_of<_unit, Unit2>>::value, bool>::type
-{
-    return static_cast<double>(left_param) <= static_cast<double>(static_cast<Unit>(right_param));
-}
-//! @brief 単位同士の比較
-template<class Unit, class Unit2>
-auto operator== (const Unit& left_param, const Unit2& right_param) -> typename std::enable_if<std::conjunction<std::is_base_of<_unit, Unit>,std::is_base_of<_unit, Unit2>>::value, bool>::type
-{
-    return static_cast<double>(left_param) == static_cast<double>(static_cast<Unit>(right_param));
-}
-//! @brief 単位同士の比較
-template<class Unit, class Unit2>
-auto operator>= (const Unit& left_param, const Unit2& right_param) -> typename std::enable_if<std::conjunction<std::is_base_of<_unit, Unit>,std::is_base_of<_unit, Unit2>>::value, bool>::type
-{
-    return static_cast<double>(left_param) >= static_cast<double>(static_cast<Unit>(right_param));
-}
-//! @brief 単位同士の比較
-template<class Unit, class Unit2>
-auto operator>  (const Unit& left_param, const Unit2& right_param) -> typename std::enable_if<std::conjunction<std::is_base_of<_unit, Unit>,std::is_base_of<_unit, Unit2>>::value, bool>::type
-{
-    return static_cast<double>(left_param) >  static_cast<double>(static_cast<Unit>(right_param));
-}
-//! @brief 単位同士の比較
-template<class Unit, class Unit2>
-auto operator!= (const Unit& left_param, const Unit2& right_param) -> typename std::enable_if<std::conjunction<std::is_base_of<_unit, Unit>,std::is_base_of<_unit, Unit2>>::value, bool>::type
-{
-    return static_cast<double>(left_param) != static_cast<double>(static_cast<Unit>(right_param));
-}
+public:
+    explicit constexpr Time(const double& num):
+        dimension::s(num) {}
 
-//! @brief 単位同士の演算
-template<class Unit, class Unit2>
-auto operator+ (const Unit& left_param, const Unit2& right_param) -> typename std::enable_if<std::conjunction<std::is_base_of<_unit, Unit>,std::is_base_of<_unit, Unit2>>::value, Unit>::type
-{
-    return Unit(static_cast<double>(left_param) + static_cast<double>(static_cast<Unit>(right_param)));
-}
-//! @brief 単位同士の演算
-template<class Unit, class Unit2>
-auto operator- (const Unit& left_param, const Unit2& right_param) -> typename std::enable_if<std::conjunction<std::is_base_of<_unit, Unit>,std::is_base_of<_unit, Unit2>>::value, Unit>::type
-{
-    return Unit(static_cast<double>(left_param) - static_cast<double>(static_cast<Unit>(right_param)));
-}
-//! @brief 単位同士の演算
-template<class Unit, class Unit2>
-auto operator* (const Unit& left_param, const Unit2& right_param) -> typename std::enable_if<std::conjunction<std::is_base_of<_unit, Unit>,std::is_base_of<_unit, Unit2>>::value, Unit>::type
-{
-    return Unit(static_cast<double>(left_param) * static_cast<double>(static_cast<Unit>(right_param)));
-}
-//! @brief 単位同士の演算
-template<class Unit, class Unit2>
-auto operator/ (const Unit& left_param, const Unit2& right_param) -> typename std::enable_if<std::conjunction<std::is_base_of<_unit, Unit>,std::is_base_of<_unit, Unit2>>::value, Unit>::type
-{
-    static_assert(std::conjunction<std::is_base_of<_unit, Unit>,std::is_base_of<_unit, Unit2>>::value, u"\n\n<<error!>> \nYou cannot perform operations on values of unit type and non-unit type. \n\x92\x50\x88\xca\x8c\x5e\x82\xc6\x94\xf1\x92\x50\x88\xca\x8c\x5e\x82\xcc\x92\x6c\x82\xc5\x89\x89\x8e\x5a\x82\xb7\x82\xe9\x82\xb1\x82\xc6\x82\xcd\x82\xc5\x82\xab\x82\xdc\x82\xb9\x82\xf1\n\n");  // 単位型と非単位型の値で演算することはできません．
-    return Unit(static_cast<double>(left_param) / [](double d){return (d ? d : DBL_TRUE_MIN);}(static_cast<double>(static_cast<Unit>(right_param))));  // ゼロ除算を防止している
-}
+    constexpr Time(const dimension::s& num):
+        dimension::s(num) {}
 
-/***** 特殊な演算 *****/
+    explicit constexpr operator double() const
+        {return number();}
+};
 
-//! @brief Hzとsの演算
-inline _hz operator/ (_pure dimensionless, _s second)
+
+template<Unit> class Frequency;  // 周波数
+template<class T> Frequency(const T& t) -> Frequency<Unit::Hz>;  // デフォルトをHzにする
+
+//! @brief 周波数(Hz)
+template<>
+class Frequency<Unit::Hz> : public dimension::Hz
 {
-    return _hz(static_cast<double>(dimensionless) / static_cast<double>(second));
-}
+public:
+    //! @brief 周波数(Hz)
+    explicit constexpr Frequency(const double& num):
+        dimension::Hz(num) {}
+
+    //! @brief 周波数(Hz)
+    constexpr Frequency(const dimension::Hz& num):
+        dimension::Hz(num) {}
+
+    //! @brief 周波数をdoubleに変換
+    explicit constexpr operator double() const
+        {return number();}
+};
+
+
+template<Unit> class Velocity;  // 速度
+template<class T> Velocity(const T& t) -> Velocity<Unit::m_s>;  // デフォルトをm_sにする
+
+//! @brief 速度(m_s)
+template<>
+class Velocity<Unit::m_s> : public dimension::m_s
+{
+public:
+    //! @brief 速度(m_s)
+    explicit constexpr Velocity(const double& num):
+        dimension::m_s(num) {}
+
+    //! @brief 速度(m_s)
+    constexpr Velocity(const dimension::m_s& num):
+        dimension::m_s(num) {}
+
+    //! @brief 速度(m_s)をdoubleに変換
+    explicit constexpr operator double() const
+        {return number();}
+};
+
+
+template<Unit> class Acceleration;  // 加速度
+template<class T> Acceleration(const T&) -> Acceleration<Unit::m_s2>;  // デフォルトをm_s2にする
+
+//! @brief 加速度(m_s2)
+template<>
+class Acceleration<Unit::m_s2> : public dimension::m_s2
+{
+public:
+    //! @brief 加速度(m_s2)
+    explicit constexpr Acceleration(const double& num):
+        dimension::m_s2(num) {}
+
+    //! @brief 加速度(m_s2)
+    constexpr Acceleration(const dimension::m_s2& num):
+        dimension::m_s2(num) {}
+
+    //! @brief 加速度をdoubleに変換
+    explicit constexpr operator double() const
+        {return number();}
+};
+
+
+template<Unit> class Temperature;  // 温度
+template<class T> Temperature(const T& t) -> Temperature<Unit::K>;  // デフォルトをKにする
+
+//! @brief 温度(K)
+template<>
+class Temperature<Unit::K> : public dimension::K
+{
+public:
+    //! @brief 温度(K)
+    explicit constexpr Temperature(const double& num):
+        dimension::K(num) {}
+
+    //! @brief 温度(K)
+    constexpr Temperature(const dimension::K& num):
+        dimension::K(num) {}
+
+    //! @brief 温度(K)をdoubleに変換
+    explicit constexpr operator double() const
+        {return number();}
+};
+
+// 温度(degC)
+template<>
+class Temperature<Unit::degC> : public Temperature<Unit::K> 
+{
+    //! @brief 温度(℃)を温度(K)に変換
+    static constexpr double degC_to_K(const double& num)
+        {return num + 273.15;}
+
+    //! @brief 温度(K)を温度(℃)に変換
+    static constexpr double K_to_degC(const double& num)
+        {return num - 273.15;}
+public:
+    //! @brief 温度(℃)
+    explicit constexpr Temperature(const double& num):
+        Temperature<Unit::K>(degC_to_K(num)) {}
+
+    //! @brief 温度(℃)
+    constexpr Temperature(const Temperature<Unit::K>& time):
+        Temperature<Unit::K>(time) {}
+    
+    //! @brief 温度(℃)をdoubleに変換
+    explicit constexpr operator double() const
+        {return K_to_degC(number());}
+};
+
+
+template<Unit> class Pressure;  // 圧力
+template<class T> Pressure(const T& t) -> Pressure<Unit::Pa>;  // デフォルトをPaにする
+
+//! @brief 圧力(Pa)
+template<>
+class Pressure<Unit::Pa> : public dimension::Pa
+{
+public:
+    //! @brief 圧力(Pa)
+    explicit constexpr Pressure(const double& num):
+        dimension::Pa(num) {}
+
+    //! @brief 圧力(Pa)
+    constexpr Pressure(const dimension::Pa& num):
+        dimension::Pa(num) {}
+
+    //! @brief 圧力(Pa)をdoubleに変換
+    explicit constexpr operator double() const
+        {return number();}
+};
+
+
+template<Unit> class AngularVelocity;  // 角速度
+template<class T> AngularVelocity(const T& t) -> AngularVelocity<Unit::rad_s>;  // デフォルトをrad_sにする
+
+//! @brief 角速度(rad_s)
+template<>
+class AngularVelocity<Unit::rad_s> : public dimension::rad_s
+{
+public:
+    //! @brief 角速度(rad_s)
+    explicit constexpr AngularVelocity(const double& num):
+        dimension::rad_s(num) {}
+
+    //! @brief 角速度(rad_s)
+    constexpr AngularVelocity(const dimension::rad_s& num):
+        dimension::rad_s(num) {}
+
+    //! @brief 角速度(rad_s)をdoubleに変換
+    explicit constexpr operator double() const
+        {return number();}
+};
+
+
+template<Unit> class MagneticFluxDensity;  // 磁束密度
+template<class Type> MagneticFluxDensity(const Type& t) -> MagneticFluxDensity<Unit::T>;  // デフォルトをTにする
+
+//! @brief 磁束密度(T)
+template<>
+class MagneticFluxDensity<Unit::T> : public dimension::T
+{
+public:
+    //! @brief 磁束密度(T)
+    explicit constexpr MagneticFluxDensity(const double& num):
+        dimension::T(num) {}
+
+    //! @brief 磁束密度(T)
+    constexpr MagneticFluxDensity(const dimension::T& num):
+        dimension::T(num) {}
+
+    //! @brief 磁束密度(T)をdoubleに変換
+    explicit constexpr operator double() const
+        {return number();}
+};
+
+
+template<Unit> class LuminousIntensity;  // 光度
+template<class T> LuminousIntensity(const T& t) -> LuminousIntensity<Unit::cd>;  // デフォルトをcdにする
+
+//! @brief 光度(cd)
+template<>
+class LuminousIntensity<Unit::cd> : public dimension::cd
+{
+public:
+    //! @brief 光度(cd)
+    explicit constexpr LuminousIntensity(const double& num):
+        dimension::cd(num) {}
+
+    //! @brief 光度(cd)
+    constexpr LuminousIntensity(const dimension::cd& num):
+        dimension::cd(num) {}
+
+    //! @brief 光度(cd)をdoubleに変換
+    explicit constexpr operator double() const
+        {return number();}
+};
+
+
+template<Unit> class DisplayResolution;  // 画素数
+template<class T> DisplayResolution(const T& t) -> DisplayResolution<Unit::px>;  // デフォルトをpxにする
+
+//! @brief 画素数(px)
+template<>
+class DisplayResolution<Unit::px> : public dimension::px
+{
+public:
+    //! @brief 画素数(px)
+    explicit constexpr DisplayResolution(const double& num):
+        dimension::px(num) {}
+
+    //! @brief 画素数(px)
+    constexpr DisplayResolution(const dimension::px& num):
+        dimension::px(num) {}
+
+    //! @brief 画素数(px)をdoubleに変換
+    explicit constexpr operator double() const
+        {return number();}
+};
+
+
+template<Unit> class Altitude;  // 標高
+template<class T> Altitude(const T& t) -> Altitude<Unit::m>;  // デフォルトをmにする
+
+//! @brief 標高(m)
+template<>
+class Altitude<Unit::m> : public dimension::m
+{
+public:
+    //! @brief 標高(m)
+    explicit constexpr Altitude(const double& num):
+        dimension::m(num) {}
+
+    //! @brief 標高(m)
+    constexpr Altitude(const dimension::m& num):
+        dimension::m(num) {}
+
+    //! @brief 標高(m)をdoubleに変換
+    explicit constexpr operator double() const
+        {return number();}
+};
+
+
+template<Unit> class Latitude;  // 緯度
+template<class T> Latitude(const T& t) -> Latitude<Unit::rad>;  // デフォルトをradにする
+
+//! @brief 緯度(rad)
+template<>
+class Latitude<Unit::rad> : public dimension::rad
+{
+public:
+    //! @brief 緯度(rad)
+    explicit constexpr Latitude(const double& num):
+        dimension::rad(num) {}
+
+    //! @brief 緯度(rad)
+    constexpr Latitude(const dimension::rad& num):
+        dimension::rad(num) {}
+
+    //! @brief 緯度(rad)をdoubleに変換
+    explicit constexpr operator double() const
+        {return number();}
+};
+
+// 緯度(deg)
+template<>
+class Latitude<Unit::deg> : public Latitude<Unit::rad> 
+{
+    //! @brief 緯度(deg)を緯度(rad)に変換
+    static constexpr double deg_to_rad(const double& num)
+        {return num * PI / 180.0;}
+
+    //! @brief 緯度(rad)を緯度(deg)に変換
+    static constexpr double rad_to_deg(const double& num)
+        {return num * 180.0 / PI;}
+public:
+    //! @brief 緯度(deg)
+    explicit constexpr Latitude(const double& num):
+        Latitude<Unit::rad>(deg_to_rad(num)) {}
+
+    //! @brief 緯度(deg)
+    constexpr Latitude(const Latitude<Unit::rad>& time):
+        Latitude<Unit::rad>(time) {}
+    
+    //! @brief 緯度(rad)をdoubleに変換
+    explicit constexpr operator double() const
+        {return rad_to_deg(number());}
+};
+
+
+template<Unit> class Longitude;  // 経度
+template<class T> Longitude(const T& t) -> Longitude<Unit::rad>;  // デフォルトをradにする
+
+//! @brief 経度(rad)
+template<>
+class Longitude<Unit::rad> : public dimension::rad
+{
+public:
+    //! @brief 経度(rad)
+    explicit constexpr Longitude(const double& num):
+        dimension::rad(num) {}
+
+    //! @brief 経度(rad)
+    constexpr Longitude(const dimension::rad& num):
+        dimension::rad(num) {}
+
+    //! @brief 経度(rad)をdoubleに変換
+    explicit constexpr operator double() const
+        {return number();}
+};
+
+// 経度(deg)
+template<>
+class Longitude<Unit::deg> : public Longitude<Unit::rad> 
+{
+    //! @brief 経度(deg)を経度(rad)に変換
+    static constexpr double deg_to_rad(const double& num)
+        {return num * PI / 180.0;}
+
+    //! @brief 経度(rad)を経度(deg)に変換
+    static constexpr double rad_to_deg(const double& num)
+        {return num * 180.0 / PI;}
+public:
+    //! @brief 経度(deg)
+    explicit constexpr Longitude(const double& num):
+        Longitude<Unit::rad>(deg_to_rad(num)) {}
+
+    //! @brief 経度(deg)
+    constexpr Longitude(const Longitude<Unit::rad>& time):
+        Longitude<Unit::rad>(time) {}
+    
+    //! @brief 経度(rad)をdoubleに変換
+    explicit constexpr operator double() const
+        {return rad_to_deg(number());}
+};
 
 }
 
 
 /***** ユーザー定義リテラル *****/
 
-//! @brief 無次元量
-inline sc::_pure operator"" _pure(const char* m_chars) {return sc::_pure(std::stod(m_chars, nullptr));}
-inline sc::_pure operator"" _pure(long double m_value) {return sc::_pure(m_value);}
-
 //! @brief 光度(cd)
-inline sc::_cd operator"" _cd(const char* cd_chars) {return sc::_cd(std::stod(cd_chars, nullptr));}
+inline sc::dimension::cd operator"" _cd(const char* cd_chars) {return sc::dimension::cd(std::stod(cd_chars, nullptr));}
 
 //! @brief 温度(℃)
-inline sc::_degC operator"" _degC(const char* degC_chars) {return sc::_degC(std::stod(degC_chars, nullptr));}
+inline sc::dimension::degC operator"" _degC(const char* degC_chars) {return sc::dimension::degC(std::stod(degC_chars, nullptr));}
 
 //! @brief 周波数(Hz)
-inline sc::_hz operator"" _hz(const char* hz_chars) {return sc::_hz(std::stod(hz_chars, nullptr));}
+inline sc::dimension::Hz operator"" _hz(const char* hz_chars) {return sc::dimension::Hz(std::stod(hz_chars, nullptr));}
 
 //! @brief 長さ(m)
-inline sc::_m operator"" _m(const char* m_chars) {return sc::_m(std::stod(m_chars, nullptr));}
+inline sc::dimension::m operator"" _m(const char* m_chars) {return sc::dimension::m(std::stod(m_chars, nullptr));}
 
 //! @brief 長さ(km)
-inline sc::_km operator"" _km(const char* km_chars) {return sc::_km(std::stod(km_chars, nullptr));}
+inline sc::dimension::m operator"" _km(const char* km_chars) {return sc::dimension::m(std::stod(km_chars, nullptr) * sc::kiro);}
 
 //! @brief 加速度(m/s²)
-inline sc::_m_s2 operator"" _m_s2(const char* m_s2_chars) {return sc::_m_s2(std::stod(m_s2_chars, nullptr));}
+inline sc::dimension::m_s2 operator"" _m_s2(const char* m_s2_chars) {return sc::dimension::m_s2(std::stod(m_s2_chars, nullptr));}
 
 //! @brief 圧力(Pa)
-inline sc::_pa operator"" _pa(const char* pa_chars) {return sc::_pa(std::stod(pa_chars, nullptr));}
+inline sc::dimension::Pa operator"" _pa(const char* pa_chars) {return sc::dimension::Pa(std::stod(pa_chars, nullptr));}
 
 //! @brief 圧力(hPa)
-inline sc::_hPa operator"" _hPa(const char* hPa_chars) {return sc::_hPa(std::stod(hPa_chars, nullptr));}
+inline sc::dimension::Pa operator"" _hPa(const char* hPa_chars) {return sc::dimension::Pa(std::stod(hPa_chars, nullptr) * sc::hecto);}
 
 //! @brief 画素数(px)
-inline sc::_px operator"" _px(const char* px_chars) {return sc::_px(std::stod(px_chars, nullptr));}
+inline sc::dimension::px operator"" _px(const char* px_chars) {return sc::dimension::px(std::stod(px_chars, nullptr));}
 
 //! @brief 角度(rad)
-inline sc::_rad operator"" _rad(const char* rad_chars) {return sc::_rad(std::stod(rad_chars, nullptr));}
+inline sc::dimension::rad operator"" _rad(const char* rad_chars) {return sc::dimension::rad(std::stod(rad_chars, nullptr));}
+
+//! @brief 角度(rad)．数値×π (rad)
+inline sc::dimension::rad operator"" _pi_rad(const char* rad_chars) {return sc::dimension::rad(sc::PI * std::stod(rad_chars, nullptr));}
 
 //! @brief 角度(°)
-inline sc::_deg operator"" _deg(const char* deg_chars) {return sc::_deg(std::stod(deg_chars, nullptr));}
+inline sc::dimension::deg operator"" _deg(const char* deg_chars) {return sc::dimension::deg(std::stod(deg_chars, nullptr));}
 
 //! @brief 角速度(rad/s)
-inline sc::_rad_s operator"" _rad_s(const char* rad_s_chars) {return sc::_rad_s(std::stod(rad_s_chars, nullptr));}
+inline sc::dimension::rad_s operator"" _rad_s(const char* rad_s_chars) {return sc::dimension::rad_s(std::stod(rad_s_chars, nullptr));}
 
-//! @brief 角速度(°/s)
-inline sc::_deg_s operator"" _deg_s(const char* deg_s_chars) {return sc::_deg_s(std::stod(deg_s_chars, nullptr));}
+// //! @brief 角速度(°/s)
+// inline sc::dimension::deg_s operator"" _deg_s(const char* deg_s_chars) {return sc::dimension::deg_s(std::stod(deg_s_chars, nullptr));}
 
 //! @brief マイクロ秒(μs)
-inline sc::_us operator"" _us(const char* us_chars) {return sc::_us(std::stod(us_chars, nullptr));}
+inline sc::dimension::s operator"" _us(const char* us_chars) {return sc::dimension::s(std::stod(us_chars, nullptr) * sc::micro);}
 
 //! @brief ミリ秒(ms)
-inline sc::_ms operator"" _ms(const char* ms_chars) {return sc::_ms(std::stod(ms_chars, nullptr));}
+inline sc::dimension::s operator"" _ms(const char* ms_chars) {return sc::dimension::s(std::stod(ms_chars, nullptr) * sc::milli);}
 
 //! @brief 秒(s)
-inline sc::_s operator"" _s(const char* s_chars) {return sc::_s(std::stod(s_chars, nullptr));}
+inline sc::dimension::s operator"" _s(const char* s_chars) {return sc::dimension::s(std::stod(s_chars, nullptr));}
 
 //! @brief 分(min)
-inline sc::_min operator"" _min(const char* min_chars) {return sc::_min(std::stod(min_chars, nullptr));}
+inline sc::dimension::s operator"" _min(const char* min_chars) {return sc::dimension::s(std::stod(min_chars, nullptr) * 60.0);}
 
 //! @brief 磁束密度(mT)
-inline sc::_mT operator"" _mT(const char* mT_chars) {return sc::_mT(std::stod(mT_chars, nullptr));}
+inline sc::dimension::T operator"" _mT(const char* mT_chars) {return sc::dimension::T(std::stod(mT_chars, nullptr) * sc::milli);}
+
+
 
 #endif  // SC19_PICO_SC_UNIT_HPP_

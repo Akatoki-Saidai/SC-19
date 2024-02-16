@@ -113,6 +113,9 @@ public:
     
     //! @brief バイナリデータを結合
     Binary operator+ (Binary other_binary) const;
+
+    //! @brief 配列の先頭へのポインタにデータを代入
+    void to_assign(uint8_t* reg_ptr) const;
 };
 
 //! @brief バイナリデータの先頭に1バイト追加

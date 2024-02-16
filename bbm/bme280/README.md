@@ -1,18 +1,5 @@
-pico-bme280
-===========
+# BME280 気温，気圧，湿度 の読み取り
+これは Raspberry Pi pico で温湿度・気圧センサーBME280 を読み込むためのプログラムです．
+通信方法はI2Cを使用しています．
 
-This is an example program that reads BME280 sensor values with a Raspberry Pi Pico using the official Bosch-API (SPI-interface).
-
-Note that about 99% of the sellers offer a "BME280/BMP280"-breakout, but instead of
-a BME280 (chip-id 0x60), you will most probably receive a cheaper BMP280 (chip-id 0x56, 0x57 or 0x58). The former provides readouts for temperature, pressure and humidity, while the latter lacks humidity.
-
-You will find a similar project for the BMP280 in
-<https://github.com/bablokb/pico-bmp280>.
-
-
-License
--------
-
-My code is licensed using the GPL v3, but it uses the files from Bosch-Sensortec
-<https://github.com/BoschSensortec/BME280_driver.git>, which is licensed under BSD-3.
-
+使用する際は bme280.hpp, bme280.cpp の二つををコピーして下さい．そのうえで，CMakeLists の add_executable に  bme280.cpp を追加してください．

@@ -4,33 +4,33 @@
 
 #include "speaker.hpp"
 
-#define PIN_Speaker_PWM 22
-static pwm_config speaker_pwm_slice_config;
-static uint8_t speaker_pwm_slice_num = pwm_gpio_to_slice_num(PIN_Speaker_PWM);
-double speaker_pwm_clkdiv = 6.5;
+namespace sc 
+{
 
 
-void SPEAKER::speaker_init(){
 
+Speaker::Speaker(const Pin& pin):
+    _pin(pin)
+{
     //pwmの設定
-    gpio_set_function(PIN_Speaker_PWM,GPIO_FUNC_PWM);
+    gpio_set_function(_pin.gpio(),GPIO_FUNC_PWM);
 
-    // uint8_t speaker_pwm_slice_num = pwm_gpio_to_slice_num(PIN_Speaker_PWM);
-    speaker_pwm_slice_config = pwm_get_default_config();
+    // uint8_t _speaker_pwm_slice_num = pwm_gpio_to_slice_num(_pin.gpio());
+    _speaker_pwm_slice_config = pwm_get_default_config();
     // 位相補正：なし
     // 分周：1分周
     // カウントモード：フリーランニング
     // 極性：通常   
     // 1周期525.0us
 
-    // double speaker_pwm_clkdiv = 1.8;
-    pwm_config_set_clkdiv( &speaker_pwm_slice_config, speaker_pwm_clkdiv );
+    // double _speaker_pwm_clkdiv = 1.8;
+    pwm_config_set_clkdiv( &_speaker_pwm_slice_config, _speaker_pwm_clkdiv );
 
-    pwm_set_enabled(speaker_pwm_slice_num, true);
+    pwm_set_enabled(_speaker_pwm_slice_num, true);
 
 }
 
-void SPEAKER::play_starwars(){
+void Speaker::play_starwars(){
 
     
     //使用する音の周波数の宣言(低いラ～高いド) 0は無音(休符)
@@ -66,7 +66,7 @@ void SPEAKER::play_starwars(){
         double starwars_melody_now = *starwars_melody_now_itr;
 
         if(starwars_melody_now == sound_rest){
-            pwm_set_gpio_level( PIN_Speaker_PWM, ( sound_rest ) );
+            pwm_set_gpio_level( _pin.gpio(), ( sound_rest ) );
         }
 
         else{
@@ -83,12 +83,12 @@ void SPEAKER::play_starwars(){
             // 出力周波数 = 125000000 / ((ラップ + 1) * 分周比)
             // ラップ  = (125000000 / (f * 分周比)) - 1
 
-            uint16_t speaker_pwm_wrap = (Raspberry_pi_clock / (starwars_melody_now * speaker_pwm_clkdiv)) - 1;
+            uint16_t speaker_pwm_wrap = (Raspberry_pi_clock / (starwars_melody_now * _speaker_pwm_clkdiv)) - 1;
 
-            pwm_config_set_wrap( &speaker_pwm_slice_config, speaker_pwm_wrap );
-            pwm_init( speaker_pwm_slice_num, &speaker_pwm_slice_config, true );
+            pwm_config_set_wrap( &_speaker_pwm_slice_config, speaker_pwm_wrap );
+            pwm_init( _speaker_pwm_slice_num, &_speaker_pwm_slice_config, true );
 
-            pwm_set_gpio_level( PIN_Speaker_PWM, ( speaker_pwm_wrap * speaker_duty ) );
+            pwm_set_gpio_level( _pin.gpio(), ( speaker_pwm_wrap * speaker_duty ) );
         }
         
         
@@ -110,11 +110,11 @@ void SPEAKER::play_starwars(){
     }
 
     // 演奏終了
-    pwm_set_gpio_level( PIN_Speaker_PWM, ( sound_rest ) );
+    pwm_set_gpio_level( _pin.gpio(), ( sound_rest ) );
 
 }
 
-void SPEAKER::play_windows7(){
+void Speaker::play_windows7(){
     // 使用する音
     const double sound_B4 = 493.883;
     const double sound_E5 = 659.255;
@@ -137,12 +137,12 @@ void SPEAKER::play_windows7(){
         static const uint32_t Raspberry_pi_clock = 125000000;
         static double speaker_duty = 0.50;
 
-        uint16_t speaker_pwm_wrap = (Raspberry_pi_clock / (windows7_melody_now * speaker_pwm_clkdiv)) - 1;
+        uint16_t speaker_pwm_wrap = (Raspberry_pi_clock / (windows7_melody_now * _speaker_pwm_clkdiv)) - 1;
 
-        pwm_config_set_wrap( &speaker_pwm_slice_config, speaker_pwm_wrap );
-        pwm_init( speaker_pwm_slice_num, &speaker_pwm_slice_config, true );
+        pwm_config_set_wrap( &_speaker_pwm_slice_config, speaker_pwm_wrap );
+        pwm_init( _speaker_pwm_slice_num, &_speaker_pwm_slice_config, true );
 
-        pwm_set_gpio_level( PIN_Speaker_PWM, ( speaker_pwm_wrap * speaker_duty ) );
+        pwm_set_gpio_level( _pin.gpio(), ( speaker_pwm_wrap * speaker_duty ) );
         
         // 次の音
         windows7_melody_now_itr = ++windows7_melody_now_itr;
@@ -158,13 +158,9 @@ void SPEAKER::play_windows7(){
         }
 
     // 演奏終了
-    pwm_set_gpio_level( PIN_Speaker_PWM, 0 );
+    pwm_set_gpio_level( _pin.gpio(), 0 );
     }
 
 }
 
-
-int  SPEAKER::speaker_function(){
-    speaker_init();
-    play_starwars();
 }

@@ -13,6 +13,7 @@ target_link_libraries(SPEAKER
     pico_stdlib 
     hardware_gpio
     hardware_pwm
+    SC
 )
 
 ##################################################

@@ -59,6 +59,15 @@ Binary Binary::operator+ (Binary other_binary) const
     return Binary(this->_binary_data + other_binary._binary_data);
 }
 
+void Binary::to_assign(uint8_t* reg_ptr) const
+{
+    for (int i=0; i<size(); ++i)
+    {
+        *reg_ptr = _binary_data.at(i);
+        ++reg_ptr;
+    }
+}
+
 Binary operator+ (uint8_t first_byte, Binary binary)
 {
     return Binary{first_byte} + binary;

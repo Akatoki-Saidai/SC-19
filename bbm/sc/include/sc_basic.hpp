@@ -62,7 +62,8 @@ public:
 
     //! @brief エラーについての説明文を返します
     //! @return エラーの説明
-    const char* what() const noexcept override;
+    const char* what() const noexcept override
+        {return _message.c_str();}
 };
 
 

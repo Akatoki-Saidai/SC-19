@@ -297,6 +297,87 @@ constexpr double ronto = 1E-27;
 constexpr double quecto = 1E-30;
 
 
+/***** ベクトル量 *****/
+
+//! @brief ベクトル量
+template<class Element>
+class Vector3 
+{
+    const Element _data[3];
+
+public:
+    //! @brief 3つの値からベクトルを構築
+    constexpr Vector3(Element x, Element y, Element z):
+        _data({x, y, z}) {}
+
+    constexpr Element x() const
+        {return _data[0];}
+    constexpr Element y() const
+        {return _data[1];}
+    constexpr Element z() const
+        {return _data[2];}
+
+    Element constexpr operator[] (std::size_t index) const
+        {return _data[index];}
+};
+
+//! @brief ベクトルの単項+
+template<class Element>
+constexpr auto operator+ (const Vector3<Element>& vector)
+{
+    return Vector3(+vector[0], +vector[1], +vector[2]);
+}
+
+//! @brief ベクトルの単項-
+template<class Element>
+constexpr auto operator- (const Vector3<Element>& vector)
+{
+    return Vector3(-vector[0], -vector[1], -vector[2]);
+}
+
+//! @brief ベクトルのスカラー倍
+template<class Element, class Scalar>
+constexpr auto operator* (const Vector3<Element>& vector3, const Scalar& scalar) -> Vector3<decltype(vector3[0]*scalar)>
+{
+    return Vector3(vector3[0]*scalar, vector3[1]*scalar, vector3[2]*scalar);
+}
+
+//! @brief ベクトルのスカラー倍
+template<class Scalar, class Element>
+constexpr auto operator* (const Scalar& scalar, const Vector3<Element>& vector3) -> Vector3<decltype(scalar*vector3[0])>
+{
+    return Vector3(scalar*vector3[0], scalar*vector3[1], scalar*vector3[2]);
+}
+
+//! @brief ベクトルの足し算
+template<class Element1, class Element2>
+constexpr auto operator+ (Vector3<Element1> vector1, Vector3<Element2> vector2) -> Vector3<decltype(vector1[0]+vector2[0])>
+{
+    return Vector3(vector1[0]+vector2[0], vector1[1]+vector2[1], vector1[2]+vector2[2]);
+}
+
+//! @brief ベクトルの引き算
+template<class Element1, class Element2>
+constexpr auto operator- (Vector3<Element1> vector1, Vector3<Element2> vector2) -> Vector3<decltype(vector1[0]-vector2[0])>
+{
+    return Vector3(vector1[0]-vector2[0], vector1[1]-vector2[1], vector1[2]-vector2[2]);
+}
+
+//! @brief ベクトルの内積
+template<class Element1, class Element2>
+constexpr auto operator* (Vector3<Element1> vector1, Vector3<Element2> vector2) -> decltype(vector1[0]*vector2[0] + vector1[1]*vector2[1] + vector1[2]*vector2[2])
+{
+    return vector1[0]*vector2[0] + vector1[1]*vector2[1] + vector1[2]*vector2[2];
+}
+
+//! @brief ベクトルの外積
+template<class Element1, class Element2>
+constexpr auto operator% (Vector3<Element1> vector1, Vector3<Element2> vector2) -> Vector3<decltype(vector1[1]*vector2[2] - vector1[2]*vector2[1])>
+{
+    return Vector3(vector1[1]*vector2[2] - vector1[2]*vector2[1], vector1[2]*vector2[0] - vector1[0]*vector2[2], vector1[0]*vector2[1] - vector1[1]*vector2[0]);
+}
+
+
 /***** 物理量 *****/
 
 template<Unit> class Length;  // 長さ
@@ -410,46 +491,26 @@ public:
 
 
 template<Unit> class Velocity;  // 速度
-template<class T> Velocity(const T& t) -> Velocity<Unit::m_s>;  // デフォルトをm_sにする
+template<class T> Velocity(const T&, const T&, const T&) -> Velocity<Unit::m_s>;  // デフォルトをm_sにする
 
 //! @brief 速度(m_s)
 template<>
-class Velocity<Unit::m_s> : public dimension::m_s
+class Velocity<Unit::m_s> : public Vector3<dimension::m_s>
 {
 public:
-    //! @brief 速度(m_s)
-    explicit constexpr Velocity(const double& num):
-        dimension::m_s(num) {}
-
-    //! @brief 速度(m_s)
-    constexpr Velocity(const dimension::m_s& num):
-        dimension::m_s(num) {}
-
-    //! @brief 速度(m_s)をdoubleに変換
-    explicit constexpr operator double() const
-        {return number();}
+    using Vector3<dimension::m_s>::Vector3;
 };
 
 
 template<Unit> class Acceleration;  // 加速度
-template<class T> Acceleration(const T&) -> Acceleration<Unit::m_s2>;  // デフォルトをm_s2にする
+template<class T> Acceleration(const T&, const T&, const T&) -> Acceleration<Unit::m_s2>;  // デフォルトをm_s2にする
 
 //! @brief 加速度(m_s2)
 template<>
-class Acceleration<Unit::m_s2> : public dimension::m_s2
+class Acceleration<Unit::m_s2> : public Vector3<dimension::m_s2>
 {
 public:
-    //! @brief 加速度(m_s2)
-    explicit constexpr Acceleration(const double& num):
-        dimension::m_s2(num) {}
-
-    //! @brief 加速度(m_s2)
-    constexpr Acceleration(const dimension::m_s2& num):
-        dimension::m_s2(num) {}
-
-    //! @brief 加速度をdoubleに変換
-    explicit constexpr operator double() const
-        {return number();}
+    using Vector3<dimension::m_s2>::Vector3;
 };
 
 
@@ -523,46 +584,26 @@ public:
 
 
 template<Unit> class AngularVelocity;  // 角速度
-template<class T> AngularVelocity(const T& t) -> AngularVelocity<Unit::rad_s>;  // デフォルトをrad_sにする
+template<class T> AngularVelocity(const T&, const T&, const T&) -> AngularVelocity<Unit::rad_s>;  // デフォルトをrad_sにする
 
 //! @brief 角速度(rad_s)
 template<>
-class AngularVelocity<Unit::rad_s> : public dimension::rad_s
+class AngularVelocity<Unit::rad_s> : public Vector3<dimension::rad_s>
 {
 public:
-    //! @brief 角速度(rad_s)
-    explicit constexpr AngularVelocity(const double& num):
-        dimension::rad_s(num) {}
-
-    //! @brief 角速度(rad_s)
-    constexpr AngularVelocity(const dimension::rad_s& num):
-        dimension::rad_s(num) {}
-
-    //! @brief 角速度(rad_s)をdoubleに変換
-    explicit constexpr operator double() const
-        {return number();}
+    using Vector3<dimension::rad_s>::Vector3;
 };
 
 
 template<Unit> class MagneticFluxDensity;  // 磁束密度
-template<class Type> MagneticFluxDensity(const Type& t) -> MagneticFluxDensity<Unit::T>;  // デフォルトをTにする
+template<class Type> MagneticFluxDensity(const Type&, const Type&, const Type&) -> MagneticFluxDensity<Unit::T>;  // デフォルトをTにする
 
 //! @brief 磁束密度(T)
 template<>
-class MagneticFluxDensity<Unit::T> : public dimension::T
+class MagneticFluxDensity<Unit::T> : public Vector3<dimension::T>
 {
 public:
-    //! @brief 磁束密度(T)
-    explicit constexpr MagneticFluxDensity(const double& num):
-        dimension::T(num) {}
-
-    //! @brief 磁束密度(T)
-    constexpr MagneticFluxDensity(const dimension::T& num):
-        dimension::T(num) {}
-
-    //! @brief 磁束密度(T)をdoubleに変換
-    explicit constexpr operator double() const
-        {return number();}
+    using Vector3<dimension::T>::Vector3;
 };
 
 

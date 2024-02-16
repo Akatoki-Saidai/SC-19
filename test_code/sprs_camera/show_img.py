@@ -8,7 +8,7 @@ with serial.Serial('COM4',1000000, timeout=3) as reader:
 
     readingBase64 = False
     list = []
-    while True:
+    while count < 100:
         line = reader.readline().decode('ascii', 'ignore').strip()
         
         # 画像部分を切り出す

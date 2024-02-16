@@ -238,24 +238,25 @@ uint16_t CountRedPixel(CamImage img, uint8_t zone_begin, uint8_t zone_end){
   uint16_t red_count = 0;
 
   while (y_coordinate <= img_height){
-    uint16_t rgb565_1 = img.getImgBuff()[( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 )];
-    uint16_t rgb565_2 = img.getImgBuff()[( ( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ) ) + 1];
+    uint8_t *rgb565_1_ptr;
+    uint8_t *rgb565_2_ptr;
+    rgb565_1_ptr = img.getImgBuff() + (( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ));
+    rgb565_2_ptr = img.getImgBuff() + ((( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ) ) + 1);
+    uint16_t rgb565_1 = *rgb565_1_ptr;
+    uint16_t rgb565_2 = *rgb565_2_ptr;
     uint16_t rgb565 = ( rgb565_1 << 8 ) | rgb565_2;
-
     // img.getImgBuff()で取得できるアドレスとその数は8bit
     // RGB565には16bit必要 -> アドレス2つ
 
     // RGB565からRGB888
-    uint16_t red888 = ((rgb565 >> 11) & 0x1F) << 3;
-    uint16_t green888 = ((rgb565 >> 5) & 0x3F) << 2;
-    uint16_t blue888 = (rgb565 & 0x1F) << 3;
+    uint16_t red888 = (rgb565 & 0x1F);
+    uint16_t green888 = ((rgb565 >> 5) & 0x3F);
+    uint16_t blue888 = ((rgb565 >> 11) & 0x1F);
 
     // 正規化
-    /*
     red888 = (red888 << 3) | (red888 >> 2);
     green888 = (green888 << 2) | (green888 >> 4);
     blue888 = (blue888 << 3) | (blue888 >> 2);
-    */
 
     // RGB888からHSV
     float red_treat = red888 / 255.0;
@@ -292,15 +293,18 @@ uint16_t CountRedPixel(CamImage img, uint8_t zone_begin, uint8_t zone_end){
     
     float hue_min = 338.0;
     float hue_max = 22.0;
-    float sat_min = 0.46;
-    float val_min = 0.41;
+    float sat_min = 0.20;
+    float val_min = 0.20;
+    // 338 22 0.46 0.41
 
     if (((hue <= hue_max) && (sat >= sat_min) && (val >= val_min)) || ((hue >= hue_min) && (sat >= sat_min) && (val >= val_min))){
       red_count++;
-      uint8_t* green_ptr_1 = &img.getImgBuff()[( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 )];
-      uint8_t* green_ptr_2 = &img.getImgBuff()[( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 )];
-      green_ptr_1 = 7;
-      green_ptr_2 = 224;
+      uint8_t *green_ptr_1 = &img.getImgBuff()[( 2 * img_width * ( y_coordinate - 1 ) ) + ( 2 * ( x_coordinate - 1 ))];
+      uint8_t *green_ptr_2 = &img.getImgBuff()[( 2 * img_width * ( y_coordinate - 1 ) ) + ( 2 * ( x_coordinate - 1 ))];
+      uint8_t green_value_1 = 0b00000111;
+      uint8_t green_value_2 = 0b11100000;
+      *green_ptr_1 = green_value_1;
+      *green_ptr_2 = green_value_2;
 
     }
     /*
@@ -313,24 +317,6 @@ uint16_t CountRedPixel(CamImage img, uint8_t zone_begin, uint8_t zone_end){
     */
 
     // テスト用print
-    /*
-    Serial.println("First Pixel: ");
-    Serial.println(img.getImgBuff()[0]);
-    Serial.println(img.getImgBuff()[1]);
-    Serial.println();
-    Serial.print("expected First Pixel: ");
-    Serial.println(img.getImgBuff()[( 2 * 320 * ( 1 - 1 ) ) + 2 * ( 1 - 1 )]);
-    Serial.println(img.getImgBuff()[( ( 2 * 320 * ( 1 - 1 ) ) + 2 * ( 1 - 1 ) ) + 1]);
-    Serial.println();
-    Serial.print("last Pixel: ");
-    Serial.println(img.getImgBuff()[2 * 320 * 240 - 2]);
-    Serial.println(img.getImgBuff()[2 * 320  * 240 - 1]);
-    Serial.println();
-    Serial.print("expected last Pixel: ");
-    Serial.println(img.getImgBuff()[( 2 * 320 * ( 240 - 1 ) ) + 2 * ( 320 - 1 )]);
-    Serial.println(img.getImgBuff()[( ( 2 * 320 * ( 240 - 1 ) ) + 2 * ( 320 - 1 ) ) + 1]);
-    Serial.println();
-    */
     /*
     Serial.print("size: ");
     Serial.println(img_size);
@@ -374,6 +360,27 @@ uint16_t CountRedPixel(CamImage img, uint8_t zone_begin, uint8_t zone_end){
       break;
       Serial.println("count time out");
     }
+
+    
+    // テスト用print
+    /*
+    Serial.println("First Pixel: ");
+    Serial.println(img.getImgBuff()[0]);
+    Serial.println(img.getImgBuff()[1]);
+    Serial.println();
+    Serial.print("expected First Pixel: ");
+    Serial.println(img.getImgBuff()[( 2 * 320 * ( 1 - 1 ) ) + 2 * ( 1 - 1 )]);
+    Serial.println(img.getImgBuff()[( ( 2 * 320 * ( 1 - 1 ) ) + 2 * ( 1 - 1 ) ) + 1]);
+    Serial.println();
+    Serial.print("last Pixel: ");
+    Serial.println(img.getImgBuff()[2 * 320 * 240 - 2]);
+    Serial.println(img.getImgBuff()[2 * 320  * 240 - 1]);
+    Serial.println();
+    Serial.print("expected last Pixel: ");
+    Serial.println(img.getImgBuff()[( 2 * 320 * ( 240 - 1 ) ) + 2 * ( 320 - 1 )]);
+    Serial.println(img.getImgBuff()[( ( 2 * 320 * ( 240 - 1 ) ) + 2 * ( 320 - 1 ) ) + 1]);
+    Serial.println();
+    */
 
   }
 
@@ -482,6 +489,7 @@ void loop(){
       Serial.flush();
       digitalWrite(LED0, LOW);
       img.~CamImage();
+      
     }
   }
   theCamera.end();

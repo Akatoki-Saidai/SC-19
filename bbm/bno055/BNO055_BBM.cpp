@@ -12,21 +12,37 @@ namespace sc
 
 // void accel_init(void);
 static int addr = 0x28;
-//加速度
-// uint8_t accel[6]; // Store data from the 6 acceleration registers
-int16_t accelX, accelY, accelZ; // Combined 3 axis data
-float f_accelX, f_accelY, f_accelZ; // Float type of acceleration data
-uint8_t accel_val = 0x08; // Start register address
+
+// //全加速度
+// // uint8_t accel[6]; // Store data from the 6 acceleration registers
+// int16_t accelX, accelY, accelZ; // Combined 3 axis data
+// float f_accelX, f_accelY, f_accelZ; // Float type of acceleration data
+// uint8_t accel_val = 0x08; // Start register address
+
 //磁気
 // uint8_t mag[6];   // magnetometer registers
 int16_t magX, magY, magZ;
 float f_magX, f_magY, f_magZ;
 uint8_t mag_val = 0x0E;
+
 //ジャイロセンサ
 // uint8_t gyro[6];
 int16_t gyroX, gyroY, gyroZ;
 float f_gyroX, f_gyroY, f_gyroZ;
 uint8_t gyro_val = 0x14;
+
+//重力加速度
+// uint8_t grv[6];
+int16_t grvX, grvY, grvZ;
+float f_grvX, f_grvY, f_grvZ;
+uint8_t grv_val = 0x2E; //GRV_DATA_X_LSB 0x2E
+
+//線形加速度
+// uint8_t accel[6];
+int16_t accelX, accelY, accelZ;
+float f_accelX, f_accelY, f_accelZ;
+uint8_t accel_val = 0x28; //LIA_DATA_X_LSB 0x28  
+
 //ここまで
 
 
@@ -50,7 +66,7 @@ BNO055::BNO055(const I2C& i2c):
 
 int BNO055::get_BNO055()
 {
-    //加速度を読み取る
+    //線形加速度を読み取る
     // i2c_write_blocking(I2C_PORT, addr, &accel_val, 1, true);
     // i2c_read_blocking(I2C_PORT, addr, accel, 6, false);
     Binary accel = _i2c.read_memory(size_t(6), SlaveAddr(addr), MemoryAddr(accel_val));
@@ -88,6 +104,19 @@ int BNO055::get_BNO055()
     f_gyroX = gyroX / 900.00;
     f_gyroY = gyroY / 900.00;
     f_gyroZ = gyroZ / 900.00;
+
+    //重力加速度
+    // i2c_write_blocking(I2C_PORT, addr, &grv_val, 1, true);
+    // i2c_read_blocking(I2C_PORT, addr, grv, 6, false);
+    Binary grv = _i2c.read_memory(size_t(6), SlaveAddr(addr), MemoryAddr(grv_val));
+
+    grvX = ((grv[1]<<8) | grv[0]);
+    grvY = ((grv[3]<<8) | grv[2]);
+    grvZ = ((grv[5]<<8) | grv[4]);
+
+    f_grvX = grvX / 100.00;
+    f_grvY = grvY / 100.00;
+    f_grvZ = grvZ / 100.00;    
 }
 
 
@@ -149,7 +178,7 @@ void BNO055::accel_init(void){
 
     // Set operation to AMG(Accel Mag Gyro)
     data[0] = 0x3D;
-    data[1] = 0b0111;
+    data[1] = 0b1100;
     // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
     _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
     sleep_ms(100);

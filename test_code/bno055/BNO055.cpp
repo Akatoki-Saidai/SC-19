@@ -136,9 +136,9 @@ int main(void){
         i2c_write_blocking(I2C_PORT, addr, &grv_val, 1, true);
         i2c_read_blocking(I2C_PORT, addr, grv, 6, false);
 
-        accelX = ((grv[1]<<8) | grv[0]);
-        accelY = ((grv[3]<<8) | grv[2]);
-        accelZ = ((grv[5]<<8) | grv[4]);
+        grvX = ((grv[1]<<8) | grv[0]);
+        grvY = ((grv[3]<<8) | grv[2]);
+        grvZ = ((grv[5]<<8) | grv[4]);
 
         f_grvX = grvX / 100.00;
         f_grvY = grvY / 100.00;

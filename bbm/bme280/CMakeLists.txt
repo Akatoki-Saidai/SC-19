@@ -4,9 +4,9 @@
 add_library(BME280 STATIC
     ${CMAKE_CURRENT_LIST_DIR}/BME280_BBM.cpp
     #BBM用のファイルを追記
-    ${CMAKE_CURRENT_LIST_DIR}/pico-bme280.c
+    # ${CMAKE_CURRENT_LIST_DIR}/pico-bme280.c
     ${CMAKE_CURRENT_LIST_DIR}/bme280.c
-    ${CMAKE_CURRENT_LIST_DIR}/user.c
+    # ${CMAKE_CURRENT_LIST_DIR}/user.c
 )
 # 以下の資料を参考にしました
 # https://qiita.com/kikochan/items/732e46e92e7f29c18ce9

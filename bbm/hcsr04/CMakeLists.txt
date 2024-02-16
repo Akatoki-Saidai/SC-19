@@ -12,6 +12,7 @@ add_library(HCSR04 STATIC
 target_link_libraries(HCSR04
     hardware_gpio
     pico_stdlib
+    SC
 )
 
 ##################################################

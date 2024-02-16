@@ -3,29 +3,31 @@
 (機体放出検知，LED)
  */
 
-#include <iostream>
-#include "stdio.h"
-#include "pico/stdlib.h"
-#include "hardware/gpio.h"
-#include "hardware/adc.h"//CMakeList.txtのtarget_link_librariesに追加
+// #include <iostream>
+// #include "stdio.h"
+// #include "pico/stdlib.h"
+// #include "hardware/gpio.h"
+// #include "hardware/adc.h"//CMakeList.txtのtarget_link_librariesに追加
 
-#define ADC_Lux_Sensor 26 // 照度用GPIO
-#define GPIO_RED_LED 27 // 赤LED用GPIO
-#define GPIO_GREEN_LED 28 // 緑LED用GPIO
+#include "njl5513r.hpp"
 
-void bio_adc_init(){
-    adc_init();
-    adc_gpio_init(ADC_Lux_Sensor); //ADC0(GPIO26)の端子設定
-    adc_select_input(0); //ADC0を設定
+// #define ADC_Lux_Sensor 26 // 照度用GPIO
+// #define GPIO_RED_LED 27 // 赤LED用GPIO
+// #define GPIO_GREEN_LED 28 // 緑LED用GPIO
 
-}
+// void bio_adc_init(){
+//     adc_init();
+//     adc_gpio_init(ADC_Lux_Sensor); //ADC0(GPIO26)の端子設定
+//     adc_select_input(0); //ADC0を設定
 
-void bio_LED_init(){
-    gpio_init(GPIO_RED_LED);
-    gpio_init(GPIO_GREEN_LED);
-    gpio_set_dir(GPIO_RED_LED, GPIO_OUT);
-    gpio_set_dir(GPIO_GREEN_LED, GPIO_OUT);
-}
+// }
+
+// void bio_LED_init(){
+//     gpio_init(GPIO_RED_LED);
+//     gpio_init(GPIO_GREEN_LED);
+//     gpio_set_dir(GPIO_RED_LED, GPIO_OUT);
+//     gpio_set_dir(GPIO_GREEN_LED, GPIO_OUT);
+// }
 
 // int main() {
 //     stdio_init_all();

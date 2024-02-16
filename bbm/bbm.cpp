@@ -3,23 +3,41 @@
 namespace sc
 {
 
+extern float f_accelX, f_accelY, f_accelZ;
+
 int main()
+{
+try
 {
 /***** setup *****/
 
-    uint8_t sda_pin = 5, scl_pin = 6;
-    // BME280 bme(sda_pin, scl_pin);  // <== こんなかんじでセットアップしたい
-    HCSR04 hcsr04;
+    I2C bme_bno_i2c(SDA(6), SCL(7));
+    print("gseivsbvisea\n");
+    // BME280 bme280(bme_bno_i2c);
+    BNO055 bno055(bme_bno_i2c);
+    
 
 /***** loop *****/
     while (true)
     {
-        // bme_data = bme.read();  // <== こんなかんじで受信できるようにしたい
-        int kyori = hcsr04.gettingTime();
-        printf("%d\n", kyori);
+        printf("aiueo\n");
+        // BME280::Measurement_t bme_data = bme280.measure();
+        bno055.get_BNO055();
+
+        // print("bme temp:%f\n", bme_data.temperature);
+        print("bno accel:%f, %f, %f\n", f_accelX, f_accelY, f_accelZ);
+        sleep(1_s);
+        
+
     }
 
     return 0;
+}
+catch(const std::exception& e)
+{
+    std::cerr << e.what() << '\n';
+    return 1;
+}
 }
 
 }
@@ -27,5 +45,7 @@ int main()
 int main()
 {
     stdio_init_all();
+    sleep_ms(1000);
+    printf("tareghieahgirefib\n");
     sc::main();
 }

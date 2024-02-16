@@ -13,6 +13,7 @@ target_link_libraries(NJL5513R
         pico_stdlib 
         hardware_gpio
         hardware_adc
+        SC
 )
 
 ##################################################

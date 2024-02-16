@@ -49,6 +49,11 @@ Binary::operator const uint8_t*() const
     return _binary_data.c_str();
 }
 
+const uint8_t* Binary::operator&() const
+{
+    return _binary_data.c_str();
+}
+
 Binary Binary::operator+ (Binary other_binary) const
 {
     return Binary(this->_binary_data + other_binary._binary_data);

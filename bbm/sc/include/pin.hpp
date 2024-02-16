@@ -59,7 +59,7 @@ public:
 
     //! @brief GPIO番号を取得
     //! @return GPIO番号
-    uint8_t get_gpio() const;
+    uint8_t gpio() const;
     
     //! @brief Pinをuint8_t型に変換
     //! @return uint8_t型のGPIO番号

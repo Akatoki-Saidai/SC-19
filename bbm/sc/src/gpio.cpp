@@ -21,21 +21,21 @@ GPIO<Out>::GPIO(Pin pin):
 GPIO<Out>::GPIO(Pin pin, Pull pull):
     _pin(pin)
 {
-    if (Pin::Status.at(_pin.get_gpio()) == PinStatus::NoUse)
+    if (Pin::Status.at(_pin.gpio()) == PinStatus::NoUse)
     {
-        Pin::Status.at(_pin.get_gpio()) = PinStatus::Gpio;
+        Pin::Status.at(_pin.gpio()) = PinStatus::Gpio;
     } else {
 throw Error(__FILE__, __LINE__, "This pin is already in use");  // このピンは既に使用されています
     }
 
-    ::gpio_init(_pin.get_gpio());  // pico-SDKの関数  ピンの初期化を行う
-    ::gpio_set_dir(_pin.get_gpio(), GPIO_OUT);  // pico-SDKの関数  通信方向の設定を行う
+    ::gpio_init(_pin.gpio());  // pico-SDKの関数  ピンの初期化を行う
+    ::gpio_set_dir(_pin.gpio(), GPIO_OUT);  // pico-SDKの関数  通信方向の設定を行う
     _pin.set_pull(pull);  // プルアップ・ダウン抵抗を設定
 }
 
 void GPIO<Out>::write(bool level) const
 {
-    ::gpio_put(_pin.get_gpio(), level);  // pico-SDKの関数  ピンにHighかLowを出力する
+    ::gpio_put(_pin.gpio(), level);  // pico-SDKの関数  ピンにHighかLowを出力する
 }
 
 void GPIO<Out>::on() const
@@ -57,21 +57,21 @@ GPIO<In>::GPIO(Pin pin):
 GPIO<In>::GPIO(Pin pin, Pull pull):
     _pin(pin)
 {
-    if (Pin::Status.at(_pin.get_gpio()) == PinStatus::NoUse)
+    if (Pin::Status.at(_pin.gpio()) == PinStatus::NoUse)
     {
-        Pin::Status.at(_pin.get_gpio()) = PinStatus::Gpio;
+        Pin::Status.at(_pin.gpio()) = PinStatus::Gpio;
     } else {
 throw Error(__FILE__, __LINE__, "This pin is already in use");  // このピンは既に使用されています
     }
 
-    ::gpio_init(_pin.get_gpio());  // pico-SDKの関数  ピンの初期化を行う
-    ::gpio_set_dir(_pin.get_gpio(), GPIO_IN);  // pico-SDKの関数  通信方向の設定を行う
+    ::gpio_init(_pin.gpio());  // pico-SDKの関数  ピンの初期化を行う
+    ::gpio_set_dir(_pin.gpio(), GPIO_IN);  // pico-SDKの関数  通信方向の設定を行う
     _pin.set_pull(pull);  // プルアップ・ダウン抵抗を設定
 }
 
 bool GPIO<In>::read() const
 {
-    return ::gpio_get(_pin.get_gpio());  // pico-SDKの関数  ピンがHighになっているかLowになっているかを取得する
+    return ::gpio_get(_pin.gpio());  // pico-SDKの関数  ピンがHighになっているかLowになっているかを取得する
 }
 
 }

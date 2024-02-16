@@ -27,7 +27,7 @@ Pin::Pin(int pin_gpio):
     
 }
 
-uint8_t Pin::get_gpio() const
+uint8_t Pin::gpio() const
 {
     return _pin_gpio;
 }

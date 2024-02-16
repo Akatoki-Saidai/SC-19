@@ -50,6 +50,11 @@ public:
 
     //! @brief 出力用ピンど電圧をlowにする
     void off() const;
+
+    //! @brief GPIO番号を取得
+    //! @return GPIO番号
+    uint8_t gpio() const
+        {return _pin.gpio();}
 };
 
 using LED = GPIO<Out>;  // LEDによる出力
@@ -72,6 +77,11 @@ public:
     //! @brief 入力用ピンから読み込み
     //! @return High(1)かLow(0)か
     bool read() const;
+
+    //! @brief GPIO番号を取得
+    //! @return GPIO番号
+    uint8_t gpio() const
+        {return _pin.gpio();}
 };
 
 }

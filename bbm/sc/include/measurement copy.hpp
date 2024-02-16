@@ -270,109 +270,43 @@
 // //! @note X,Y,Z軸の右ねじの方向への回転をそれぞれ roll, pitch, yaw とする．
 // //! @note 基準となる座標系から，yaw->pitch->rollの順番に回転させたときの相対的な(機体の)座標系の向き
 // template<CoordinateSystem> 
-// // class Posture : private Data3D<_rad>
-// // {
-// // public:
-// //     //! @brief 相対的な(機体の)座標系の向き．
-// //     //! @note X,Y,Z軸の右ねじの方向への回転をそれぞれ roll, pitch, yaw とする．
-// //     //! @note 基準となる座標系から，yaw->pitch->rollの順番に回転させたときの相対的な(機体の)座標系の向き
-// //     Posture(_rad roll, _rad pitch, _rad yaw):
-// //         Data3D(roll, pitch, yaw) {}
+// class Posture : private Data3D<_rad>
+// {
+// public:
+//     //! @brief 相対的な(機体の)座標系の向き．
+//     //! @note X,Y,Z軸の右ねじの方向への回転をそれぞれ roll, pitch, yaw とする．
+//     //! @note 基準となる座標系から，yaw->pitch->rollの順番に回転させたときの相対的な(機体の)座標系の向き
+//     Posture(_rad roll, _rad pitch, _rad yaw):
+//         Data3D(roll, pitch, yaw) {}
 
-// //     //! @brief roll方向(x軸右ねじ)への回転
-// //     _rad roll() const
-// //         {return x();}
+//     //! @brief roll方向(x軸右ねじ)への回転
+//     _rad roll() const
+//         {return x();}
 
-// //     //! @brief pitch方向(y軸右ねじ)への回転
-// //     _rad pitch() const
-// //         {return y();}
+//     //! @brief pitch方向(y軸右ねじ)への回転
+//     _rad pitch() const
+//         {return y();}
 
-// //     //! @brief yaw方向(z軸右ねじ)への回転
-// //     _rad yaw() const
-// //         {return z();}
-// // };
+//     //! @brief yaw方向(z軸右ねじ)への回転
+//     _rad yaw() const
+//         {return z();}
+// };
 
 
 // // 位置
 // template<CoordinateSystem> class Position;
 
-// // // 三次元の位置
-// // template<class _m>
-// // class Position3D
-// // {
-// //     const _m _x;
-// //     const _m _y;
-// //     const _m _z;
-
-// // public:
-// //     //! @brief 三次元の位置データを作成する
-// //     //! @details -0.0は0.0に変換して扱います
-// //     Position3D(_m x, _m y, _m z):
-// //         _x(static_cast<_m>(not_minus0(static_cast<double>(x)))), _y(static_cast<_m>(not_minus0(static_cast<double>(y)))), _z(static_cast<_m>(not_minus0(static_cast<double>(z)))) {}
-
-// //     //! @brief 三次元のデータを作成する
-// //     //! @details -0.0は0.0に変換して扱います
-// //     //! @param r 大きさ
-// //     //! @param theta 極角θ．+z軸を0として，-z軸に向かう方向が正です  0 ~ π
-// //     //! @param phi 方位角φ．+x軸を0として，x軸からy軸に向かう方向が正です  0 ~ 2π
-// //     Position3D(_m r, Theta theta, Phi phi):
-// //         _x(static_cast<double>(r)*sin(double(_rad(theta)))*cos(double(_rad(phi)))), _y(double(r)*sin(double(_rad(theta)))*sin(double(_rad(phi)))), _z(double(r)*cos(double(_rad(theta)))) {}
-
-//     // //! @brief 3次元データのx成分を返します
-//     // _m x() const noexcept 
-//     //     {return _x;}
-
-//     // //! @brief 3次元データのy成分を返します
-//     // _m y() const noexcept 
-//     //     {return _y;}
-
-//     // //! @brief 3次元データのz成分を返します
-//     // _m z() const noexcept 
-//     //     {return _z;}
-
-//     // //! @brief 3次元データの大きさ，原点からの距離を返します
-//     // _m r() const
-//     //     {return static_cast<_m>(std::sqrt(static_cast<double>(_x)*static_cast<double>(_x) + static_cast<double>(_y)*static_cast<double>(_y) + static_cast<double>(_z)*static_cast<double>(_z)));}
-
-//     // //! @brief 3次元データの極角θを返します
-//     // //! @note +z軸を0として，-z軸に向かう方向が正です  0 ~ π
-//     // Theta theta() const
-//     //     {return static_cast<Theta>(static_cast<_rad>(atan(std::sqrt(static_cast<double>(_x)*static_cast<double>(_x) + static_cast<double>(_y)*static_cast<double>(_y)) / static_cast<double>(_z)) + (static_cast<double>(_z)>0.0 ? 0.0 : 2.0*M_PI)));}
-
-//     // //! @brief 3次元データの方位角φを返します．
-//     // //! @note +x軸を0として，x軸からy軸に向かう方向が正です  0 ~ 2π
-//     // Phi phi() const
-//     //     {return static_cast<Phi>(static_cast<_rad>(atan(static_cast<double>(_y)/static_cast<double>(_x)) + (static_cast<double>(_x)<0.0 ? M_PI : (static_cast<double>(_y)<0 ? 2.0*M_PI : 0.0))));}
-
-// //     virtual operator Position<World>() = 0;
-// // };
-
 // //! @brief 地心座標系での位置
 // //! @note 原点:地球の重心，+x:経度0°，+y:東経90°，+z:地軸(北)
 // template<>
-// class Position<World>
+// class Position<World> : public Data3D<_m>
 // {
-//     const _m _x;
-//     const _m _y;
-//     const _m _z;
-
 // public:
-//     //! @brief 地心座標系での位置データを作成する
-//     //! @details -0.0は0.0に変換して扱います
-//     Position(_m x, _m y, _m z):
-//         _x(static_cast<_m>(not_minus0(static_cast<double>(x)))), _y(static_cast<_m>(not_minus0(static_cast<double>(y)))), _z(static_cast<_m>(not_minus0(static_cast<double>(z)))) {}
-
-//     //! @brief 地心座標系での位置データを作成する
-//     //! @details -0.0は0.0に変換して扱います
-//     //! @param r 大きさ
-//     //! @param theta 極角θ．+z軸を0として，-z軸に向かう方向が正です  0 ~ π
-//     //! @param phi 方位角φ．+x軸を0として，x軸からy軸に向かう方向が正です  0 ~ 2π
-//     Position(_m r, Theta theta, Phi phi):
-//         _x(static_cast<double>(r)*sin(double(_rad(theta)))*cos(double(_rad(phi)))), _y(double(r)*sin(double(_rad(theta)))*sin(double(_rad(phi)))), _z(double(r)*cos(double(_rad(theta)))) {}
+//     using Data3D<_m>::Data3D;
 
 //     //! @brief 位置 (緯度，経度, [標高])
 //     Position(Latitude lat, Longitude lon, Altitude alt = 0_m):
-//         Position(
+//         Data3D(
 //             _m((Earth_N(lat)+double(alt.to_HAE())) * cos(double(_rad(lat))) * cos(double(_rad(lon)))), 
 //             _m((Earth_N(lat)+double(alt.to_HAE())) * cos(double(_rad(lat))) * sin(double(_rad(lon)))),
 //             _m((Earth_N(lat)*(1.0-Earth_e*Earth_e) + double(alt.to_HAE())) * sin(double(_rad(lat))))
@@ -393,54 +327,27 @@
 //         {return static_cast<_m>((std::sqrt(double(x())*double(x()) + double(y())*double(y())) / cos(double(_rad(Latitude(theta())))) ) - Earth_N(Latitude(theta())));}
 //     // この関数を作成するにあたり，以下の資料を参考にしました
 //     // https://vldb.gsi.go.jp/sokuchi/surveycalc/surveycalc/algorithm/trans/trans_alg.html
-
-//     //! @brief 3次元データのx成分を返します
-//     _m x() const noexcept 
-//         {return _x;}
-
-//     //! @brief 3次元データのy成分を返します
-//     _m y() const noexcept 
-//         {return _y;}
-
-//     //! @brief 3次元データのz成分を返します
-//     _m z() const noexcept 
-//         {return _z;}
-
-//     //! @brief 3次元データの大きさ，原点からの距離を返します
-//     _m r() const
-//         {return static_cast<_m>(std::sqrt(static_cast<double>(_x)*static_cast<double>(_x) + static_cast<double>(_y)*static_cast<double>(_y) + static_cast<double>(_z)*static_cast<double>(_z)));}
-
-//     //! @brief 3次元データの極角θを返します
-//     //! @note +z軸を0として，-z軸に向かう方向が正です  0 ~ π
-//     Theta theta() const
-//         {return static_cast<Theta>(static_cast<_rad>(atan(std::sqrt(static_cast<double>(_x)*static_cast<double>(_x) + static_cast<double>(_y)*static_cast<double>(_y)) / static_cast<double>(_z)) + (static_cast<double>(_z)>0.0 ? 0.0 : 2.0*M_PI)));}
-
-//     //! @brief 3次元データの方位角φを返します．
-//     //! @note +x軸を0として，x軸からy軸に向かう方向が正です  0 ~ 2π
-//     Phi phi() const
-//         {return static_cast<Phi>(static_cast<_rad>(atan(static_cast<double>(_y)/static_cast<double>(_x)) + (static_cast<double>(_x)<0.0 ? M_PI : (static_cast<double>(_y)<0 ? 2.0*M_PI : 0.0))));}
 // };
 
 // //! @brief 局所座標系での位置
 // //! @note 原点:地上の基準点，+x:南，+y:東，+z:天頂
 // template<>
-// class Position<Local> : private Position<World>
+// class Position<Local> : public Data3D<_m>
 // {
 // public:
-//     static inline Position<World> BaseOrigin{Latitude(35.861268_deg), Longitude(139.607155_deg), Altitude(5_m)};  // 局所座標系の原点 (外部から変更可)
+//     using Data3D<_m>::Data3D;
 
-//     Position():
-//         Position<World>() {}
+//     static inline Position<World> BasePosition{Latitude(35.861268_deg), Longitude(139.607155_deg), Altitude(5_m)};  // 局所座標系の原点 (外部から変更可)
 
 // };
 
 // //! @brief 機体座標系での位置
 // //! @note 原点:機体の重心，+x:前，+y:左，+z:上
 // template<>
-// class Position<Body> : public Position3D
+// class Position<Body> : public Data3D<_m>
 // {
 // public:
-//     using Position3D::Position3D;
+//     using Data3D<_m>::Data3D;
 
 //     static inline Position<World> BasePosition{Latitude(35.861268_deg), Longitude(139.607155_deg), Altitude(5_m)};  // 機体座標系の原点 (外部から変更可)
 //     static inline Posture<Local> BasePosture{0_rad, 0_rad, 0_rad};  // 機体座標系の傾き

@@ -18,7 +18,7 @@ namespace sc
 TX::TX(int tx_gpio):
     Pin(tx_gpio)
 {
-    if (get_gpio() != all_of(EnableUART0_TX) && get_gpio() != all_of(EnableUART1_TX))
+    if (gpio() != all_of(EnableUART0_TX) && gpio() != all_of(EnableUART1_TX))
     {
 throw Error(__FILE__, __LINE__, "An incorrect TX pin number was entered");  // 正しくないTXピンの番号が入力されました
     }
@@ -26,10 +26,10 @@ throw Error(__FILE__, __LINE__, "An incorrect TX pin number was entered");  // �
 
 UART_ID TX::get_uart_id() const
 {
-    if (get_gpio() == any_of(EnableUART0_TX))
+    if (gpio() == any_of(EnableUART0_TX))
     {
 return UART_ID::uart_0;
-    } else if (get_gpio() == any_of(EnableUART1_TX)) {
+    } else if (gpio() == any_of(EnableUART1_TX)) {
 return UART_ID::uart_1;
     } else {
 throw Error(__FILE__, __LINE__, "An incorrect TX pin number was entered");  // 正しくないTXピンの番号が入力されました
@@ -41,7 +41,7 @@ throw Error(__FILE__, __LINE__, "An incorrect TX pin number was entered");  // �
 RX::RX(int tx_gpio):
     Pin(tx_gpio)
 {
-    if (get_gpio() != all_of(EnableUART0_RX) && get_gpio() != all_of(EnableUART1_RX))
+    if (gpio() != all_of(EnableUART0_RX) && gpio() != all_of(EnableUART1_RX))
     {
 throw Error(__FILE__, __LINE__, "An incorrect RX pin number was entered");  // 正しくないRXピンの番号が入力されました
     }
@@ -49,10 +49,10 @@ throw Error(__FILE__, __LINE__, "An incorrect RX pin number was entered");  // �
 
 UART_ID RX::get_uart_id() const
 {
-    if (get_gpio() == any_of(EnableUART0_RX))
+    if (gpio() == any_of(EnableUART0_RX))
     {
 return UART_ID::uart_0;
-    } else if (get_gpio() == any_of(EnableUART1_RX)) {
+    } else if (gpio() == any_of(EnableUART1_RX)) {
 return UART_ID::uart_1;
     } else {
 throw Error(__FILE__, __LINE__, "An incorrect RX pin number was entered");  // 正しくないRXピンの番号が入力されました
@@ -64,27 +64,27 @@ throw Error(__FILE__, __LINE__, "An incorrect RX pin number was entered");  // �
 
 
 
-UART::UART(TX tx, RX rx, Freq freq):
+UART::UART(TX tx, RX rx, Frequency<Unit::Hz>  freq):
     _tx(tx), _rx(rx), _freq(freq), _uart_id(tx.get_uart_id())
 {
     if (tx.get_uart_id() != rx.get_uart_id())
     {
 throw Error(__FILE__, __LINE__, "An incorrect UART pin number was entered");  // 正しくないUARTのピン番号が入力されました
-    } else if (!(Pin::Status.at(_tx.get_gpio()) == PinStatus::NoUse && Pin::Status.at(_rx.get_gpio()) == PinStatus::NoUse)) {
+    } else if (!(Pin::Status.at(_tx.gpio()) == PinStatus::NoUse && Pin::Status.at(_rx.gpio()) == PinStatus::NoUse)) {
 throw Error(__FILE__, __LINE__, "This pin is already in use");  // このピンは既に使用されています
     } else if (UART::IsUse[_uart_id]) {
 throw Error(__FILE__, __LINE__, "UART cannot be reinitialized");  // UARTを再度初期化することはできません
     }
 
-    Pin::Status.at(_tx.get_gpio()) = PinStatus::UartTx;
-    Pin::Status.at(_rx.get_gpio()) = PinStatus::UartRx;
+    Pin::Status.at(_tx.gpio()) = PinStatus::UartTx;
+    Pin::Status.at(_rx.gpio()) = PinStatus::UartRx;
 
     UART::IsUse[_uart_id] = true;
 
     ::uart_init((_uart_id ? uart1 : uart0), static_cast<double>(_freq));  // pico-SDKの関数  UARTを初期化する
 
-    ::gpio_set_function(_tx.get_gpio(), GPIO_FUNC_UART);  // pico-SDKの関数  ピンの機能をUARTモードにする
-    ::gpio_set_function(_rx.get_gpio(), GPIO_FUNC_UART);  // pico-SDKの関数  ピンの機能をUARTモードにする
+    ::gpio_set_function(_tx.gpio(), GPIO_FUNC_UART);  // pico-SDKの関数  ピンの機能をUARTモードにする
+    ::gpio_set_function(_rx.gpio(), GPIO_FUNC_UART);  // pico-SDKの関数  ピンの機能をUARTモードにする
 
     // 割り込み処理の設定を行う
     if (_uart_id)
@@ -142,8 +142,5 @@ void UART::uart1_handler()
     }
 }
 
-bool UART::IsUse[2] = {false, false};  // UARTの使用状況を初期化
-std::deque<uint8_t> UART::uart0_queue(UART::MaxInputLen, 0);
-std::deque<uint8_t> UART::uart1_queue(UART::MaxInputLen, 0);
 
 }

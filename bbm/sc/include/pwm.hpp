@@ -40,7 +40,7 @@ public:
     //! @brief PWMのセットアップ
     //! @param pin PWMで出力するためのピン
     //! @param freq 設定する周波数 (実際に設定される周波数は少しずれる)
-    PWM(Pin pin, Freq freq = 0xffff_hz);
+    PWM(Pin pin, Frequency<Unit::Hz> freq = 0xffff_hz);
 
 private:
     static constexpr float SysClock = 125E6;  // PWMの基準として使うシステムクロックの周波数 (Hz)
@@ -55,10 +55,10 @@ private:
     const Channel _channel;  // チャンネル (1つのスライスに2つのピンが対応しているため，そのどちらを指すかを識別する値)
     const uint16_t _wrap;  // 分解能 (詳しくは下記の資料へ)
     const float _clk_div;  // 分周比 (詳しくは下記の資料へ)
-    static inline const Freq MaxFreq = 125'000'000_hz;
-    static inline const Freq MinFreq = 8.0_hz;
-    static constexpr uint16_t MaxWrap = 0xffff;
-    static constexpr uint16_t MinWrap = 1;
+    static inline const Frequency<Unit::Hz> MaxFreq = 125'000'000_hz;  // PWMで扱える周波数の最大値
+    static inline const Frequency<Unit::Hz> MinFreq = 8.0_hz;  // PWMで扱える周波数の最小値
+    static constexpr uint16_t MaxWrap = 0xffff;  // PWMで扱えるWrapの最大値
+    static constexpr uint16_t MinWrap = 1;  // PWMで扱えるWrapの最小値
 
 public:
     //! @brief ピンの出力レベル(ピンの出力が1になっている割合)を設定
@@ -67,17 +67,17 @@ public:
 
     //! @brief 1周期のうちで出力がHighになっている時間を設定
     //! @param high_time high(1)になる時間
-    void write(_ms high_time) const;
+    void write(Time<Unit::s> high_time) const;
 
 private:
     //! @brief 周波数から，設定できる最大の分解能(カウンタの最大値)を計算  (詳しくは下記の資料へ)
     //! @param freq 設定したい周波数
-    static uint16_t to_wrap(Freq freq);
+    static uint16_t to_wrap(Frequency<Unit::Hz> freq);
 
     //! @brief 周波数と分解能から分周比を計算  (詳しくは下記の資料へ)
     //! @param freq 設定したい周波数
     //! @param wrap 設定したい分解能
-    static float to_clk_div(Freq freq, uint16_t wrap);
+    static float to_clk_div(Frequency<Unit::Hz> freq, uint16_t wrap);
 
 };
 // PWMクラスは以下の資料を参考にして作成しました

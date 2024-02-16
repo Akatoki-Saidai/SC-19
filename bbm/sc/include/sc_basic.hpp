@@ -16,6 +16,7 @@
 #define _USE_MATH_DEFINES  // 円周率などの定数を使用する  math.hを読み込む前に定義する必要がある (math.hはcmathやiostreamに含まれる)
 #include <algorithm>
 #include <cfloat>  // double型の最小値など
+#include <cstddef>  // size_tなど
 #include <iostream>  // coutなど
 #include <string>
 
@@ -35,20 +36,22 @@ class Error : public std::exception
 {
     const std::string _message;  // エラーメッセージ
 public:
-    //! @brief エラーを記録し，標準エラー出力に出力します
+    //! @brief エラーを記録します
     //! @param FILE __FILE__としてください (自動でファイル名に置き換わります)
     //! @param LINE __LINE__としてください (自動で行番号に置き換わります)
     //! @param message 出力したいエラーメッセージ (自動で改行)
-    Error(const std::string& FILE, int LINE, const std::string& message) noexcept;
+    Error(const std::string& FILE, int LINE, const std::string& message) noexcept:
+        _message("<<ERROR>>  FILE : " + std::string(FILE) + "  LINE : " + std::to_string(LINE) + "\n           MESSAGE : " + _message + "\n") {}
 
-    //! @brief キャッチしたエラーを記録し，標準エラー出力に出力します
+    //! @brief キャッチしたエラーを記録ます
     //! @param FILE ＿FILE＿としてください (自動でファイル名に置き換わります)
     //! @param LINE ＿LINE＿としてください (自動で行番号に置き換わります)
     //! @param e キャッチした例外
     //! @param message 出力したいエラーメッセージ (自動で改行)
-    Error(const std::string& FILE, int LINE, const std::exception& e, const std::string& message) noexcept;
+    Error(const std::string& FILE, int LINE, const std::exception& e, const std::string& message) noexcept:
+        _message(std::string(e.what()) + "required from here\n" + "<<ERROR>>  FILE : " + std::string(FILE) + "  LINE : " + std::to_string(LINE) + "\n           MESSAGE : " + _message + "\n") {}
 
-    //! @brief エラーを記録し，printfの形式で標準エラー出力に出力します
+    //! @brief printfの形式でエラーメッセージを記録します
     //! @param FILE __FILE__としてください (自動でファイル名に置き換わります)
     //! @param LINE __LINE__としてください (自動で行番号に置き換わります)
     //! @param format フォーマット文字列
@@ -71,7 +74,7 @@ std::string format_str(const std::string& format, Args... args) noexcept
 {
     try
     {
-        const size_t formatted_chars_num = std::snprintf(nullptr, 0, format.c_str(), args...);  // フォーマット後の文字数を計算
+        const std::size_t formatted_chars_num = std::snprintf(nullptr, 0, format.c_str(), args...);  // フォーマット後の文字数を計算
         char formatted_chars[formatted_chars_num + 1];  // フォーマット済みの文字列を保存するための配列を作成
         std::snprintf(&formatted_chars[0], formatted_chars_num + 1, format.c_str(), args...);  // フォーマットを実行
 return std::string(formatted_chars);  // フォーマット済み文字列を出力
@@ -98,12 +101,19 @@ void print(const std::string& format, Args... args) noexcept
     print(format_str(format, args...));
 }
 
+//! @brief エラーメッセージを出力
+//! @param e キャッチしたエラー
+inline void print(const std::exception& e) noexcept
+{
+    print(e.what());
+}
+
 
 //! @brief 指定した時間 待機
 //! @param time 待機する時間 (100_ms のように入力)
-inline void sleep(_ms time)
+inline void sleep(Time<Unit::s> time)
 {
-    ::sleep_us(static_cast<double>(static_cast<_us>(time)));  // pico-sdkの関数  マイクロ秒待機
+    ::sleep_us(static_cast<double>(time * (1/micro)));  // pico-sdkの関数  マイクロ秒待機
 }
 
 
@@ -125,6 +135,23 @@ template<> constexpr inline double not0(const double& value) {return (value ? va
 //! @param value 0かもしれない数
 //! @return 0ではない数
 template<> constexpr inline long double not0(const long double& value) {return (value ? value : LDBL_TRUE_MIN);}
+
+
+
+//! @brief エラー防止のため，-0.0であるかを判定し+0.0を返す．floatバージョン
+//! @param value -0.0かもしれない数
+//! @return -0.0ではない数
+constexpr inline float not_minus0(const float& value) {return (value ? value : 0.0F);}
+
+//! @brief エラー防止のため，-0.0であるかを判定し+0.0を返す．doubleバージョン
+//! @param value -0.0かもしれない数
+//! @return -0.0ではない数
+constexpr inline double not_minus0(const double& value) {return (value ? value : 0.0);}
+
+//! @brief エラー防止のため，-0.0であるかを判定し+0.0を返す．long doubleバージョン
+//! @param value -0.0かもしれない数
+//! @return -0.0ではない数
+constexpr inline long double not_minus0(const long double& value) {return (value ? value : 0.0L);}
 
 
 //! @brief コピーを禁止するための親クラス

@@ -21,7 +21,6 @@
 #include "omit.hpp"
 // #include "pin.hpp"
 #include "pwm.hpp"
-#include "sd.hpp"
 #include "spi_slave.hpp"
 #include "spi.hpp"
 #include "uart.hpp"

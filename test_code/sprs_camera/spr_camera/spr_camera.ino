@@ -154,7 +154,7 @@ void initCamera(){
   err = theCamera.setStillPictureImageFormat(
     CAM_IMGSIZE_QVGA_H,
     CAM_IMGSIZE_QVGA_V,
-    CAM_IMAGE_PIX_FMT_JPG);
+    CAM_IMAGE_PIX_FMT_RGB565);
   if (err != CAM_ERR_SUCCESS)
   {
     printError(err);

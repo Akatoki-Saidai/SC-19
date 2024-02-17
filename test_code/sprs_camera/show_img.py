@@ -21,6 +21,10 @@ with serial.Serial('COM4',1000000, timeout=3) as reader:
             data = np.frombuffer(buffer, dtype=np.uint8)
             image = cv2.imdecode(data, cv2.IMREAD_COLOR)
             cv2.imshow("Camera",image)
+            # for element in data:
+                # print(element)
+            # print("End array\n")
+            # print(len(data))
             cv2.waitKey(1) 
             count = count + 1
             readingBase64 = False

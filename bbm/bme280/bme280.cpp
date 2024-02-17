@@ -40,10 +40,8 @@ BME280::BME280(const I2C& i2c):
     // gpio_set_function(sda_pin, GPIO_FUNC_I2C);
     // gpio_pull_up(scl_pin);
     // gpio_pull_up(sda_pin);
-
     // See if SPI is working - interrograte the device for its I2C ID number, should be 0x60
     read_registers(0xD0, &chip_id, 1);
-
     // 標高を計算する基準点をセット
     pressure0    = 1013.25; //hPa
     temperature0 = 20; //`C
@@ -51,11 +49,9 @@ BME280::BME280(const I2C& i2c):
   
     // read compensation params once
     read_compensation_parameters();
-    
     measurement_reg.osrs_p = 0b011; // x4 Oversampling
     measurement_reg.osrs_t = 0b011; // x4 Oversampling
     write_register(0xF4, MODE::MODE_SLEEP); //SLEEP_MODE ensures configuration is saved
- 
     // save configuration
     write_register(0xF2, 0x1); // Humidity oversampling register - going for x1
     write_register(0xF4, measurement_reg.get());// Set rest of oversampling modes and run mode to normal
@@ -162,7 +158,7 @@ uint32_t BME280::compensate_humidity(int32_t adc_H) {
 void BME280::write_register(uint8_t reg, uint8_t data) {
     uint8_t buf[2];
     //buf[0] = reg & 0x7f;  // remove read bit as this is a write
-    buf[0] = reg;
+    buf[0] = reg & 0b01111111;
     buf[1] = data;
     // i2c_write_blocking(i2c_hw, _addr, buf, 2, true);
     // sleep_ms(10);
@@ -178,7 +174,8 @@ void BME280::read_registers(uint8_t reg, uint8_t *buf, uint16_t len) {
     // sleep_ms(10);
     // i2c_read_blocking(i2c_hw, _addr, buf, len, false);
     // sleep_ms(10);
-    _i2c.read_memory(size_t(len),SlaveAddr(_addr),MemoryAddr(reg)).to_assign(buf);
+    Binary b = _i2c.read_memory(size_t(len),SlaveAddr(_addr),MemoryAddr(reg | 0b10000000));
+    b.to_assign(buf);
 }
 
 

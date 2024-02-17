@@ -104,7 +104,6 @@ public:
     // 標高を計算する基準点とする 気圧，気温，標高をセット
     void set_origin(float _pressure0, float _temperature0, float _altitude0);
 
-
     /*
     Constructor has the following default values for params
     uint i2c_no    = 0, 

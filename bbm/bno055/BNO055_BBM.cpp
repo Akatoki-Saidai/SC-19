@@ -79,7 +79,7 @@ std::tuple<Acceleration<Unit::m_s2>,MagneticFluxDensity<Unit::T>,AngularVelocity
     f_accelY = accelY / 100.00;
     f_accelZ = accelZ / 100.00;
 
-    
+    Acceleration<Unit::m_s2>accel_vector(double(f_accelX),double(f_accelY),double(f_accelZ));
 
     //地磁気
     // i2c_write_blocking(I2C_PORT, addr, &mag_val, 1, true);
@@ -94,6 +94,8 @@ std::tuple<Acceleration<Unit::m_s2>,MagneticFluxDensity<Unit::T>,AngularVelocity
     f_magY = magY / 16.00;
     f_magZ = magZ / 16.00;
     
+    MagneticFluxDensity<Unit::T>Mag_vector(double(f_magX),double(f_magY),double(f_magZ));
+    
     //ジャイロ
     // i2c_write_blocking(I2C_PORT, addr, &gyro_val, 1, true);
     // i2c_read_blocking(I2C_PORT, addr, gyro, 6, false);
@@ -106,6 +108,8 @@ std::tuple<Acceleration<Unit::m_s2>,MagneticFluxDensity<Unit::T>,AngularVelocity
     f_gyroX = gyroX / 900.00;
     f_gyroY = gyroY / 900.00;
     f_gyroZ = gyroZ / 900.00;
+
+    AngularVelocity<Unit::rad>gyro_vector(double(f_gyroX),double(f_gyroY),double(f_gyroZ));
 
     //重力加速度
     // i2c_write_blocking(I2C_PORT, addr, &grv_val, 1, true);
@@ -120,6 +124,7 @@ std::tuple<Acceleration<Unit::m_s2>,MagneticFluxDensity<Unit::T>,AngularVelocity
     f_grvY = grvY / 100.00;
     f_grvZ = grvZ / 100.00;
 
+    Acceleration<Unit::m_s2>
 }
 
 

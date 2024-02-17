@@ -99,7 +99,7 @@ std::tuple<Pressure<Unit::Pa>,Humidity<Unit::percent>,Temperature<Unit::K>> BME2
     // measurement.altitude_1 = altitude0 + ((temperature0 + 273.15F) / 0.0065F) * (1 - std::pow((measurement.pressure / pressure0), (1.0F / 5.257F)));
     // measurement.altitude_2 = altitude0 + ((measurement.temperature + 273.15F) / 0.0065F) * (std::pow((pressure0 / measurement.pressure), 1.0F / 5.257F) -1.0F);
 
-    return std::tuple<float,float,float>(pressure_Pa,humidity_percent,temperature_K);
+    return std::tuple<Pressure<Unit::Pa>,Humidity<Unit::percent>,Temperature<Unit::K>>(pressure_Pa,humidity_percent,temperature_K);
 }
 
 uint8_t BME280::get_chipID() {

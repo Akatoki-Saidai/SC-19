@@ -144,7 +144,7 @@ Binary I2C::read(std::size_t size, SlaveAddr slave_addr) const
 
 void I2C::write_memory(Binary output_data, SlaveAddr slave_addr, MemoryAddr memory_addr) const
 {
-    Binary corrected_data = memory_addr + output_data;
+    Binary corrected_data = (memory_addr & 0b01111111U) + output_data;
     ::i2c_write_blocking((_i2c_id ? i2c1 : i2c0), slave_addr, corrected_data, corrected_data.size(), false);  // pico-SDKの関数  I2Cで送信
 }
 
@@ -152,7 +152,7 @@ Binary I2C::read_memory(std::size_t size, SlaveAddr slave_addr, MemoryAddr memor
 {
     std::vector<uint8_t> input_data(size);
     std::size_t input_size = 0;  // 実際には何バイト受信したか
-    uint8_t output_data = memory_addr;
+    uint8_t output_data = memory_addr | 0b10000000U;
     ::i2c_write_blocking((_i2c_id ? i2c1 : i2c0), slave_addr, &output_data, 1, true);  // まず，メモリアドレスを送信
     input_size = ::i2c_read_blocking((_i2c_id ? i2c1 : i2c0), slave_addr, input_data.data(), size, false);  // pico-SDKの関数  I2Cで受信
     input_data.resize(input_size);

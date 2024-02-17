@@ -64,7 +64,7 @@ BNO055::BNO055(const I2C& i2c):
 
 }
 
-std::tuple<Acceleration<Unit::m_s2>,MagneticFluxDensity<Unit::T>,AngularVelocity<Unit::rad>> BNO055::read()
+std::tuple<Acceleration<Unit::m_s2>,MagneticFluxDensity<Unit::T>,AngularVelocity<Unit::rad_s>> BNO055::read()
 {
     //線形加速度を読み取る
     // i2c_write_blocking(I2C_PORT, addr, &accel_val, 1, true);
@@ -109,7 +109,7 @@ std::tuple<Acceleration<Unit::m_s2>,MagneticFluxDensity<Unit::T>,AngularVelocity
     f_gyroY = gyroY / 900.00;
     f_gyroZ = gyroZ / 900.00;
 
-    AngularVelocity<Unit::rad>gyro_vector(double(f_gyroX),double(f_gyroY),double(f_gyroZ));
+    AngularVelocity<Unit::rad_s>gyro_vector(double(f_gyroX),double(f_gyroY),double(f_gyroZ));
 
     //重力加速度
     // i2c_write_blocking(I2C_PORT, addr, &grv_val, 1, true);

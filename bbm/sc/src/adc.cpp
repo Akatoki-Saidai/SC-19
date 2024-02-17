@@ -24,16 +24,16 @@ throw Error(__FILE__, __LINE__, "ADC cannot be reinitialized");  // ADCを再度
 
     Pin::Status.at(_adc_pin.gpio()) = PinStatus::Adc;
 
-    ADC::IsUse[_channel] = true;
-
     if (ADC::IsUse[0]==false && ADC::IsUse[1]==false && ADC::IsUse[2]==false && ADC::IsUse[3]==false && ADC::IsUse[4]==false)
     {
         ::adc_init();
     }
 
+    ADC::IsUse[_channel] = true;
+
     ::adc_gpio_init(_adc_pin.gpio());
 
-    ::adc_select_input(_channel);    
+    ::adc_select_input(_channel);
 }
 
 uint16_t ADC::read() const

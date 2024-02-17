@@ -149,7 +149,7 @@ void I2C::write_memory(Binary output_data, SlaveAddr slave_addr, MemoryAddr memo
 }
 
 Binary I2C::read_memory(std::size_t size, SlaveAddr slave_addr, MemoryAddr memory_addr) const
-{   
+{
     std::vector<uint8_t> input_data(size);
     std::size_t input_size = 0;  // 実際には何バイト受信したか
     uint8_t output_data = memory_addr;

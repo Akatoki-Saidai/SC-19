@@ -16,8 +16,8 @@ class HCSR04 {
     const GPIO<Out>& _out_pin;
     const GPIO<In>& _in_pin;
 public:
-    static absolute_time_t up_edge_time;
-    static absolute_time_t dn_edge_time;
+    static inline absolute_time_t up_edge_time{};
+    static inline absolute_time_t dn_edge_time{};
     static inline uint64_t dtime = 0;
     HCSR04(GPIO<Out> out_pin, GPIO<In> in_pin);
     Length<Unit::m> read();          

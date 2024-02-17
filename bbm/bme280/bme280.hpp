@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <cmath>
+#include <tuple>
 #include "pico/stdlib.h"
 #include "pico/binary_info.h"
 #include "hardware/i2c.h"
@@ -84,13 +85,21 @@ struct MeasurementControl_t {
 public:
     // struct used for transmitting sensor values 
     // from the sensor to the program
-    struct Measurement_t {
-        float temperature; //気温
-        float humidity;    //湿度
-        float pressure;    //気圧
-        float altitude_1;    //高度
-        float altitude_2;    //高度
-    } measurement;
+    // struct Measurement_t {
+    //     float temperature; //気温
+    //     float humidity;    //湿度
+    //     float pressure;    //気圧
+    //     float altitude_1;    //高度
+    //     float altitude_2;    //高度
+    // } mesurement;
+
+    std::tuple<float,float,float> read();
+
+    float temperature;
+    float pressure;
+    float humidity;
+
+    std::tuple<float,float,float>measurement;
 
     // 標高を計算する基準点とする 気圧，気温，標高をセット
     void set_origin(float _pressure0, float _temperature0, float _altitude0);
@@ -109,7 +118,7 @@ public:
 
 
     // get sensor values from BME280
-    Measurement_t measure();
+    // Measurement_t measure();
     // get chip ID from sensor (=I2C address)
     uint8_t get_chipID();
  

@@ -67,7 +67,7 @@ void BME280::set_origin(float _pressure0=1013.25, float _temperature0=20, float 
     altitude0    = _altitude0;
 }
 
-BME280::Measurement_t BME280::measure() {
+std::tuple<float,float,float> BME280::read() {
     int32_t pressure, humidity, temperature;
     if (measurement_reg.mode == BME280::MODE::MODE_FORCED) {
         write_register(0xf4, measurement_reg.get());
@@ -86,14 +86,19 @@ BME280::Measurement_t BME280::measure() {
     pressure = compensate_pressure(pressure);
     humidity = compensate_humidity(humidity);
     temperature = compensate_temp(temperature);
-    measurement.pressure = pressure / 100.0;
-    measurement.humidity = humidity / 1024.0;
-    measurement.temperature = temperature / 100.0;
+    Pressure<Unit::Pa>(double(pressure/100.0));
+    Humidity(double(humidity/1024.0));
+    Temperature<Unit::K>(double(temperature/100.0));
+    // measurement.pressure = Pressure / 100.0;
+    // measurement.humidity = Humidity / 1024.0;
+    // measurement.temperature = Temperature / 100.0;
 
-    // apply formula to retrieve altitude from air pressure
-    measurement.altitude_1 = altitude0 + ((temperature0 + 273.15F) / 0.0065F) * (1 - std::pow((measurement.pressure / pressure0), (1.0F / 5.257F)));
-    measurement.altitude_2 = altitude0 + ((measurement.temperature + 273.15F) / 0.0065F) * (std::pow((pressure0 / measurement.pressure), 1.0F / 5.257F) -1.0F);
-    
+    std::tuple<float,float,float>measurement(pressure,humidity,temperature);
+
+    // // apply formula to retrieve altitude from air pressure
+    // measurement.altitude_1 = altitude0 + ((temperature0 + 273.15F) / 0.0065F) * (1 - std::pow((measurement.pressure / pressure0), (1.0F / 5.257F)));
+    // measurement.altitude_2 = altitude0 + ((measurement.temperature + 273.15F) / 0.0065F) * (std::pow((pressure0 / measurement.pressure), 1.0F / 5.257F) -1.0F);
+
     return measurement;
 }
 

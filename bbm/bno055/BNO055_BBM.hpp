@@ -14,7 +14,7 @@ class BNO055 {
     void accel_init(void);
 public:
     BNO055(const I2C& i2c);
-    int get_BNO055();          
+    std::tuple<Acceleration<Unit::m_s2>,MagneticFluxDensity<Unit::T>,AngularVelocity<Unit::rad>> read();          
 };
 
 }

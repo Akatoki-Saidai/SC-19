@@ -1,66 +1,66 @@
-#include <stdio.h>
-#include "pico/stdlib.h"
-#include "hardware/i2c.h"
+// #include <stdio.h>
+// #include "pico/stdlib.h"
+// #include "hardware/i2c.h"
 
-#define I2C_PORT i2c1
+// #define I2C_PORT i2c1
 
-static int addr = 0x28;
+// static int addr = 0x28;
 
-// Initialise Accelerometer Function
-void accel_init(void){
-    // Check to see if connection is correct
-    sleep_ms(1000); // Add a short delay to help BNO005 boot up
-    uint8_t reg = 0x00;
-    uint8_t chipID[1];
-    i2c_write_blocking(I2C_PORT, addr, &reg, 1, true);
-    i2c_read_blocking(I2C_PORT, addr, chipID, 1, false);
+// // Initialise Accelerometer Function
+// void accel_init(void){
+//     // Check to see if connection is correct
+//     sleep_ms(1000); // Add a short delay to help BNO005 boot up
+//     uint8_t reg = 0x00;
+//     uint8_t chipID[1];
+//     i2c_write_blocking(I2C_PORT, addr, &reg, 1, true);
+//     i2c_read_blocking(I2C_PORT, addr, chipID, 1, false);
 
-    if(chipID[0] != 0xA0){
-        while(1){
-            printf("Chip ID Not Correct - Check Connection!");
-            sleep_ms(5000);
-        }
-    }
+//     if(chipID[0] != 0xA0){
+//         while(1){
+//             printf("Chip ID Not Correct - Check Connection!");
+//             sleep_ms(5000);
+//         }
+//     }
 
-    // Use internal oscillator
-    uint8_t data[2];
-    data[0] = 0x3F;
-    data[1] = 0x40;
-    i2c_write_blocking(I2C_PORT, addr, data, 2, true);
+//     // Use internal oscillator
+//     uint8_t data[2];
+//     data[0] = 0x3F;
+//     data[1] = 0x40;
+//     i2c_write_blocking(I2C_PORT, addr, data, 2, true);
 
-    // Reset all interrupt status bits
-    data[0] = 0x3F;
-    data[1] = 0x01;
-    i2c_write_blocking(I2C_PORT, addr, data, 2, true);
+//     // Reset all interrupt status bits
+//     data[0] = 0x3F;
+//     data[1] = 0x01;
+//     i2c_write_blocking(I2C_PORT, addr, data, 2, true);
 
-    // Configure Power Mode
-    data[0] = 0x3E;
-    data[1] = 0x00;
-    i2c_write_blocking(I2C_PORT, addr, data, 2, true);
-    sleep_ms(50);
+//     // Configure Power Mode
+//     data[0] = 0x3E;
+//     data[1] = 0x00;
+//     i2c_write_blocking(I2C_PORT, addr, data, 2, true);
+//     sleep_ms(50);
 
-    // Defaul Axis Configuration
-    data[0] = 0x41;
-    data[1] = 0x24;
-    i2c_write_blocking(I2C_PORT, addr, data, 2, true);
+//     // Defaul Axis Configuration
+//     data[0] = 0x41;
+//     data[1] = 0x24;
+//     i2c_write_blocking(I2C_PORT, addr, data, 2, true);
 
-    // Default Axis Signs
-    data[0] = 0x42;
-    data[1] = 0x00;
-    i2c_write_blocking(I2C_PORT, addr, data, 2, true);
+//     // Default Axis Signs
+//     data[0] = 0x42;
+//     data[1] = 0x00;
+//     i2c_write_blocking(I2C_PORT, addr, data, 2, true);
 
-    // Set units to m/s^2
-    data[0] = 0x3B;
-    data[1] = 0b0001000;
-    i2c_write_blocking(I2C_PORT, addr, data, 2, true);
-    sleep_ms(30);
+//     // Set units to m/s^2
+//     data[0] = 0x3B;
+//     data[1] = 0b0001000;
+//     i2c_write_blocking(I2C_PORT, addr, data, 2, true);
+//     sleep_ms(30);
 
-    // Set operation to AMG(Accel Mag Gyro)
-    data[0] = 0x3D;
-    data[1] = 0b0111;
-    i2c_write_blocking(I2C_PORT, addr, data, 2, true);
-    sleep_ms(100);
-}
+//     // Set operation to AMG(Accel Mag Gyro)
+//     data[0] = 0x3D;
+//     data[1] = 0b0111;
+//     i2c_write_blocking(I2C_PORT, addr, data, 2, true);
+//     sleep_ms(100);
+// }
 
 // int main(void){
 //     stdio_init_all(); // Initialise STD I/O for printing over serial

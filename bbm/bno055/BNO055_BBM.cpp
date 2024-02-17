@@ -64,7 +64,7 @@ BNO055::BNO055(const I2C& i2c):
 
 }
 
-int BNO055::get_BNO055()
+std::tuple<Acceleration<Unit::m_s2>,MagneticFluxDensity<Unit::T>,AngularVelocity<Unit::rad>> BNO055::read()
 {
     //線形加速度を読み取る
     // i2c_write_blocking(I2C_PORT, addr, &accel_val, 1, true);
@@ -78,6 +78,8 @@ int BNO055::get_BNO055()
     f_accelX = accelX / 100.00;
     f_accelY = accelY / 100.00;
     f_accelZ = accelZ / 100.00;
+
+    
 
     //地磁気
     // i2c_write_blocking(I2C_PORT, addr, &mag_val, 1, true);
@@ -116,7 +118,8 @@ int BNO055::get_BNO055()
 
     f_grvX = grvX / 100.00;
     f_grvY = grvY / 100.00;
-    f_grvZ = grvZ / 100.00;    
+    f_grvZ = grvZ / 100.00;
+
 }
 
 

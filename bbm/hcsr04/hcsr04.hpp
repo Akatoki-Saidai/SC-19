@@ -10,12 +10,18 @@
 
 namespace sc
 {
-// Class declaration
+//! @brief HCSR04のクラス
+//! @param trig_pin 出力用のTrigピン
+//! @param echo_pin 入力用のEchoピン
 class HCSR04 {
     const GPIO<Out> _out_pin;
     const GPIO<In> _in_pin;
 public:
+    //! @brief HCSR04のクラス
+    //! @param trig_pin 出力用のTrigピン
+    //! @param echo_pin 入力用のEchoピン
     HCSR04(Pin trig_pin, Pin echo_pin);
+    
     Length<Unit::m> read();          
 };
 

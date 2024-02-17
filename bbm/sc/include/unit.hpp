@@ -211,7 +211,7 @@ enum class Unit
     m_s, m_s2, rad_s,
 
     // 非SI単位
-    deg, h, min, eV, px
+    deg, h, min, eV, px, percent
 };
 
 // 単位の次元
@@ -264,6 +264,7 @@ namespace dimension
     using min = s;
     using eV = J;
     using px = pure;
+    using percent = pure;
 }
 // 以下の資料を参考にしました
 // https://unit.aist.go.jp/nmij/public/report/si-brochure/pdf/SI_9th_%E6%97%A5%E6%9C%AC%E8%AA%9E%E7%89%88_r.pdf
@@ -764,6 +765,29 @@ public:
     //! @brief 経度(rad)をdoubleに変換
     explicit constexpr operator double() const
         {return rad_to_deg(number());}
+};
+
+
+template<Unit> class Humidity;  // 湿度
+template<class T> Humidity(const T& t) -> Humidity<Unit::percent>;  // デフォルトをpercentにする
+
+//! @brief 湿度(%)
+template<>
+class Humidity<Unit::percent> : public dimension::percent
+{
+public:
+    //! @brief 湿度(%)
+    explicit constexpr Humidity(const double& num):
+        dimension::percent(num) {}
+
+    //! @brief 湿度(%)
+    constexpr Humidity(const dimension::percent& num):
+        dimension::percent(num) {}
+
+    //! @brief 湿度(%)をdoubleに変換
+    //! @brief 50.0%なら，50.0が返される
+    explicit constexpr operator double() const
+        {return number();}
 };
 
 }

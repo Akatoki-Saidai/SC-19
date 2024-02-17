@@ -93,7 +93,7 @@ public:
     //     float altitude_2;    //高度
     // } mesurement;
 
-    std::tuple<float,float,float> read();
+    std::tuple<Pressure<Unit::Pa>,Humidity<Unit::percent>,Temperature<Unit::K>> read();
 
     float temperature;
     float pressure;

@@ -20,7 +20,7 @@ public:
     static absolute_time_t dn_edge_time;
     static inline uint64_t dtime = 0;
     HCSR04(GPIO<Out> out_pin, GPIO<In> in_pin);
-    Length<Unit::m> HCSR04::read();          
+    Length<Unit::m> read();          
 };
 
 }

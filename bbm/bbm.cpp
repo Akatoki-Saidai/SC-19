@@ -12,7 +12,10 @@ try
 /***** setup *****/
 
     I2C bme_bno_i2c(SDA(6), SCL(7));
-    // BME280 bme280(bme_bno_i2c);
+
+    //こいつがやばい
+    BME280 bme280(bme_bno_i2c);
+    
     BNO055 bno055(bme_bno_i2c);
     
 
@@ -22,6 +25,8 @@ try
         // BME280::Measurement_t bme_data = bme280.measure();
 
         std::tuple bno_result = bno055.read();
+
+        std::tuple bme_result = bme280.read();
 
         // print("bme temp:%f\n", bme_data.temperature);
         Acceleration<Unit::m_s2> accel_result = std::get<0>(bno_result);
@@ -37,6 +42,12 @@ try
         printf("X: %6.2f    Y: %6.2f    Z: %6.2f\n", mag_result[0],mag_result[1],mag_result[2]);        
         printf("gyro");
         printf("X: %6.2f    Y: %6.2f    Z: %6.2f\n", gyro_result[0],gyro_result[1],gyro_result[2]);
+        printf("\n");
+
+        printf("   pressure : %f\n",std::get<0>(bme_result));
+        printf("   humidity : %f\n",std::get<1>(bme_result));
+        printf("Temperature : %f\n",std::get<2>(bme_result));
+        print("\n");
 
         sleep(1_s);
         

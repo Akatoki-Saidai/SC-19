@@ -11,6 +11,7 @@
 
 #include "sc_basic.hpp"
 
+#include "adc.hpp"
 #include "binary.hpp"
 #include "flush.hpp"
 #include "gpio.hpp"

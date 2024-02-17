@@ -39,6 +39,7 @@ add_subdirectory(bno055)
 add_subdirectory(drv8835)
 add_subdirectory(hcsr04)
 add_subdirectory(njl5513r)
+add_subdirectory(sd)
 add_subdirectory(speaker)
 
 # 実行ファイルを作成
@@ -55,6 +56,7 @@ target_link_libraries(BBM
     DRV8835
     HCSR04
     NJL5513R
+    SD
     SPEAKER
 )
 

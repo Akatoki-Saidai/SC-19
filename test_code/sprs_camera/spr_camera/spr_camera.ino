@@ -205,7 +205,7 @@ void initCamera(){
 }
 
 
-void sendImageToSerial (CamImage img) {
+void sendImageToSerial (CamImage &img) {
     int inputLen = img.getImgSize();
     uint8_t* p = img.getImgBuff();
     Serial.flush();
@@ -223,7 +223,7 @@ void sendImageToSerial (CamImage img) {
 }
 
 
-uint16_t CountRedPixel(CamImage img, uint8_t zone_begin, uint8_t zone_end){
+uint16_t CountRedPixel(CamImage &img, uint8_t zone_begin, uint8_t zone_end){
   // Serial.println("Start red count...");
   uint16_t start_time = millis();
 
@@ -238,12 +238,12 @@ uint16_t CountRedPixel(CamImage img, uint8_t zone_begin, uint8_t zone_end){
   uint16_t red_count = 0;
 
   while (y_coordinate <= img_height){
-    uint8_t *rgb565_1_ptr;
-    uint8_t *rgb565_2_ptr;
-    rgb565_1_ptr = img.getImgBuff() + (( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ));
-    rgb565_2_ptr = img.getImgBuff() + ((( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ) ) + 1);
-    uint16_t rgb565_1 = *rgb565_1_ptr;
-    uint16_t rgb565_2 = *rgb565_2_ptr;
+    // uint8_t *rgb565_1_ptr;
+    // uint8_t *rgb565_2_ptr;
+    uint16_t rgb565_1 = *(img.getImgBuff() + (( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 )));
+    uint16_t rgb565_2 = *(img.getImgBuff() + ((( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ) ) + 1));
+    // uint16_t rgb565_1 = *rgb565_1_ptr;
+    // uint16_t rgb565_2 = *rgb565_2_ptr;
     uint16_t rgb565 = ( rgb565_1 << 8 ) | rgb565_2;
     // img.getImgBuff()で取得できるアドレスとその数は8bit
     // RGB565には16bit必要 -> アドレス2つ
@@ -293,18 +293,23 @@ uint16_t CountRedPixel(CamImage img, uint8_t zone_begin, uint8_t zone_end){
     
     float hue_min = 338.0;
     float hue_max = 22.0;
-    float sat_min = 0.20;
-    float val_min = 0.20;
+    float sat_min = 0.46;
+    float val_min = 0.41;
     // 338 22 0.46 0.41
 
     if (((hue <= hue_max) && (sat >= sat_min) && (val >= val_min)) || ((hue >= hue_min) && (sat >= sat_min) && (val >= val_min))){
       red_count++;
-      uint8_t *green_ptr_1 = &img.getImgBuff()[( 2 * img_width * ( y_coordinate - 1 ) ) + ( 2 * ( x_coordinate - 1 ))];
-      uint8_t *green_ptr_2 = &img.getImgBuff()[( 2 * img_width * ( y_coordinate - 1 ) ) + ( 2 * ( x_coordinate - 1 ))];
-      uint8_t green_value_1 = 0b00000111;
-      uint8_t green_value_2 = 0b11100000;
-      *green_ptr_1 = green_value_1;
-      *green_ptr_2 = green_value_2;
+      
+      uint8_t *green_ptr_1;
+      uint8_t *green_ptr_2;
+      green_ptr_1 = img.getImgBuff() + (( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ));
+      green_ptr_2 = img.getImgBuff() + ((( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ) ) + 1);
+      *green_ptr_1 = ((*green_ptr_1 >> 5) | 0x07);
+      *green_ptr_2 = ((*green_ptr_2 << 5) | 0xE0);
+        
+      // Serial.println("green_ptr?: ");
+      // Serial.println(*green_ptr_1);
+      // Serial.println(*green_ptr_2);
 
     }
     /*
@@ -318,6 +323,24 @@ uint16_t CountRedPixel(CamImage img, uint8_t zone_begin, uint8_t zone_end){
 
     // テスト用print
     /*
+    Serial.print("expected rgb565: ");
+    Serial.println(*(img.getImgBuff() + (( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ))));
+    Serial.println(*(img.getImgBuff() + ((( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ) ) + 1)));
+    Serial.print("expected rgb565 address plusver: ");
+    Serial.println((int)(img.getImgBuff() + (( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ))));
+    Serial.println((int)(img.getImgBuff() + ((( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ) ) + 1)));
+    Serial.print("expected rgb565 address array: ");
+    Serial.println(img.getImgBuff()[(( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ))]);
+    Serial.println(img.getImgBuff()[((( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ) ) + 1)]);
+    Serial.print("expected rgb565 address &ver: ");
+    Serial.println((int)&img.getImgBuff()[(( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ))]);
+    Serial.println((int)&img.getImgBuff()[((( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ) ) + 1)]);
+    Serial.print("expected rgb565 address &plusver: ");
+    // *(…)とBuff[]が同じ値 => Buffが返すのはアドレスの値でBuff[]にすると数値
+    // Serial.println((int)(&img.getImgBuff() + (( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ))));
+    // Serial.println((int)(&img.getImgBuff() + ((( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ) ) + 1)));
+    // ↑エラー
+
     Serial.print("size: ");
     Serial.println(img_size);
     Serial.print("buf_size: ");
@@ -364,6 +387,8 @@ uint16_t CountRedPixel(CamImage img, uint8_t zone_begin, uint8_t zone_end){
     
     // テスト用print
     /*
+    CAM_IMAGE_PIX_FMT pixformat = img.getPixFormat();
+    Serial.println(pixformat);
     Serial.println("First Pixel: ");
     Serial.println(img.getImgBuff()[0]);
     Serial.println(img.getImgBuff()[1]);
@@ -392,7 +417,7 @@ uint16_t CountRedPixel(CamImage img, uint8_t zone_begin, uint8_t zone_end){
 }
 
 
-uint8_t red_detect(CamImage img) {
+uint8_t red_detect(CamImage &img) {
   // HSVに変換 -> 数える
 
   // 領域分け

@@ -64,8 +64,7 @@ BNO055::BNO055(const I2C& i2c):
 
 }
 
-std::tuple<Acceleration<Unit::m_s2>,MagneticFluxDensity<Unit::T>,AngularVelocity<Unit::rad_s>> BNO055::read()
-{
+std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity<Unit::T>,AngularVelocity<Unit::rad_s>> BNO055::read(){
     //線形加速度を読み取る
     // i2c_write_blocking(I2C_PORT, addr, &accel_val, 1, true);
     // i2c_read_blocking(I2C_PORT, addr, accel, 6, false);
@@ -79,37 +78,7 @@ std::tuple<Acceleration<Unit::m_s2>,MagneticFluxDensity<Unit::T>,AngularVelocity
     f_accelY = accelY / 100.00;
     f_accelZ = accelZ / 100.00;
 
-    Acceleration<Unit::m_s2>accel_vector(double(f_accelX),double(f_accelY),double(f_accelZ));
-
-    //地磁気
-    // i2c_write_blocking(I2C_PORT, addr, &mag_val, 1, true);
-    // i2c_read_blocking(I2C_PORT, addr, mag, 6, false);
-    Binary mag = _i2c.read_memory(size_t(6), SlaveAddr(addr), MemoryAddr(mag_val));
-
-    magX = ((mag[1] << 8) | mag[0]);
-    magY = ((mag[3] << 8) | mag[2]);
-    magZ = ((mag[5] << 8) | mag[4]);
-
-    f_magX = magX / 16.00;
-    f_magY = magY / 16.00;
-    f_magZ = magZ / 16.00;
-    
-    MagneticFluxDensity<Unit::T>Mag_vector(double(f_magX),double(f_magY),double(f_magZ));
-    
-    //ジャイロ
-    // i2c_write_blocking(I2C_PORT, addr, &gyro_val, 1, true);
-    // i2c_read_blocking(I2C_PORT, addr, gyro, 6, false);
-    Binary gyro = _i2c.read_memory(size_t(6), SlaveAddr(addr), MemoryAddr(gyro_val));
-
-    gyroX = ((gyro[1] << 8) | gyro[0]);
-    gyroY = ((gyro[3] << 8) | gyro[2]);
-    gyroZ = ((gyro[5] << 8) | gyro[4]);
-
-    f_gyroX = gyroX / 900.00;
-    f_gyroY = gyroY / 900.00;
-    f_gyroZ = gyroZ / 900.00;
-
-    AngularVelocity<Unit::rad_s>gyro_vector(double(f_gyroX),double(f_gyroY),double(f_gyroZ));
+    Acceleration<Unit::m_s2>accel_vector{dimension::m_s2(f_accelX),dimension::m_s2(f_accelY),dimension::m_s2(f_accelZ)};
 
     //重力加速度
     // i2c_write_blocking(I2C_PORT, addr, &grv_val, 1, true);
@@ -124,7 +93,39 @@ std::tuple<Acceleration<Unit::m_s2>,MagneticFluxDensity<Unit::T>,AngularVelocity
     f_grvY = grvY / 100.00;
     f_grvZ = grvZ / 100.00;
 
-    Acceleration<Unit::m_s2>grav_vector(double(f_grvX),double(f_grvY),double(f_grvZ));
+    Acceleration<Unit::m_s2>grav_vector{dimension::m_s2(f_grvX),dimension::m_s2(f_grvY),dimension::m_s2(f_grvZ)};
+
+    //地磁気
+    // i2c_write_blocking(I2C_PORT, addr, &mag_val, 1, true);
+    // i2c_read_blocking(I2C_PORT, addr, mag, 6, false);
+    Binary mag = _i2c.read_memory(size_t(6), SlaveAddr(addr), MemoryAddr(mag_val));
+
+    magX = ((mag[1] << 8) | mag[0]);
+    magY = ((mag[3] << 8) | mag[2]);
+    magZ = ((mag[5] << 8) | mag[4]);
+
+    f_magX = magX / 16.00;
+    f_magY = magY / 16.00;
+    f_magZ = magZ / 16.00;
+    
+    MagneticFluxDensity<Unit::T>Mag_vector{dimension::T(f_magX),dimension::T(f_magY),dimension::T(f_magZ)};
+    
+    //ジャイロ
+    // i2c_write_blocking(I2C_PORT, addr, &gyro_val, 1, true);
+    // i2c_read_blocking(I2C_PORT, addr, gyro, 6, false);
+    Binary gyro = _i2c.read_memory(size_t(6), SlaveAddr(addr), MemoryAddr(gyro_val));
+
+    gyroX = ((gyro[1] << 8) | gyro[0]);
+    gyroY = ((gyro[3] << 8) | gyro[2]);
+    gyroZ = ((gyro[5] << 8) | gyro[4]);
+
+    f_gyroX = gyroX / 900.00;
+    f_gyroY = gyroY / 900.00;
+    f_gyroZ = gyroZ / 900.00;
+
+    AngularVelocity<Unit::rad_s>gyro_vector{dimension::rad_s(f_gyroX),dimension::rad_s(f_gyroY),dimension::rad_s(f_gyroZ)};
+
+    return std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity<Unit::T>,AngularVelocity<Unit::rad_s>> {accel_vector,grav_vector,Mag_vector,gyro_vector};
 }
 
 
@@ -136,9 +137,9 @@ void BNO055::accel_init(void){
     sleep_ms(1000); // Add a short delay to help BNO005 boot up
     uint8_t reg = 0x00;
     uint8_t chipID[1];
-    // i2c_write_blocking(I2C_PORT, addr, &reg, 1, true);
-    // i2c_read_blocking(I2C_PORT, addr, chipID, 1, false);
-    chipID[0] = _i2c.read_memory(size_t(1), SlaveAddr(addr), MemoryAddr(reg))[0];
+    // i2c_write_blocking(i2c1, addr, &reg, 1, true);
+    // i2c_read_blocking(i2c1, addr, chipID, 1, false);
+    chipID[0] = _i2c.read_memory(size_t(1), SlaveAddr(addr), MemoryAddr(reg)).at(0);
 
 //while文を削除した
     if(chipID[0] != 0xA0){

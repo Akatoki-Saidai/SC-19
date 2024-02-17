@@ -6,11 +6,6 @@ namespace sc
 // prototype ...
 void hcsr_callback(uint gpio, uint32_t emask);
 
-// global variable ...
-static absolute_time_t up_edge_time;
-static absolute_time_t dn_edge_time;
-static uint64_t dtime = 0;
-
 HCSR04::HCSR04(GPIO<Out> out_pin, GPIO<In> in_pin):
     _out_pin(out_pin), _in_pin(in_pin)
 {
@@ -23,8 +18,10 @@ HCSR04::HCSR04(GPIO<Out> out_pin, GPIO<In> in_pin):
     gpio_set_irq_enabled_with_callback(_in_pin.gpio(), GPIO_IRQ_EDGE_RISE + GPIO_IRQ_EDGE_FALL, true, &hcsr_callback);
 }
 
-int HCSR04::gettingTime()
+Length<Unit::m> HCSR04::read()
 {
+    int temperature=20,humidity=60;
+    double distance;
     // trigger
     // gpio_put(28, 1);
     _out_pin.on();
@@ -35,7 +32,8 @@ int HCSR04::gettingTime()
     // wait
     busy_wait_ms(100);
     
-    return dtime;
+   distance=(331.4+(0.606*temperature)+(0.0124*humidity))*(dtime/2.0);
+   return Length<Unit::m>(distance);
 }
 
 // function: callback of hcsr04 echo signal intrrupt
@@ -45,11 +43,11 @@ void hcsr_callback(uint gpio, uint32_t emask) {
 
     if (emask == GPIO_IRQ_EDGE_RISE) {
         // high -> up edge detect: count start
-        up_edge_time = get_absolute_time();
+        HCSR04::up_edge_time = get_absolute_time();
     } else if (emask == GPIO_IRQ_EDGE_FALL) {
         // low -> down edge detect: calculate time from rise edge to fall edge
-        dn_edge_time = get_absolute_time();
-        dtime = absolute_time_diff_us(up_edge_time, dn_edge_time);
+        HCSR04::dn_edge_time = get_absolute_time();
+        HCSR04::dtime = absolute_time_diff_us(HCSR04::up_edge_time, HCSR04::dn_edge_time);
     } else {
         // do nothing
     }

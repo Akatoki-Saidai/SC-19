@@ -124,7 +124,7 @@ std::tuple<Acceleration<Unit::m_s2>,MagneticFluxDensity<Unit::T>,AngularVelocity
     f_grvY = grvY / 100.00;
     f_grvZ = grvZ / 100.00;
 
-    Acceleration<Unit::m_s2>
+    Acceleration<Unit::m_s2>grav_vector(double(f_grvX),double(f_grvY),double(f_grvZ));
 }
 
 

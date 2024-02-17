@@ -99,7 +99,7 @@ public:
     float pressure;
     float humidity;
 
-    std::tuple<float,float,float>measurement;
+    // std::tuple<float,float,float>measurement;
 
     // 標高を計算する基準点とする 気圧，気温，標高をセット
     void set_origin(float _pressure0, float _temperature0, float _altitude0);

@@ -61,7 +61,7 @@ Binary Binary::operator+ (Binary other_binary) const
 
 void Binary::to_assign(uint8_t* reg_ptr) const
 {
-    for (int i=0; i<size(); ++i)
+    for (int i=0; i< this->size(); ++i)
     {
         *reg_ptr = _binary_data.at(i);
         ++reg_ptr;

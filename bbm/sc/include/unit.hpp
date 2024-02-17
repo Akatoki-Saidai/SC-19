@@ -608,23 +608,23 @@ public:
 };
 
 
-template<Unit> class LuminousIntensity;  // 光度
-template<class T> LuminousIntensity(const T& t) -> LuminousIntensity<Unit::cd>;  // デフォルトをcdにする
+template<Unit> class Illuminance;  // 照度
+template<class T> Illuminance(const T& t) -> Illuminance<Unit::lx>;  // デフォルトをlxにする
 
-//! @brief 光度(cd)
+//! @brief 照度(lx)
 template<>
-class LuminousIntensity<Unit::cd> : public dimension::cd
+class Illuminance<Unit::lx> : public dimension::lx
 {
 public:
-    //! @brief 光度(cd)
-    explicit constexpr LuminousIntensity(const double& num):
-        dimension::cd(num) {}
+    //! @brief 照度(lx)
+    explicit constexpr Illuminance(const double& num):
+        dimension::lx(num) {}
 
-    //! @brief 光度(cd)
-    constexpr LuminousIntensity(const dimension::cd& num):
-        dimension::cd(num) {}
+    //! @brief 照度(lx)
+    constexpr Illuminance(const dimension::lx& num):
+        dimension::lx(num) {}
 
-    //! @brief 光度(cd)をdoubleに変換
+    //! @brief 照度(lx)をdoubleに変換
     explicit constexpr operator double() const
         {return number();}
 };

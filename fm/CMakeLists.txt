@@ -42,12 +42,12 @@ add_subdirectory(njl5513r)
 add_subdirectory(speaker)
 
 # 実行ファイルを作成
-add_executable(BBM
-    bbm.cpp
+add_executable(FM
+    fm.cpp
 )
 
 # コンパイルする際にライブラリをリンク
-target_link_libraries(BBM
+target_link_libraries(FM
     pico_stdlib
     SC
     BME280
@@ -59,8 +59,8 @@ target_link_libraries(BBM
 )
 
 # USB出力を有効にし，UART出力を無効にする
-pico_enable_stdio_usb(BBM 1)
-pico_enable_stdio_uart(BBM 0)
+pico_enable_stdio_usb(FM 1)
+pico_enable_stdio_uart(FM 0)
 
 # map/bin/hex/uf2などのファイルを追加で出力する
-pico_add_extra_outputs(BBM)
+pico_add_extra_outputs(FM)

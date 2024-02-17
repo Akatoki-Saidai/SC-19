@@ -1,9 +1,15 @@
-#include "bbm.hpp"
+#include "fm.hpp"
 
 namespace sc
 {
 
-extern float f_accelX, f_accelY, f_accelZ;
+enum class Fase 
+{
+    Wait,//待機
+    Fall,//落下
+    Ldistance,//遠距離
+    Sdistance,//近距離
+} fase;
 
 int main()
 {
@@ -19,29 +25,58 @@ try
 /***** loop *****/
     while (true)
     {
-        // BME280::Measurement_t bme_data = bme280.measure();
-
-        std::tuple bno_result = bno055.read();
-
-        // print("bme temp:%f\n", bme_data.temperature);
-        Acceleration<Unit::m_s2> accel_result = std::get<0>(bno_result);
-        Acceleration<Unit::m_s2> gravity_result = std::get<1>(bno_result);
-        MagneticFluxDensity<Unit::T> mag_result = std::get<2>(bno_result);
-        AngularVelocity<Unit::rad_s> gyro_result = std::get<3>(bno_result);
-
-        printf("accel");
-        printf("X: %6.2f    Y: %6.2f    Z: %6.2f\n", accel_result[0],accel_result[1],accel_result[2]);
-        printf("gravity");
-        printf("X: %6.2f    Y: %6.2f    Z: %6.2f\n", gravity_result[0],gravity_result[1],gravity_result[2]);
-        printf("mag");
-        printf("X: %6.2f    Y: %6.2f    Z: %6.2f\n", mag_result[0],mag_result[1],mag_result[2]);        
-        printf("gyro");
-        printf("X: %6.2f    Y: %6.2f    Z: %6.2f\n", gyro_result[0],gyro_result[1],gyro_result[2]);
-
-        sleep(1_s);
+        //それぞれのセンサで値取得
+        //高度計算
         
-
-    }
+        switch (fase)
+        {
+            case Fase::Wait: //待機フェーズ
+            {
+                if(true)//照度によりキャリア展開検知　→落下フェーズへ
+                {
+                    fase=Fase::Fall;
+                    break;
+                }
+                else{
+                    break;
+                }
+            }
+            case Fase::Fall: //落下フェーズ   
+            {
+                if(true)//高度から着地を検知・パラシュート分離検知　→遠距離フェーズへ
+                {
+                    fase=Fase::Ldistance;
+                    break;
+                }
+                else{
+                    break;
+                }
+            }
+            case Fase::Ldistance: //遠距離フェーズ
+            {
+                if(true)//ゴールまでの距離４ｍ以内　→近距離フェーズへ
+                {
+                    fase=Fase::Sdistance;
+                    break;
+                }
+                else//GNSSで位置を計測しモータ駆動しゴールへ近づく
+                {
+                    break;
+                }
+            }
+            case Fase::Sdistance://近距離フェーズ
+            {
+                if(true)//ゴールがカメラの真ん中
+                {
+                    //少し進む
+                    //超音波でゴール検知　→ゴール
+                }
+                else//角度調整
+                {
+                    break;
+                }
+            }
+        }
 
     return 0;
 }
@@ -49,9 +84,6 @@ catch(const std::exception& e)
 {
     std::cerr << e.what() << '\n';
     return 1;
-}
-}
-
 }
 
 int main()

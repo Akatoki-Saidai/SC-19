@@ -22,7 +22,7 @@ try
     {
         printf("aiueo\n");
         // BME280::Measurement_t bme_data = bme280.measure();
-        bno055.get_BNO055();
+        bno055.read();
 
         // print("bme temp:%f\n", bme_data.temperature);
         print("bno accel:%f, %f, %f\n", f_accelX, f_accelY, f_accelZ);

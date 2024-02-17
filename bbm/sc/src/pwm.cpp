@@ -17,7 +17,7 @@ namespace sc
 
 /***** class Duty *****/
 
-constexpr Duty::Duty(float duty):
+Duty::Duty(float duty):
     _duty(duty)
 {
     if (_duty < MinDuty || MaxDuty < _duty)

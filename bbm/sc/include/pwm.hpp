@@ -27,7 +27,7 @@ class Duty
 public:
     //! @brief Duty比を指定
     //! @param duty Duty比 (ピンの出力が1になっている割合)
-    constexpr Duty(float duty);
+    Duty(float duty);
 
     constexpr operator float() const noexcept
         {return _duty;}

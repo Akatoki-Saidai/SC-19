@@ -1,6 +1,7 @@
 # ライブラリを作成
 add_library(SC STATIC)
 target_sources(SC PUBLIC
+    ${CMAKE_CURRENT_LIST_DIR}/src/adc.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/binary.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/flush.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/gpio.cpp
@@ -25,6 +26,7 @@ target_include_directories(SC PUBLIC
 # コンパイルする際にライブラリをリンク
 target_link_libraries(SC PUBLIC 
     hardware_gpio
+    hardware_adc
     hardware_i2c
     hardware_pwm
     hardware_spi

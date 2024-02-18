@@ -14,6 +14,8 @@ CamImage img;
 
 const int lineSize = 3*32;
 uint8_t encoded[lineSize * 4/3 + 3];
+bool CameraStart;
+bool Launch;
 
 // base64 encoder
 const uint8_t base64Table[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -94,28 +96,39 @@ void printError(enum CamErr err)
 
 void CamCB(CamImage img)
 {
-  /* Check the img instance is available or not. */
+  
   if (img.isAvailable())
   {
-      /* If you want RGB565 data, convert image data format to RGB565 */
-      img.convertPixFormat(CAM_IMAGE_PIX_FMT_RGB565);
+    /*
+    int iso = theCamera.getISOSensitivity();
+    int exposure = theCamera.getAbsoluteExposure();
+    int hdr = theCamera.getHDR();
+    Serial.print("ISO ");
+    Serial.print(iso);
+    Serial.print(",Exposure ");
+    Serial.print(exposure);
+    Serial.print(",HDR ");
+    Serial.print(hdr);
+    Serial.println();
+    */
+    
+    uint8_t red_result = red_detect(img);
+    // Serial.println(red_result);
 
-      /* You can use image data directly by using getImgSize() and getImgBuff().
-       * for displaying image to a display, etc. */
 
-      /*
-      Serial.print("Image data size = ");
-      Serial.print(img.getImgSize(), DEC);
-      Serial.print(" , ");
-      Serial.print("buff addr = ");
-      Serial.print((unsigned long)img.getImgBuff(), HEX);
-      Serial.println("");
-      */
+    // 画像の転送(USB)
+    digitalWrite(LED0, HIGH);
+    Serial.flush();
+    sendByteImage(img);
+    Serial.flush();
+    digitalWrite(LED0, LOW);
+      
+    }
+
+  else {
+    Serial.println("Failed to get video stream image");
   }
-    else
-  {
-      Serial.println("Failed to get video stream image");
-  }
+
 }
 
 void initCamera(){
@@ -132,14 +145,12 @@ void initCamera(){
 
   
   // カメラストリームを受信したら CamCBを実行する
-  /*
   Serial.println("Start streaming");
   err = theCamera.startStreaming(true, CamCB);
   if (err != CAM_ERR_SUCCESS)
   {
       printError(err);
   }
-  */
 
   // ホワイトバランスの設定
   Serial.println("Set Auto white balance parameter");
@@ -148,7 +159,7 @@ void initCamera(){
   {
       printError(err);
   }
-
+  
   // 静止画フォーマットの設定
   Serial.println("Set still picture format");
   err = theCamera.setStillPictureImageFormat(
@@ -204,26 +215,93 @@ void initCamera(){
 */
 }
 
+/*
+void initCameraJPG(){
+  CamErr err;
+
+  Serial.println("Prepare JPG");
+  err = theCamera.begin();
+  if (err != CAM_ERR_SUCCESS)
+  {
+      printError(err);
+  }
+
+  err = theCamera.setAutoWhiteBalanceMode(CAM_WHITE_BALANCE_AUTO);
+  if (err != CAM_ERR_SUCCESS)
+  {
+      printError(err);
+  }
+  
+  err = theCamera.setStillPictureImageFormat(
+    CAM_IMGSIZE_QVGA_H,
+    CAM_IMGSIZE_QVGA_V,
+    CAM_IMAGE_PIX_FMT_JPG);
+  if (err != CAM_ERR_SUCCESS)
+  {
+    printError(err);
+  }
+  
+  err = theCamera.setAutoISOSensitivity(true);
+  if (err != CAM_ERR_SUCCESS)
+  {
+    printError(err);
+  }
+  
+  err = theCamera.setAutoExposure(true);
+  if (err != CAM_ERR_SUCCESS)
+  {
+      printError(err);
+  }
+}
+*/
 
 void sendImageToSerial (CamImage &img) {
     int inputLen = img.getImgSize();
     uint8_t* p = img.getImgBuff();
-    Serial.flush();
+    // uint16_t byte1, byte2, byte;
     Serial.println("#Image");
+    Serial.flush();
+    delay(2000);
+    // for (size_t i = 0; i < img.getImgSize(); i++)
     while(inputLen > 0)
     {
+      
       int len = inputLen > lineSize ? lineSize : inputLen;
       inputLen = inputLen - len;
       base64Encode(encoded, p, len); 
       p += len;
       Serial.println((char*)encoded);
+      /*
+      byte1 = img.getImgBuff()[i];
+      i++;
+      byte2 = img.getImgBuff()[i];
+      byte = (byte1 << 8) | byte2;
+      Serial.println(byte);
+      */
     }
     Serial.println("#End");
+    delay(1000);
+    // free(p);
+}
+
+void sendByteImage (CamImage &img) {
+    size_t img_size = img.getImgSize();
+    uint8_t byte;
+    Serial.println("#Image");
+    Serial.flush();
+    delay(2000);
+    for (size_t i = 0; i < img_size; i++)
+    {
+      byte = img.getImgBuff()[i];
+      Serial.write(byte);
+    }
+    // Serial.println("#End");
+    delay(1000);
     // free(p);
 }
 
 
-uint16_t CountRedPixel(CamImage &img, uint8_t zone_begin, uint8_t zone_end){
+uint16_t CountRedPixel(CamImage &img, uint16_t zone_begin, uint16_t zone_end){
   // Serial.println("Start red count...");
   uint16_t start_time = millis();
 
@@ -249,9 +327,9 @@ uint16_t CountRedPixel(CamImage &img, uint8_t zone_begin, uint8_t zone_end){
     // RGB565には16bit必要 -> アドレス2つ
 
     // RGB565からRGB888
-    uint16_t red888 = (rgb565 & 0x1F);
+    uint16_t red888 = ((rgb565 >> 11) & 0x1F);
     uint16_t green888 = ((rgb565 >> 5) & 0x3F);
-    uint16_t blue888 = ((rgb565 >> 11) & 0x1F);
+    uint16_t blue888 = (rgb565 & 0x1F);
 
     // 正規化
     red888 = (red888 << 3) | (red888 >> 2);
@@ -350,6 +428,7 @@ uint16_t CountRedPixel(CamImage &img, uint8_t zone_begin, uint8_t zone_end){
     Serial.print("height: ");
     Serial.println(img_height);
     
+
     Serial.print("rgb565: ");
     Serial.println(rgb565);
     Serial.print("red888: ");
@@ -369,8 +448,10 @@ uint16_t CountRedPixel(CamImage &img, uint8_t zone_begin, uint8_t zone_end){
     Serial.println(sat);
     Serial.print("val: ");
     Serial.println(val);
+    Serial.println();
     Serial.flush();
     */
+    
     
     if (x_coordinate == zone_end){
       x_coordinate = zone_begin;
@@ -421,9 +502,9 @@ uint8_t red_detect(CamImage &img) {
   // HSVに変換 -> 数える
 
   // 領域分け
-  uint8_t img_width = img.getWidth();
-  uint8_t center_begin = ( ( img_width / 2 ) - (img_width / 6) ) + 1;
-  uint8_t right_begin = img_width / 2 + (img_width / 6);
+  uint16_t img_width = img.getWidth();
+  uint16_t center_begin = ( ( img_width / 2 ) - (img_width / 8) ) + 1;
+  uint16_t right_begin = (img_width / 2) + (img_width / 8);
   
   uint16_t left_red;
   uint16_t center_red;
@@ -478,45 +559,75 @@ uint8_t red_detect(CamImage &img) {
 
 void setup(){
   Serial.begin(BAUDRATE);
+  // Serial1.begin(115200);
   delay(500);
   while (!Serial);
+  
+  initCamera();
+  delay(10);
 
+  bool CameraStart = true;
+  bool Launch = false;
 }
 
 void loop(){
-  initCamera();
+  /*
+  if (Serial1.available() > 0){
+    char pico_order = Serial1.read();
+  }
+  */
+
+  if ((CameraStart == true) && (Launch == false)){
+    theCamera.startStreaming(true, CamCB);
+    Launch = true;
+  }
+  /*
+  initCameraJPG();
   delay(10);
-  for (uint8_t i = 0; i < 50; i++) {
-    img = theCamera.takePicture();
-    if (img.isAvailable())
-    {
-      /*
-      int iso = theCamera.getISOSensitivity();
-      int exposure = theCamera.getAbsoluteExposure();
-      int hdr = theCamera.getHDR();
-      Serial.print("ISO ");
-      Serial.print(iso);
-      Serial.print(",Exposure ");
-      Serial.print(exposure);
-      Serial.print(",HDR ");
-      Serial.print(hdr);
-      Serial.println();
-      */
-
-      uint8_t red_result = red_detect(img);
-      // Serial.println(red_result);
-
-
-      // 画像の転送(USB)
-      digitalWrite(LED0, HIGH);
-      Serial.flush();
-      sendImageToSerial(img);
-      Serial.flush();
-      digitalWrite(LED0, LOW);
-      img.~CamImage();
-      
-    }
+  img = theCamera.takePicture();
+  if (img.isAvailable())
+  {
+    digitalWrite(LED0, HIGH);
+    Serial.flush();
+    sendImageToSerial(img);
+    Serial.flush();
+    digitalWrite(LED0, LOW);
+    img.~CamImage();
   }
   theCamera.end();
 
+  
+  initCamera();
+  delay(10);
+  img = theCamera.takePicture();
+  if (img.isAvailable())
+  {
+    int iso = theCamera.getISOSensitivity();
+    int exposure = theCamera.getAbsoluteExposure();
+    int hdr = theCamera.getHDR();
+    Serial.print("ISO ");
+    Serial.print(iso);
+    Serial.print(",Exposure ");
+    Serial.print(exposure);
+    Serial.print(",HDR ");
+    Serial.print(hdr);
+    Serial.println();
+    
+    uint8_t red_result = red_detect(img);
+    // Serial.println(red_result);
+
+
+    // 画像の転送(USB)
+    // digitalWrite(LED0, HIGH);
+    // Serial.flush();
+    // sendImageToSerial(img);
+    // Serial.flush();
+    // digitalWrite(LED0, LOW);
+    img.~CamImage();
+      
+    }
+  theCamera.end();
+
+  delay(3000);
+*/
 }

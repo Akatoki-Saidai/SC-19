@@ -59,6 +59,4 @@ void Pin::set_pull(Pull pull) const
     }
 }
 
-std::vector<PinStatus> Pin::Status(28, PinStatus::NoUse);
-
 }

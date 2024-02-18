@@ -72,7 +72,7 @@ public:
     void set_pull(Pull pull) const; 
 
     //! @brief 現在のピンの使用状況．要素の番号はGPIOピン番号を表す
-    static std::vector<PinStatus> Status;
+    static inline std::vector<PinStatus> Status{29, PinStatus::NoUse};
 };
 
 }

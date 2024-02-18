@@ -27,9 +27,11 @@ target_include_directories(SC PUBLIC
 target_link_libraries(SC PUBLIC 
     hardware_gpio
     hardware_adc
+    hardware_flash
     hardware_i2c
     hardware_pwm
     hardware_spi
+    hardware_sync
     hardware_uart
     pico_stdlib
 )

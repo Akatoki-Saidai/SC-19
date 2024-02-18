@@ -2,6 +2,7 @@
 #define SC19_PICO_SD_HPP_
 
 #include<ctime>
+#include<chrono>
 #include <stdio.h>
 #include<string>
 //
@@ -23,18 +24,14 @@ class SD
 {
     sd_card_t *pSD;
     FRESULT fr;
-    const char* filename = []{
-            char time_str[17];
-            std::time_t t = std::time(nullptr);
-            std::strftime(time_str, sizeof(time_str), "%Y%m%d_%H%M%S", std::localtime(&t));
-            return (std::string("log_") + time_str).c_str();
-        }();
+    std::string filename_str = std::string("log_") + __DATE__[4] + __DATE__[5] + '_' + __TIME__[0] + __TIME__[1] + __TIME__[3] + __TIME__[4] + ".txt";
+    const char* filename = filename_str.c_str();
 public:
-    SD(MISO miso, MOSI mosi, SCK sck, Pin ss, Pin card_detect, dimension::Hz freq = 12'500'000_hz);
+    SD();
 
     ~SD();
 
-    void write(std::string& write_str);
+    void write(const std::string& write_str);
 };
 
 }

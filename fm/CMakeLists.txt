@@ -43,6 +43,10 @@ add_subdirectory(speaker)
 
 # 実行ファイルを作成
 add_executable(FM
+    fm_fall.cpp
+    fm_long.cpp 
+    fm_short.cpp 
+    fm_wait.cpp
     fm.cpp
 )
 

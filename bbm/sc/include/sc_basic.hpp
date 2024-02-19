@@ -111,9 +111,6 @@ void print(const std::string& format, Args... args)
 //! @param time 待機する時間 (100_ms のように入力)
 inline void sleep(Time<Unit::s> time)
 {
-    #ifdef DEBUG
-        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
-    #endif
     ::sleep_us(static_cast<double>(time * (1/micro)));  // pico-sdkの関数  マイクロ秒待機
 }
 

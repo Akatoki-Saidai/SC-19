@@ -30,12 +30,7 @@ public:
     Duty(float duty);
 
     constexpr operator float() const noexcept
-    {
-        #ifdef DEBUG
-            std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
-        #endif
-        return _duty;
-    }
+        {return _duty;}
 };
 
 // PWM(パルス幅変調)を行います

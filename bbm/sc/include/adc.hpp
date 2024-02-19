@@ -34,8 +34,7 @@ private:
     const Pin _adc_pin;
     const uint8_t _channel;
 
-    static uint8_t get_channel(Pin pin)
-        {return pin.gpio() - 26;}
+    static uint8_t get_channel(Pin pin);
 
 public:
     //! @brief ADCを読み取り

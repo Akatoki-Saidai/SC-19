@@ -24,7 +24,7 @@ MISO::MISO(int miso_gpio):
 {
     if (gpio() != all_of(EnableSPI0_MISO) && gpio() != all_of(EnableSPI1_MISO))
     {
-throw Error(__FILE__, __LINE__, "An incorrect MISO pin number was entered");  // 正しくないMISOピンの番号が入力されました
+throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect MISO pin number was entered"));  // 正しくないMISOピンの番号が入力されました
     }
 }
 
@@ -36,7 +36,7 @@ return SPI_ID::spi_0;
     } else if (gpio() == any_of(EnableSPI1_MISO)) {
 return SPI_ID::spi_1;
     } else {
-throw Error(__FILE__, __LINE__, "An incorrect MISO pin number was entered");  // 正しくないMISOピンの番号が入力されました
+throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect MISO pin number was entered"));  // 正しくないMISOピンの番号が入力されました
     }
 }
 
@@ -61,7 +61,7 @@ SCK::SCK(int sck_gpio):
 {
     if (gpio() != all_of(EnableSPI0_SCK) && gpio() != all_of(EnableSPI1_SCK))
     {
-throw Error(__FILE__, __LINE__, "An incorrect SCK pin number was entered");  // 正しくないSCKピンの番号が入力されました
+throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect SCK pin number was entered"));  // 正しくないSCKピンの番号が入力されました
     }
 }
 
@@ -73,7 +73,7 @@ return SPI_ID::spi_0;
     } else if (gpio() == any_of(EnableSPI1_SCK)) {
 return SPI_ID::spi_1;
     } else {
-throw Error(__FILE__, __LINE__, "An incorrect SCK pin number was entered");  // 正しくないSCKピンの番号が入力されました
+throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect SCK pin number was entered"));  // 正しくないSCKピンの番号が入力されました
     }
 }
 
@@ -84,7 +84,7 @@ MOSI::MOSI(int miso_gpio):
 {
     if (gpio() != all_of(EnableSPI0_MOSI) && gpio() != all_of(EnableSPI1_MOSI))
     {
-throw Error(__FILE__, __LINE__, "An incorrect MOSI pin number was entered");  // 正しくないMOSIピンの番号が入力されました
+throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect MOSI pin number was entered"));  // 正しくないMOSIピンの番号が入力されました
     }
 }
 
@@ -96,7 +96,7 @@ return SPI_ID::spi_0;
     } else if (gpio() == any_of(EnableSPI1_MOSI)) {
 return SPI_ID::spi_1;
     } else {
-throw Error(__FILE__, __LINE__, "An incorrect MOSI pin number was entered");  // 正しくないMOSIピンの番号が入力されました
+throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect MOSI pin number was entered"));  // 正しくないMOSIピンの番号が入力されました
     }
 }
 
@@ -107,7 +107,7 @@ SPI::MemoryAddr::MemoryAddr(unsigned int memory_addr):
     {
         if (MaxMemoryAddr < memory_addr)
         {
-throw Error(__FILE__, __LINE__, "An incorrect memory address was entered");  // 正しくないメモリアドレスが入力されました
+throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect memory address was entered"));  // 正しくないメモリアドレスが入力されました
         }
     }
 
@@ -119,18 +119,26 @@ SPI::MemoryAddr::operator uint8_t() const
 /***** class SPI *****/
 
 SPI::SPI(MISO miso, CS cs, SCK sck, MOSI mosi):
-    SPI(miso, cs, sck, mosi, 10'000_hz) {}
+    SPI(miso, cs, sck, mosi, 10'000_hz)
+{
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
+}
 
 SPI::SPI(MISO miso, CS cs, SCK sck, MOSI mosi, Frequency<Unit::Hz>  freq):
     _miso(miso), _sck(sck), _mosi(mosi), _freq(freq), _spi_id(miso.get_spi_id())
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     if (!(miso.get_spi_id() == sck.get_spi_id() && sck.get_spi_id() == mosi.get_spi_id()))
     {
-throw Error(__FILE__, __LINE__, "An incorrect SPI pin number was entered");  // 正しくないSPIのピン番号が入力されました
+throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect SPI pin number was entered"));  // 正しくないSPIのピン番号が入力されました
     } else if (Pin::Status.at(_miso.gpio()) != PinStatus::NoUse || Pin::Status.at(_sck.gpio()) != PinStatus::NoUse || Pin::Status.at(_mosi.gpio()) != PinStatus::NoUse || !cs.no_use()) {
-throw Error(__FILE__, __LINE__, "This pin is already in use");  // このピンは既に使用されています
+throw std::logic_error(f_err(__FILE__, __LINE__, "This pin is already in use"));  // このピンは既に使用されています
     } else if (SPI::IsUse[_spi_id]) {
-throw Error(__FILE__, __LINE__, "SPI cannot be reinitialized");  // SPIを再度初期化することはできません
+throw std::logic_error(f_err(__FILE__, __LINE__, "SPI cannot be reinitialized"));  // SPIを再度初期化することはできません
     }
 
     Pin::Status.at(_miso.gpio()) = PinStatus::SpiMiso;
@@ -157,9 +165,12 @@ throw Error(__FILE__, __LINE__, "SPI cannot be reinitialized");  // SPIを再度
 
 void SPI::write(Binary output_data, CS cs_pin) const
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     if (cs_pin.size() > 1)
     {
-throw Error(__FILE__, __LINE__, "Cannot communicate with multiple devices at the same time");  // 複数のデバイスと同時に通信することはできません
+throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot communicate with multiple devices at the same time"));  // 複数のデバイスと同時に通信することはできません
     }
     _cs_pins.at(cs_pin.get().at(0)).write(0);  // 通信先のデバイスにつながるCSピンをオフにして，通信の開始を伝える
     spi_write_blocking((_spi_id ? spi1 : spi0), output_data, output_data.size());  // pico-SDKの関数  SPIで送信
@@ -168,9 +179,12 @@ throw Error(__FILE__, __LINE__, "Cannot communicate with multiple devices at the
 
 Binary SPI::read(std::size_t size, CS cs_pin) const
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     if (cs_pin.size() > 1)
     {
-throw Error(__FILE__, __LINE__, "Cannot communicate with multiple devices at the same time");  // 複数のデバイスと同時に通信することはできません
+throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot communicate with multiple devices at the same time"));  // 複数のデバイスと同時に通信することはできません
     }
     std::vector<uint8_t> input_data(size);
     std::size_t input_size = 0;  // 実際には何バイト受信したか
@@ -187,9 +201,12 @@ throw Error(__FILE__, __LINE__, "Cannot communicate with multiple devices at the
 
 void SPI::write_memory(Binary output_data, CS cs_pin, MemoryAddr memory_addr) const
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     if (cs_pin.size() > 1)
     {
-throw Error(__FILE__, __LINE__, "Cannot communicate with multiple devices at the same time");  // 複数のデバイスと同時に通信することはできません
+throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot communicate with multiple devices at the same time"));  // 複数のデバイスと同時に通信することはできません
     }
     Binary corrected_data = uint8_t(memory_addr & 0b01111111) + output_data;
     _cs_pins.at(cs_pin.get().at(0)).write(0);  // 通信先のデバイスにつながるCSピンをオフにして，通信の開始を伝える
@@ -199,9 +216,12 @@ throw Error(__FILE__, __LINE__, "Cannot communicate with multiple devices at the
 
 Binary SPI::read_memory(std::size_t size, CS cs_pin, MemoryAddr memory_addr) const
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     if (cs_pin.size() > 1)
     {
-throw Error(__FILE__, __LINE__, "Cannot communicate with multiple devices at the same time");  // 複数のデバイスと同時に通信することはできません
+throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot communicate with multiple devices at the same time"));  // 複数のデバイスと同時に通信することはできません
     }
     std::vector<uint8_t> input_data(size);
     uint8_t write_memory_addr = memory_addr | 0b10000000;

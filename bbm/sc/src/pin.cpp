@@ -22,7 +22,7 @@ Pin::Pin(int pin_gpio):
 {
     if (pin_gpio < Pin::MinGpio || Pin::MaxGpio < pin_gpio)
     {
-        throw Error(__FILE__, __LINE__, "This GPIO number is not available");  // このGPIO番号は利用できません
+        throw std::invalid_argument(f_err(__FILE__, __LINE__, "GPIO number %d is not available", pin_gpio));  // このGPIO番号は利用できません
     }
     
 }
@@ -39,6 +39,9 @@ Pin::operator uint8_t() const
 
 void Pin::set_pull(Pull pull) const
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     switch (pull)
     {
         case Pull::Up:

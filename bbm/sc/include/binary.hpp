@@ -40,7 +40,12 @@ public:
     //! @param data コンテナ形式のデータ
     template<typename Iterable, typename std::enable_if<IsIterable<Iterable>::value, std::nullptr_t>::type = nullptr>  // コンテナ形式の型でなければエラーになる
     Binary(const Iterable& data):
-        _binary_data(std::begin(data), std::end(data)) {}
+        _binary_data(std::begin(data), std::end(data))
+    {
+        #ifdef DEBUG
+            std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+        #endif
+    }
 
     // //! @brief バイト列を作成
     // //! @param text string型のデータ
@@ -62,18 +67,33 @@ public:
     //! @brief { }からバイト列を作成
     //! @param init_list {1, 2, 3}などのデータ
     Binary(const std::initializer_list<uint8_t>& init_list):
-        _binary_data(init_list) {}
+        _binary_data(init_list) 
+    {
+        #ifdef DEBUG
+            std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+        #endif
+    }
 
     //! @brief 配列からバイト列を作成
     //! @param array_ptr 配列
     //! @param size 配列の長さ
     template<class UINT8>
     Binary(const UINT8* array_ptr, std::size_t size):
-        _binary_data(array_ptr, array_ptr + size) {}
+        _binary_data(array_ptr, array_ptr + size) 
+    {
+        #ifdef DEBUG
+            std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+        #endif
+    }
 
     //! @brief 1バイトの値からバイト列を作成
     Binary(const uint8_t& bite_data):
-        _binary_data({bite_data}) {}
+        _binary_data({bite_data}) 
+    {
+        #ifdef DEBUG
+            std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+        #endif
+    }
 
     //! @brief バイト列のサイズを返す
     //! @return バイト列のサイズ

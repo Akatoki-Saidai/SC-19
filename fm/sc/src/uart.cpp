@@ -94,12 +94,14 @@ throw Error(__FILE__, __LINE__, "UART cannot be reinitialized");  // UARTを再�
         uart_set_fifo_enabled(uart1, false);  // FIFO(受信したデータを一時的に保管する機能)をオフにし，1文字ずつ受信する
         irq_set_exclusive_handler(UART1_IRQ, uart1_handler);  // 割り込み処理で実行する関数をセット
         irq_set_enabled(UART1_IRQ, true);  // 割り込み処理を有効にする
+        uart_set_irq_enables(uart1, true, false);  // UARTの受信のみを割り込み処理で行う
     } else {
         uart_set_hw_flow(uart0, false, false);  // フロー制御(受信準備が終わるまで送信しないで待つ機能)を無効にする
         uart_set_format(uart0, 8, 1, UART_PARITY_NONE);  // UART通信の設定をする
         uart_set_fifo_enabled(uart0, false);  // FIFO(受信したデータを一時的に保管する機能)をオフにし，1文字ずつ受信する
         irq_set_exclusive_handler(UART0_IRQ, uart0_handler);  // 割り込み処理で実行する関数をセット
         irq_set_enabled(UART0_IRQ, true);  // 割り込み処理を有効にする
+        uart_set_irq_enables(uart0, true, false);  // UARTの受信のみを割り込み処理で行う
     }
 }
 

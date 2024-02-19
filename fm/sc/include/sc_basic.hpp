@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cfloat>  // double型の最小値など
 #include <cstddef>  // size_tなど
+#include <functional>  // function
 #include <iostream>  // coutなど
 #include <string>
 
@@ -41,7 +42,11 @@ public:
     //! @param LINE __LINE__としてください (自動で行番号に置き換わります)
     //! @param message 出力したいエラーメッセージ (自動で改行)
     Error(const std::string& FILE, int LINE, const std::string& message) noexcept:
-        _message("<<ERROR>>  FILE : " + std::string(FILE) + "  LINE : " + std::to_string(LINE) + "\n           MESSAGE : " + _message + "\n") {}
+        _message("<<ERROR>>  FILE : " + std::string(FILE) + "  LINE : " + std::to_string(LINE) + "\n           MESSAGE : " + _message + "\n") 
+    {
+        printf(_message.c_str());
+        sleep_ms(100);
+    }
 
     //! @brief キャッチしたエラーを記録ます
     //! @param FILE ＿FILE＿としてください (自動でファイル名に置き換わります)
@@ -49,7 +54,11 @@ public:
     //! @param e キャッチした例外
     //! @param message 出力したいエラーメッセージ (自動で改行)
     Error(const std::string& FILE, int LINE, const std::exception& e, const std::string& message) noexcept:
-        _message(std::string(e.what()) + "required from here\n" + "<<ERROR>>  FILE : " + std::string(FILE) + "  LINE : " + std::to_string(LINE) + "\n           MESSAGE : " + _message + "\n") {}
+        _message(std::string(e.what()) + "required from here\n" + "<<ERROR>>  FILE : " + std::string(FILE) + "  LINE : " + std::to_string(LINE) + "\n           MESSAGE : " + _message + "\n") 
+    {
+        printf(_message.c_str());
+        sleep_ms(100);
+    }
 
     //! @brief printfの形式でエラーメッセージを記録します
     //! @param FILE __FILE__としてください (自動でファイル名に置き換わります)
@@ -88,25 +97,32 @@ return std::string(formatted_chars);  // フォーマット済み文字列を出
 // https://pyopyopyo.hatenablog.com/entry/2019/02/08/102456
 
 
-//! @brief メッセージを出力する関数です．
+//! @brief メッセージを出力する関数．
+//! @note SDカードなどに出力するときは上書きしてください
 //! @param message 出力する文字列
-//! 出力時にSDカードにも記録する場合などは，この関数に追記してください
-void print(const std::string& message) noexcept;
+inline std::function<void(const std::string&)> set_print = [](const std::string& message)
+{
+    try
+    {
+        std::cout << message << std::flush;
+    }
+    catch(const std::exception& e) {printf("Failed to save log\n");}  // ログの保存に失敗しました
+};
 
 //! @brief printfの形式で出力
 //! @param format フォーマット文字列
 //! @param args フォーマット文字列に埋め込む値
 template<typename... Args>
-void print(const std::string& format, Args... args) noexcept
+void print(const std::string& format, Args... args)
 {
-    print(format_str(format, args...));
+    set_print(format_str(format, args...));
 }
 
 //! @brief エラーメッセージを出力
 //! @param e キャッチしたエラー
-inline void print(const std::exception& e) noexcept
+inline void print(const std::exception& e)
 {
-    print(e.what());
+    set_print(e.what());
 }
 
 
@@ -220,9 +236,9 @@ any_of(const Iterable&)
 template<typename T, typename U>
 constexpr bool operator==(const T& one, const any_of<U>& list)
 {
-    for (auto element : list._compare_list)
+        for (auto element : list._compare_list)
     {
-        if (one == element)
+                if (one == element)
 return true;
     }
     return false;

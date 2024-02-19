@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cfloat>  // double型の最小値など
 #include <cstddef>  // size_tなど
+#include <functional>  // function
 #include <iostream>  // coutなど
 #include <string>
 
@@ -88,25 +89,32 @@ return std::string(formatted_chars);  // フォーマット済み文字列を出
 // https://pyopyopyo.hatenablog.com/entry/2019/02/08/102456
 
 
-//! @brief メッセージを出力する関数です．
+//! @brief メッセージを出力する関数．
+//! @note SDカードなどに出力するときは上書きしてください
 //! @param message 出力する文字列
-//! 出力時にSDカードにも記録する場合などは，この関数に追記してください
-void print(const std::string& message) noexcept;
+inline std::function<void(const std::string&)> set_print = [](const std::string& message)
+{
+    try
+    {
+        std::cout << message << std::flush;
+    }
+    catch(const std::exception& e) {printf("Failed to save log\n");}  // ログの保存に失敗しました
+};
 
 //! @brief printfの形式で出力
 //! @param format フォーマット文字列
 //! @param args フォーマット文字列に埋め込む値
 template<typename... Args>
-void print(const std::string& format, Args... args) noexcept
+void print(const std::string& format, Args... args)
 {
-    print(format_str(format, args...));
+    set_print(format_str(format, args...));
 }
 
 //! @brief エラーメッセージを出力
 //! @param e キャッチしたエラー
-inline void print(const std::exception& e) noexcept
+inline void print(const std::exception& e)
 {
-    print(e.what());
+    set_print(e.what());
 }
 
 

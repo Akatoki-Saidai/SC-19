@@ -33,8 +33,8 @@ enum UART_ID
 //! @brief  UARTのTXピン
 class TX : public Pin
 {
-    static constexpr uint8_t EnableUART0_TX[] = {0, 4, 8, 12, 16, 20};  // UART0のTXピンのGPIO番号が取り得る値
-    static constexpr uint8_t EnableUART1_TX[] = {2, 6, 10, 14, 18, 26};  // UART1のTXピンのGPIO番号が取り得る値
+    static constexpr uint8_t EnableUART0_TX[] = {0, 12, 16};  // UART0のTXピンのGPIO番号が取り得る値
+    static constexpr uint8_t EnableUART1_TX[] = {4, 8};  // UART1のTXピンのGPIO番号が取り得る値
 public:
     //! @brief TXピンを指定
     //! @param tx_gpio TXピンのGPIO番号
@@ -48,8 +48,8 @@ public:
 //! @brief  UARTのRXピン
 class RX : public Pin
 {
-    static constexpr uint8_t EnableUART0_RX[] = {1, 5, 9, 13, 17, 21};  // UART0のRXピンのGPIO番号が取り得る値
-    static constexpr uint8_t EnableUART1_RX[] = {3, 7, 11, 15, 19, 27};  // UART1のRXピンのGPIO番号が取り得る値
+    static constexpr uint8_t EnableUART0_RX[] = {1, 13, 17};  // UART0のRXピンのGPIO番号が取り得る値
+    static constexpr uint8_t EnableUART1_RX[] = {5, 9};  // UART1のRXピンのGPIO番号が取り得る値
 public:
     //! @brief RXピンを指定
     //! @param rx_gpio RXピンのGPIO番号

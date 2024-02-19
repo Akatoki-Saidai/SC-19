@@ -2,7 +2,7 @@
 #define SC19_PICO_BNO055_HPP_
 
 #include <stdio.h>
-
+#include <tuple>
 #include "sc.hpp"
 
 namespace sc 

@@ -125,7 +125,7 @@ std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity
 
     AngularVelocity<Unit::rad_s>gyro_vector{dimension::rad_s(f_gyroX),dimension::rad_s(f_gyroY),dimension::rad_s(f_gyroZ)};
 
-    return std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity<Unit::T>,AngularVelocity<Unit::rad_s>> {accel_vector,grav_vector,Mag_vector,gyro_vector};
+    return {accel_vector,grav_vector,Mag_vector,gyro_vector};
 }
 
 

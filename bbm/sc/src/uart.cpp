@@ -113,7 +113,7 @@ void UART::write(Binary output_data) const
 Binary UART::read() const
 {
     std::deque<uint8_t> other_data(0);
-    std::swap(uart0_queue, other_data);
+    std::swap((_uart_id ? uart1_queue : uart0_queue), other_data);
     return sc::Binary(other_data);  // 割り込み処理で一時保存しておいたデータを返す
 }
 

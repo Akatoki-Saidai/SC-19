@@ -34,7 +34,7 @@ public:
 };
 
 // PWM(パルス幅変調)を行います
-class PWM
+class PWM : Noncopyable
 {
 public:
     //! @brief PWMのセットアップ

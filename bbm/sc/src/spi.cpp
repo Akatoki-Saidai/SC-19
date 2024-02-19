@@ -210,6 +210,10 @@ throw Error(__FILE__, __LINE__, "Cannot communicate with multiple devices at the
     ::spi_write_blocking((_spi_id ? spi1 : spi0), &write_memory_addr, 1);  // まず，メモリアドレスを送信
     input_size = ::spi_read_blocking((_spi_id ? spi1 : spi0), 0, input_data.data(), size);  // pico-SDKの関数  SPIで受信
     _cs_pins.at(cs_pin.get().at(0)).write(1);  // 通信先のデバイスにつながるCSピンをオンにして，通信の終了を伝える
+    if (input_size < 0)
+    {
+        input_size = 0;
+    }
     input_data.resize(input_size);
     return Binary(input_data);
 }

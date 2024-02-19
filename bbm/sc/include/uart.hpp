@@ -62,7 +62,7 @@ public:
 
 
 //! @brief UART通信
-class UART
+class UART : Noncopyable
 {
 private:
     const TX _tx;  // UARTで使用するTXピン

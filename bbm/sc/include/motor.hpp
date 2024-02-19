@@ -24,7 +24,7 @@ public:
     // in1_pwm : モータードライバのIN1
     // in2_pwm : モータードライバのIN2
     // 左右のモーターを扱う場合はMotor2クラスを使用してください
-    Motor1(PWM in1_pwm, PWM in2_pwm):
+    Motor1(const PWM& in1_pwm, const PWM& in2_pwm):
         _in1_pwm(in1_pwm), _in2_pwm(in2_pwm) {}
 
     // モーターを動かす
@@ -34,22 +34,22 @@ public:
     // ブレーキをかける
     void brake() const;
 private:
-    const PWM _in1_pwm;
-    const PWM _in2_pwm;
+    const PWM& _in1_pwm;
+    const PWM& _in2_pwm;
 };
 // https://hellobreak.net/raspberry-pi-pico-dc-motor/
 
 // 左右のモーターの制御
 class Motor2
 {
-    const Motor1 _left_motor;
-    const Motor1 _right_motor;
+    const Motor1& _left_motor;
+    const Motor1& _right_motor;
 public:
     //! @brief  左右のモーターをセットアップ
     //! @param left_motor 左のモーター
     //! @param right_motor 右のモーター
     // 左右のモーターを扱う場合はMotor2クラスを使用してください
-    Motor2(Motor1 left_motor, Motor1 right_motor):
+    Motor2(const Motor1& left_motor, const Motor1& right_motor):
         _left_motor(left_motor),
         _right_motor(right_motor) {}
 

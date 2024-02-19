@@ -23,7 +23,7 @@ namespace sc
 class PicoTemp;
 
 // ADC(アナログ-デジタル変換)
-class ADC
+class ADC : Noncopyable
 {
 public:
     //! @brief PWMのセットアップ
@@ -47,7 +47,7 @@ public:
 
 
 //! @brief picoの内蔵温度センサ
-class PicoTemp
+class PicoTemp : Noncopyable
 {
 public:
     PicoTemp();
@@ -56,7 +56,7 @@ public:
 };
 
 //! @brief picoのVSYSピンの電圧
-class VsysVoltage 
+class VsysVoltage : Noncopyable
 {
 public:
     VsysVoltage();

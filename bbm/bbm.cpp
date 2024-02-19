@@ -30,7 +30,7 @@ try
     GPIO<In> para_separate(Pin(17), Pull::Up);  // パラシュート分離の検知用ピン (分離したらHigh)
     printf("8");
     // GPIO18は未使用
-    // HCSR04 hcsr04(Pin(28), Pin(19));  // 超音波センサHCSR04
+    HCSR04 hcsr04(Pin(28), Pin(19));  // 超音波センサHCSR04
     printf("9");
     Motor1 motor_right(PWM(20), PWM(21));  // 右のモーター
     printf("a");
@@ -64,7 +64,7 @@ try
         auto bno_data = bno055.read();  // BNO055(9軸)から受信
     printf("j");
 
-        // auto hcsr_data = hcsr04.read();  // HCSR04(超音波)から受信
+        auto hcsr_data = hcsr04.read();  // HCSR04(超音波)から受信
     printf("k");
 
         auto njl_data = njl5513r.read();  // NJL5513R(照度)から受信
@@ -94,7 +94,7 @@ try
         print("magnetic x:%f, y:%f, z:%f T\n", magnetic.x(), magnetic.y(), magnetic.z());
         print("gyro x:%f, y:%f, z:%f rad/s2\n", gyro.x(), gyro.y(), gyro.z());
 
-        // print("kyori:%f m\n", hcsr_data);
+        print("kyori:%f m\n", hcsr_data);
 
         print("syoudo:%f lx\n\n", njl_data);
 

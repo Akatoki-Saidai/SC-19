@@ -158,7 +158,7 @@ uint32_t BME280::compensate_humidity(int32_t adc_H) {
 void BME280::write_register(uint8_t reg, uint8_t data) {
     uint8_t buf[2];
     //buf[0] = reg & 0x7f;  // remove read bit as this is a write
-    buf[0] = reg & 0b01111111;
+    buf[0] = reg;
     buf[1] = data;
     // i2c_write_blocking(i2c_hw, _addr, buf, 2, true);
     // sleep_ms(10);
@@ -174,7 +174,7 @@ void BME280::read_registers(uint8_t reg, uint8_t *buf, uint16_t len) {
     // sleep_ms(10);
     // i2c_read_blocking(i2c_hw, _addr, buf, len, false);
     // sleep_ms(10);
-    Binary b = _i2c.read_memory(size_t(len),SlaveAddr(_addr),MemoryAddr(reg | 0b10000000));
+    Binary b = _i2c.read_memory(size_t(len),SlaveAddr(_addr),MemoryAddr(reg));
     b.to_assign(buf);
 }
 

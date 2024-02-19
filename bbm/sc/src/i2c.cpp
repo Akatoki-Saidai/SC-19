@@ -101,7 +101,7 @@ I2C::MemoryAddr::operator uint8_t() const
 /***** class I2C *****/
 
 I2C::I2C(SDA sda, SCL scl):
-    I2C(sda, scl, 10'000_hz)
+    I2C(sda, scl, 10000_hz)
 {
     #ifdef DEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 

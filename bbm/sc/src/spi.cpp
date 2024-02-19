@@ -119,7 +119,7 @@ SPI::MemoryAddr::operator uint8_t() const
 /***** class SPI *****/
 
 SPI::SPI(MISO miso, CS cs, SCK sck, MOSI mosi):
-    SPI(miso, cs, sck, mosi, 10'000_hz)
+    SPI(miso, cs, sck, mosi, 10000_hz)
 {
     #ifdef DEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 

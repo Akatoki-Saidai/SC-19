@@ -28,8 +28,25 @@ void short_fase(const BME280& bme280, const BNO055& bno055, const HCSR04& hcsr04
             }
          }
     }
-    else//角度調整
+    else if(true)//ゴールがカメラの右
     {
+        motor.right(1.0); 
+        sleep(1_s);
+        motor.right(0); 
+        break;
+    }
+    else if(true)//ゴールがカメラの左
+    {
+        motor.left(1.0); 
+        sleep(1_s);
+        motor.left(0); 
+        break;
+    }
+    else//ゴールがみつからない
+    {
+        motor.right(1.0); 
+        sleep(1_s);
+        motor.right(0); 
         break;
     }
 }

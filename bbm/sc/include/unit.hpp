@@ -13,6 +13,8 @@
 
 // #include "sc_basic.hpp"
 
+#include <cmath>
+
 
 namespace sc
 {
@@ -659,6 +661,9 @@ template<class T> Altitude(const T& t) -> Altitude<Unit::m>;  // デフォルト
 template<>
 class Altitude<Unit::m> : public dimension::m
 {
+    static double _pressure0;
+    static double _temperature0;
+    static double _altitude0;
 public:
     //! @brief 標高(m)
     explicit constexpr Altitude(const double& num):
@@ -671,6 +676,18 @@ public:
     //! @brief 標高(m)をdoubleに変換
     explicit constexpr operator double() const
         {return number();}
+
+    //! @brief
+    static void set_origin(double pressure0=1013.25, double temperature0=20, double altitude0=0)
+    {
+        _pressure0    = pressure0;
+        _temperature0 = temperature0;
+        _altitude0    = altitude0;
+    }
+
+    constexpr Altitude(double pressure, double temperature):
+        // dimension::m(_altitude0 + ((temperature + 273.15) / 0.0065F) * (std::pow((_pressure0 / pressure), 1.0F / 5.257F) -1.0F)) {}
+        dimension::m(_altitude0 + ((_temperature0 + 273.15F) / 0.0065F) * (1 - std::pow((pressure / _pressure0), (1.0F / 5.257F)))) {}
 };
 
 

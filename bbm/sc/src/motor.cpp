@@ -25,7 +25,7 @@ void Motor1::run(float speed) const
     } else {
         // 逆回転するとき
         _in1_pwm.write(0.0F);
-        _in2_pwm.write(speed);
+        _in2_pwm.write(-speed);
     }
 }
 

@@ -685,7 +685,7 @@ public:
         _altitude0    = altitude0;
     }
 
-    constexpr Altitude(double pressure, double temperature):
+    Altitude(double pressure, double temperature):
         // dimension::m(_altitude0 + ((temperature + 273.15) / 0.0065F) * (std::pow((_pressure0 / pressure), 1.0F / 5.257F) -1.0F)) {}
         dimension::m(_altitude0 + ((_temperature0 + 273.15F) / 0.0065F) * (1 - std::pow((pressure / _pressure0), (1.0F / 5.257F)))) {}
 };

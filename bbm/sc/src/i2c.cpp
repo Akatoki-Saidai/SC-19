@@ -138,6 +138,10 @@ Binary I2C::read(std::size_t size, SlaveAddr slave_addr) const
     std::vector<uint8_t> input_data(size);
     std::size_t input_size = 0;  // 実際には何バイト受信したか
     input_size = ::i2c_read_blocking((_i2c_id ? i2c1 : i2c0), slave_addr, input_data.data(), size, false);  // pico-SDKの関数  I2Cで受信
+    if (input_size < 0)
+    {
+        input_size = 0;
+    }
     input_data.resize(input_size);
     return Binary(input_data);
 }

@@ -8,7 +8,7 @@ camera.ino - Simple camera example sketch
 #include <Camera.h>
 
 #define BAUDRATE (1000000)
-// #define BAUDRATE                (115200)
+#define BAUDRATE1 (115200)
 
 CamImage img;
 
@@ -135,7 +135,7 @@ void initCamera(){
   CamErr err;
 
   /* begin() without parameters means that
-   * number of buffers = 1, 30FPS, QVGA, YUV 4:2:2 format */
+   * number of buffers = 1, 30FPS, QVGA, RGB565 format */
   Serial.println("Prepare camera");
   err = theCamera.begin();
   if (err != CAM_ERR_SUCCESS)
@@ -178,14 +178,6 @@ void initCamera(){
   {
     printError(err);
   }
-  /*
-  // ISO 値を固定する場合は setAutoISOSensitivity(false) に 
-  err = theCamera.setISOSensitivity(CAM_ISO_SENSITIVITY_1600);
-  if (err != CAM_ERR_SUCCESS)
-  {
-      printError(err);
-  }
-  */
 
   // 露出の設定
   Serial.println("Set Auto exposure");
@@ -194,75 +186,15 @@ void initCamera(){
   {
       printError(err);
   }
- /*
-  // 露出を固定する場合は setAutoExposure(false) に 
-  int exposure = 2740; // 最大値は 2740(NO HDR)  317(HDR) な模様
-  err = theCamera.setAbsoluteExposure(exposure);
-  if (err != CAM_ERR_SUCCESS)
-  {
-      printError(err);
-  }
-*/
 
-  // HDRの設定
-/*
-  Serial.println("Set HDR");
-  err = theCamera.setHDR(CAM_HDR_MODE_ON);
-  if (err != CAM_ERR_SUCCESS)
-  {
-      printError(err);
-  }
-*/
 }
-
-/*
-void initCameraJPG(){
-  CamErr err;
-
-  Serial.println("Prepare JPG");
-  err = theCamera.begin();
-  if (err != CAM_ERR_SUCCESS)
-  {
-      printError(err);
-  }
-
-  err = theCamera.setAutoWhiteBalanceMode(CAM_WHITE_BALANCE_AUTO);
-  if (err != CAM_ERR_SUCCESS)
-  {
-      printError(err);
-  }
-  
-  err = theCamera.setStillPictureImageFormat(
-    CAM_IMGSIZE_QVGA_H,
-    CAM_IMGSIZE_QVGA_V,
-    CAM_IMAGE_PIX_FMT_JPG);
-  if (err != CAM_ERR_SUCCESS)
-  {
-    printError(err);
-  }
-  
-  err = theCamera.setAutoISOSensitivity(true);
-  if (err != CAM_ERR_SUCCESS)
-  {
-    printError(err);
-  }
-  
-  err = theCamera.setAutoExposure(true);
-  if (err != CAM_ERR_SUCCESS)
-  {
-      printError(err);
-  }
-}
-*/
 
 void sendImageToSerial (CamImage &img) {
     int inputLen = img.getImgSize();
     uint8_t* p = img.getImgBuff();
-    // uint16_t byte1, byte2, byte;
     Serial.println("#Image");
     Serial.flush();
     delay(2000);
-    // for (size_t i = 0; i < img.getImgSize(); i++)
     while(inputLen > 0)
     {
       
@@ -271,13 +203,6 @@ void sendImageToSerial (CamImage &img) {
       base64Encode(encoded, p, len); 
       p += len;
       Serial.println((char*)encoded);
-      /*
-      byte1 = img.getImgBuff()[i];
-      i++;
-      byte2 = img.getImgBuff()[i];
-      byte = (byte1 << 8) | byte2;
-      Serial.println(byte);
-      */
     }
     Serial.println("#End");
     delay(1000);
@@ -316,15 +241,10 @@ uint16_t CountRedPixel(CamImage &img, uint16_t zone_begin, uint16_t zone_end){
   uint16_t red_count = 0;
 
   while (y_coordinate <= img_height){
-    // uint8_t *rgb565_1_ptr;
-    // uint8_t *rgb565_2_ptr;
+    // RGB565取得
     uint16_t rgb565_1 = *(img.getImgBuff() + (( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 )));
     uint16_t rgb565_2 = *(img.getImgBuff() + ((( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ) ) + 1));
-    // uint16_t rgb565_1 = *rgb565_1_ptr;
-    // uint16_t rgb565_2 = *rgb565_2_ptr;
     uint16_t rgb565 = ( rgb565_1 << 8 ) | rgb565_2;
-    // img.getImgBuff()で取得できるアドレスとその数は8bit
-    // RGB565には16bit必要 -> アドレス2つ
 
     // RGB565からRGB888
     uint16_t red888 = ((rgb565 >> 11) & 0x1F);
@@ -559,7 +479,7 @@ uint8_t red_detect(CamImage &img) {
 
 void setup(){
   Serial.begin(BAUDRATE);
-  // Serial1.begin(115200);
+  // Serial1.begin(BAUDRATE1);
   delay(500);
   while (!Serial);
   
@@ -581,51 +501,41 @@ void loop(){
     theCamera.startStreaming(true, CamCB);
     Launch = true;
   }
-  /*
-  initCameraJPG();
-  delay(10);
-  img = theCamera.takePicture();
-  if (img.isAvailable())
-  {
-    digitalWrite(LED0, HIGH);
-    Serial.flush();
-    sendImageToSerial(img);
-    Serial.flush();
-    digitalWrite(LED0, LOW);
-    img.~CamImage();
-  }
-  theCamera.end();
 
-  
+/*
   initCamera();
   delay(10);
-  img = theCamera.takePicture();
-  if (img.isAvailable())
-  {
-    int iso = theCamera.getISOSensitivity();
-    int exposure = theCamera.getAbsoluteExposure();
-    int hdr = theCamera.getHDR();
-    Serial.print("ISO ");
-    Serial.print(iso);
-    Serial.print(",Exposure ");
-    Serial.print(exposure);
-    Serial.print(",HDR ");
-    Serial.print(hdr);
-    Serial.println();
-    
-    uint8_t red_result = red_detect(img);
-    // Serial.println(red_result);
-
-
-    // 画像の転送(USB)
-    // digitalWrite(LED0, HIGH);
-    // Serial.flush();
-    // sendImageToSerial(img);
-    // Serial.flush();
-    // digitalWrite(LED0, LOW);
-    img.~CamImage();
+  for (uint8_t i = 0; i < 50; i++){
+    img = theCamera.takePicture();
+    if (img.isAvailable())
+    {
+      /*
+      int iso = theCamera.getISOSensitivity();
+      int exposure = theCamera.getAbsoluteExposure();
+      int hdr = theCamera.getHDR();
+      Serial.print("ISO ");
+      Serial.print(iso);
+      Serial.print(",Exposure ");
+      Serial.print(exposure);
+      Serial.print(",HDR ");
+      Serial.print(hdr);
+      Serial.println();
+      */
       
-    }
+      uint8_t red_result = red_detect(img);
+      // Serial.println(red_result);
+
+
+      // 画像の転送(USB)
+      // digitalWrite(LED0, HIGH);
+      // Serial.flush();
+      // sendImageToSerial(img);
+      // Serial.flush();
+      // digitalWrite(LED0, LOW);
+      img.~CamImage();
+        
+      }
+  }
   theCamera.end();
 
   delay(3000);

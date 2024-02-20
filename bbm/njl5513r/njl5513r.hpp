@@ -24,7 +24,7 @@ public:
         {return _red_led;}
 
     Illuminance<Unit::lx> read() 
-        {return Illuminance<Unit::lx>(_lux_adc.read());}
+        {return Illuminance<Unit::lx>(_lux_adc.read() * 9);}
 
 };
 

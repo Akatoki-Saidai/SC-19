@@ -187,7 +187,7 @@ Binary SPI::read(std::size_t size, CS cs_pin) const
 throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot communicate with multiple devices at the same time"));  // 複数のデバイスと同時に通信することはできません
     }
     std::vector<uint8_t> input_data(size);
-    std::size_t input_size = 0;  // 実際には何バイト受信したか
+    int input_size = 0;  // 実際には何バイト受信したか
     _cs_pins.at(cs_pin.get().at(0)).write(0);  // 通信先のデバイスにつながるCSピンをオフにして，通信の開始を伝える
     input_size = ::spi_read_blocking((_spi_id ? spi1 : spi0), 0, input_data.data(), size);  // pico-SDKの関数  SPIで受信
     _cs_pins.at(cs_pin.get().at(0)).write(1);  // 通信先のデバイスにつながるCSピンをオンにして，通信の終了を伝える
@@ -225,7 +225,7 @@ throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot communicate with multip
     }
     std::vector<uint8_t> input_data(size);
     uint8_t write_memory_addr = memory_addr | 0b10000000;
-    std::size_t input_size = 0;  // 実際には何バイト受信したか
+    int input_size = 0;  // 実際には何バイト受信したか
     _cs_pins.at(cs_pin.get().at(0)).write(0);  // 通信先のデバイスにつながるCSピンをオフにして，通信の開始を伝える
     ::spi_write_blocking((_spi_id ? spi1 : spi0), &write_memory_addr, 1);  // まず，メモリアドレスを送信
     input_size = ::spi_read_blocking((_spi_id ? spi1 : spi0), 0, input_data.data(), size);  // pico-SDKの関数  SPIで受信

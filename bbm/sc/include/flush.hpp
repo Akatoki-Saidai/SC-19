@@ -28,16 +28,18 @@ class Flush : Noncopyable
     static constexpr uint32_t _block_size = 0xFFFF;  // 1ブロックのサイズ
     static constexpr uint8_t _block_num = 1;  // 使用するブロックの数
     uint32_t _target_offset = _target_begin;
-    std::array<uint8_t, FLASH_PAGE_SIZE> write_data;
+    std::array<uint8_t, FLASH_PAGE_SIZE> _write_data;
 public:
     //! @brief フラッシュメモリのセットアップ
     Flush();
 
     void write(const Binary& write_data);
 
-    const uint8_t* read();
-
     void print();
+
+    void clear();
+
+    ~Flush();
 };
 
 // uint8_t g_read_data[3];

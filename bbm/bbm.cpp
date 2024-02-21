@@ -12,11 +12,11 @@ try
     printf("0");
     UART uart_twelite(TX(0), RX(1), 115200_hz);  // TWELITEとの通信を行うUART
     printf("1");
-    GPIO<In> yobi_spresense(Pin(2));  // Spresenseとの通信を行う予備のピン
+    GPIO<In> yobi_spresense(Pin(2), Pull::Down);  // Spresenseとの通信を行う予備のピン
     printf("2");
-    GPIO<Out> yobi_twelite(Pin(3));  // TWELITEに出力する予備の通信ピン
+    GPIO<In> yobi_twelite(Pin(3));  // TWELITEに出力する予備の通信ピン
     printf("3");
-    // UART uart_spresense(TX(4), RX(5), 115200_hz);  // Spresenseとの通信を行うUART
+    UART uart_spresense(TX(4), RX(5), 115200_hz);  // Spresenseとの通信を行うUART
     printf("4");
     I2C i2c_bme_bno(SDA(6), SCL(7));  // BMEとBNOからの受信を行うI2C
     printf("5");
@@ -36,11 +36,15 @@ try
     printf("a");
     Speaker speaker(Pin(22));  // スピーカー
     printf("b");
+    GPIO<In> usb_conect(Pin(24));  // USBの接続を確認
     LED led_red(Pin(27));    // 照度センサ搭載の赤色LED
     printf("c");
     NJL5513R njl5513r(ADC(26), led_red, led_green);  // 照度センサnjl5513r
     printf("d");
     // GPIO28は上記のように超音波センサ
+    PicoTemp pico_temp;
+    VsysVoltage vsys;
+    LED led_pico(Pin(25));  // pico内蔵LED
 
 
     BME280 bme280(i2c_bme_bno);  // 温湿度気圧センサのBME280
@@ -51,11 +55,32 @@ try
     printf("g");
     SD sd;  // SDカード
     printf("h");
+    Flush flush;
+
+    // print関数を設定
+    set_print = [&](const std::string & message)
+    {
+        std::cout << message << std::endl;
+        sd.write(message);
+        flush.write(message);
+    };
     
 
 /***** loop *****/
     while (true)
     {
+        try
+        {
+            
+        flush.write("aiueo\n");
+        flush.write("kakikukeko\n");
+        // flush.write(Binary(std::array<uint8_t, 250U>{}));
+        sleep(1_s);
+        if (yobi_spresense.read())
+            flush.print();
+        if (!para_separate.read())
+            flush.clear();
+
         /***** 受信 *****/
 
         auto bme_data = bme280.read();  // BME280(温湿圧)から受信
@@ -98,29 +123,40 @@ try
 
         print("syoudo:%f lx\n\n", njl_data);
 
+        auto pico_temp_data = pico_temp.read();
+        print("temp : %f degC\n", pico_temp_data);
+    
+        auto vsys_data = vsys.read();
+        print("vsys : %f V\n", vsys_data);
+
+
 
         /***** 動作 *****/
 
         led_red.on();  // 赤色LEDを点ける
     printf("t");
-        sleep(500_ms);
+        // sleep(1_s);
         led_green.on();  // 緑色LEDを点ける
     printf("u");
-        sleep(1_s);
+        // sleep(1_s);
         led_red.off();
     printf("v");
         led_green.off();
     printf("w");
+    led_pico.on();
+    // sleep(1_s);
+    led_pico.off();
 
-        speaker.play_starwars();  // スターウォーズを再生
+        // speaker.play_windows7();  // スターウォーズを再生
     printf("x");
 
+    // while(true)
         motor.forward(1.0);  // 前に進む
     printf("y");
-        sleep(1_s);
+        // sleep(1_s);
         motor.right(1.0);  // 右に進む
     printf("z");
-        sleep(1_s);
+        // sleep(1_s);
         motor.forward(-1.0);  // 後ろに進む
     printf("finish");
 
@@ -130,7 +166,11 @@ try
             print("bunri ok!\n");
         else 
             print("bunri mada\n");
-
+        }
+        catch(const std::exception& e)
+        {
+            print(e.what());
+        }
     }
 
     return 0;
@@ -139,7 +179,7 @@ catch(const std::exception& e)
 {
     // エラー時の出力
     std::cerr << e.what() << std::endl;
-    std::cout << e.what() << std::endl;
+    sleep(100_ms);
     exit(1);
 }
 }

@@ -132,17 +132,17 @@ public:
     const uint8_t* operator&() const;
     
     //! @brief バイナリデータを結合
-    Binary operator+ (Binary other_binary) const;
+    Binary operator+ (const Binary& other_binary) const;
 
     //! @brief 配列の先頭へのポインタにデータを代入
     void to_assign(uint8_t* reg_ptr) const;
 };
 
 //! @brief バイナリデータの先頭に1バイト追加
-Binary operator+ (uint8_t first_byte, Binary binary);
+Binary operator+ (uint8_t first_byte, const Binary& binary);
 
 //! @brief バイナリデータの末尾に1バイト追加
-Binary operator+ (Binary binary, uint8_t end_byte);
+Binary operator+ (const Binary& binary, uint8_t end_byte);
 
 }
 

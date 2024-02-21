@@ -78,7 +78,7 @@ const uint8_t* Binary::operator&() const
     return _binary_data.c_str();
 }
 
-Binary Binary::operator+ (Binary other_binary) const
+Binary Binary::operator+ (const Binary& other_binary) const
 {
     #ifdef DEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
@@ -98,7 +98,7 @@ void Binary::to_assign(uint8_t* reg_ptr) const
     }
 }
 
-Binary operator+ (uint8_t first_byte, Binary binary)
+Binary operator+ (uint8_t first_byte, const Binary& binary)
 {
     #ifdef DEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
@@ -106,7 +106,7 @@ Binary operator+ (uint8_t first_byte, Binary binary)
     return Binary{first_byte} + binary;
 }
 
-Binary operator+ (Binary binary, uint8_t end_byte)
+Binary operator+ (const Binary& binary, uint8_t end_byte)
 {
     #ifdef DEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 

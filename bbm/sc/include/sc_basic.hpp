@@ -13,6 +13,8 @@
 
 #include "pico/stdlib.h"
 
+#define DEBUG
+
 #define _USE_MATH_DEFINES  // 円周率などの定数を使用する  math.hを読み込む前に定義する必要がある (math.hはcmathやiostreamに含まれる)
 #include <algorithm>
 #include <cfloat>  // double型の最小値など

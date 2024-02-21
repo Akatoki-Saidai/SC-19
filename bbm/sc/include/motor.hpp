@@ -25,7 +25,12 @@ public:
     // in2_pwm : モータードライバのIN2
     // 左右のモーターを扱う場合はMotor2クラスを使用してください
     Motor1(const PWM& in1_pwm, const PWM& in2_pwm):
-        _in1_pwm(in1_pwm), _in2_pwm(in2_pwm) {}
+        _in1_pwm(in1_pwm), _in2_pwm(in2_pwm)
+    {
+        #ifdef DEBUG
+            std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+        #endif
+    }
 
     // モーターを動かす
     // speed : モーターの出力  -1.0以上+1.0以下の値  負の値のとき逆回転

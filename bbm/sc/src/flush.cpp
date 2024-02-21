@@ -56,6 +56,10 @@ void Flush::write(const Binary& write_binary)
             // 割り込みフラグを戻す
             restore_interrupts(ints);
             _target_offset += _write_data.size();
+            if (_target_offset > _target_end)
+            {
+                _target_offset = _target_begin;
+            }
 
             _write_data.fill(0U);
             _write_index = 0;

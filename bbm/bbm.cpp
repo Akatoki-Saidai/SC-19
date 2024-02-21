@@ -9,6 +9,8 @@ int main()
 try
 {
 /***** setup *****/
+    sleep(5_s);
+    
     printf("0");
     UART uart_twelite(TX(0), RX(1), 115200_hz);  // TWELITEとの通信を行うUART
     printf("1");
@@ -71,7 +73,7 @@ try
     {
         try
         {
-            
+
         /***** 受信 *****/
 
         auto bme_data = bme280.read();  // BME280(温湿圧)から受信

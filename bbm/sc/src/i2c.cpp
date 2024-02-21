@@ -142,10 +142,10 @@ void I2C::write(Binary output_data, SlaveAddr slave_addr) const
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     int output_size = 0;  // 実際には何バイト送信したか
-    ::i2c_write_blocking((_i2c_id ? i2c1 : i2c0), slave_addr, output_data, output_data.size(), false);  // pico-SDKの関数  I2Cで送信
+    ::i2c_write_blocking_until((_i2c_id ? i2c1 : i2c0), slave_addr, output_data, output_data.size(), false, make_timeout_time_us(100*1000));  // pico-SDKの関数  I2Cで送信
     if (output_size < 0)
     {
-throw std::runtime_error(f_err(__FILE__, __LINE__, "Failed to transmit via I2C"));  // I2Cによる送信に失敗しました
+throw std::runtime_error(f_err(__FILE__, __LINE__, "Failed to transmit via I2C. SlaveAddr:%hhx", slave_addr));  // I2Cによる送信に失敗しました
     }
 }
 
@@ -157,11 +157,11 @@ Binary I2C::read(std::size_t size, SlaveAddr slave_addr) const
     std::vector<uint8_t> input_data(size);
 
     int input_size = 0;  // 実際には何バイト受信したか
-    input_size = ::i2c_read_blocking((_i2c_id ? i2c1 : i2c0), slave_addr, input_data.data(), size, false);  // pico-SDKの関数  I2Cで受信
+    input_size = ::i2c_read_blocking_until((_i2c_id ? i2c1 : i2c0), slave_addr, input_data.data(), size, false, make_timeout_time_us(100*1000));  // pico-SDKの関数  I2Cで受信
     if (input_size < 0)
     {
         // input_size = 0;
-throw std::runtime_error(f_err(__FILE__, __LINE__, "Failed to receive via I2C"));  // I2Cによる受信に失敗しました
+throw std::runtime_error(f_err(__FILE__, __LINE__, "Failed to receive via I2C. SlaveAddr:%hhx", slave_addr));  // I2Cによる受信に失敗しました
     }
     input_data.resize(input_size);
     return Binary(input_data);
@@ -174,10 +174,10 @@ void I2C::write_memory(Binary output_data, SlaveAddr slave_addr, MemoryAddr memo
     #endif
     Binary corrected_data = memory_addr + output_data;
     int output_size = 0;  // 実際には何バイト送信したか
-    output_size = ::i2c_write_blocking((_i2c_id ? i2c1 : i2c0), slave_addr, corrected_data, corrected_data.size(), false);  // pico-SDKの関数  I2Cで送信
+    output_size = ::i2c_write_blocking_until((_i2c_id ? i2c1 : i2c0), slave_addr, corrected_data, corrected_data.size(), false, make_timeout_time_us(100*1000));  // pico-SDKの関数  I2Cで送信
     if (output_size < 0)
     {
-throw std::runtime_error(f_err(__FILE__, __LINE__, "Failed to transmit via I2C"));  // I2Cによる送信に失敗しました
+throw std::runtime_error(f_err(__FILE__, __LINE__, "Failed to transmit via I2C. SlaveAddr:%hhx, MemoryAddr:%hhx", slave_addr, memory_addr));  // I2Cによる送信に失敗しました
     }
 }
 
@@ -187,17 +187,23 @@ Binary I2C::read_memory(std::size_t size, SlaveAddr slave_addr, MemoryAddr memor
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     std::vector<uint8_t> input_data(size);
+    printf("r0 ");
     int output_size = 0;  // 実際には何バイト送信したか
     int input_size = 0;  // 実際には何バイト受信したか
     uint8_t output_data = memory_addr;
-    output_size = ::i2c_write_blocking((_i2c_id ? i2c1 : i2c0), slave_addr, &output_data, 1, true);  // まず，メモリアドレスを送信
-    input_size = ::i2c_read_blocking((_i2c_id ? i2c1 : i2c0), slave_addr, input_data.data(), size, false);  // pico-SDKの関数  I2Cで受信
+    printf("r1 ");
+    output_size = ::i2c_write_blocking_until((_i2c_id ? i2c1 : i2c0), slave_addr, &output_data, 1, true, make_timeout_time_us(100*1000));  // まず，メモリアドレスを送信
+    printf("r2 ");
+    input_size = ::i2c_read_blocking_until((_i2c_id ? i2c1 : i2c0), slave_addr, input_data.data(), size, false, make_timeout_time_us(100*1000));  // pico-SDKの関数  I2Cで受信
+    printf("r3 is:%d, os:%d ", input_size, output_size);
     if (input_size < 0 || output_size < 0)
     {
         // input_size = 0;
-throw std::runtime_error(f_err(__FILE__, __LINE__, "Failed to receive via I2C"));  // I2Cによる受信に失敗しました
+throw std::runtime_error(f_err(__FILE__, __LINE__, "Failed to receive via I2C. SlaveAddr:%hhx, MemoryAddr:%hhx", slave_addr, memory_addr));  // I2Cによる受信に失敗しました
     }
+    printf("r4 ");
     input_data.resize(input_size);
+    printf("r5 ");
     return Binary(input_data);
 }
 

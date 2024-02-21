@@ -178,7 +178,7 @@ throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot communicate with multip
     _cs_pins.at(cs_pin.get().at(0)).write(1);  // 通信先のデバイスにつながるCSピンをオンにして，通信の終了を伝える
     if (output_size < 0)
     {
-throw std::runtime_error(f_err(__FILE__, __LINE__, "Failed to transmit via SPI"));  // SPIによる送信に失敗しました
+throw std::runtime_error(f_err(__FILE__, __LINE__, "Failed to transmit via SPI. CsPin:%hhx", cs_pin.get().at(0)));  // SPIによる送信に失敗しました
     }
 }
 
@@ -199,7 +199,7 @@ throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot communicate with multip
     if (input_size < 0)
     {
         // input_size = 0;
-throw std::runtime_error(f_err(__FILE__, __LINE__, "Failed to receive via SPI"));  // SPIによる受信に失敗しました
+throw std::runtime_error(f_err(__FILE__, __LINE__, "Failed to receive via SPI. CsPin:%hhx", cs_pin.get().at(0)));  // SPIによる受信に失敗しました
     }
     input_data.resize(input_size);
     return Binary(input_data);
@@ -221,7 +221,7 @@ throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot communicate with multip
     _cs_pins.at(cs_pin.get().at(0)).write(1);  // 通信先のデバイスにつながるCSピンをオンにして，通信の終了を伝える
     if (output_size < 0)
     {
-throw std::runtime_error(f_err(__FILE__, __LINE__, "Failed to transmit via SPI"));  // SPIによる送信に失敗しました
+throw std::runtime_error(f_err(__FILE__, __LINE__, "Failed to transmit via SPI. CsPin:%hhx, MemoryAddr:%hhx", cs_pin.get().at(0), memory_addr));  // SPIによる送信に失敗しました
     }
 }
 
@@ -245,7 +245,7 @@ throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot communicate with multip
     if (input_size < 0 || output_size < 0)
     {
         // input_size = 0;
-throw std::runtime_error(f_err(__FILE__, __LINE__, "Failed to receive via SPI"));  // SPIによる受信に失敗しました
+throw std::runtime_error(f_err(__FILE__, __LINE__, "Failed to receive via SPI. CsPin:%hhx, MemoryAddr:%hhx", cs_pin.get().at(0), memory_addr));  // SPIによる受信に失敗しました
     }
     input_data.resize(input_size);
     return Binary(input_data);

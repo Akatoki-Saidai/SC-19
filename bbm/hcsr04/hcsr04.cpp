@@ -18,6 +18,9 @@ namespace sc
 HCSR04::HCSR04(Pin trig_pin, Pin echo_pin):
     _out_pin(trig_pin, Pull::Down), _in_pin(echo_pin)
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     // gpio_init(28);
     // gpio_set_dir(28, GPIO_OUT);
     // gpio_pull_down(28);
@@ -29,6 +32,9 @@ HCSR04::HCSR04(Pin trig_pin, Pin echo_pin):
 
 Length<Unit::m> HCSR04::read()
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     int temperature=20,humidity=60;
     double distance;
     // trigger

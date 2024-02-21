@@ -30,6 +30,9 @@ static pwm_config pwm2_2_slice_config;
 
 
 void motor_init(void) {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     stdio_init_all();
     //1
     gpio_set_function(PIN_PWM1_1,GPIO_FUNC_PWM);
@@ -73,22 +76,34 @@ void motor_init(void) {
 
 
 void forward(double duty){
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     //duty 50%
     pwm_set_gpio_level( PIN_PWM1_1, ( pwm1_1_slice_config.top * duty ) );
     pwm_set_gpio_level( PIN_PWM2_1, ( pwm2_1_slice_config.top * duty ) );
 }
 
 void back(double duty){
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     pwm_set_gpio_level( PIN_PWM1_2, ( pwm1_2_slice_config.top * duty ) );
     pwm_set_gpio_level( PIN_PWM2_2, ( pwm2_2_slice_config.top * duty ) );
 }
 
 void right(double duty){
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     pwm_set_gpio_level( PIN_PWM1_2, ( pwm1_1_slice_config.top * duty ) );
     pwm_set_gpio_level( PIN_PWM2_1, ( pwm2_1_slice_config.top * duty ) );
 }
 
 void left(double duty){
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     pwm_set_gpio_level( PIN_PWM1_1, ( pwm1_1_slice_config.top * duty ) );
     pwm_set_gpio_level( PIN_PWM2_2, ( pwm2_1_slice_config.top * duty ) );
 }

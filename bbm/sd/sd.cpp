@@ -5,6 +5,9 @@ namespace sc
 
 SD::SD()
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     pSD = sd_get_by_num(0);
 
     fr = f_mount(&pSD->fatfs, pSD->pcName, 1);
@@ -19,6 +22,9 @@ SD::~SD()
 
 void SD::write(const std::string& write_str)
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     FIL fil;
     fr = f_open(&fil, filename, FA_OPEN_APPEND | FA_WRITE);
     if (FR_OK != fr && FR_EXIST != fr)

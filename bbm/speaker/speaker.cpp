@@ -12,6 +12,9 @@ namespace sc
 Speaker::Speaker(const Pin& pin):
     _pin(pin)
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     //pwmの設定
     gpio_set_function(_pin.gpio(),GPIO_FUNC_PWM);
 
@@ -31,7 +34,9 @@ Speaker::Speaker(const Pin& pin):
 }
 
 void Speaker::play_starwars(){
-
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     
     //使用する音の周波数の宣言(低いラ～高いド) 0は無音(休符)
     const double sound_rest = 0;
@@ -115,6 +120,9 @@ void Speaker::play_starwars(){
 }
 
 void Speaker::play_windows7(){
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     // 使用する音
     const double sound_B4 = 493.883;
     const double sound_E5 = 659.255;

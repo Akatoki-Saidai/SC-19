@@ -51,6 +51,9 @@ uint8_t accel_val = 0x28; //LIA_DATA_X_LSB 0x28
 BNO055::BNO055(const I2C& i2c):
     _i2c(i2c)
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
 
     // // Configure the I2C Communication
     // // i2c_init(I2C_PORT, 400 * 1000);
@@ -65,6 +68,9 @@ BNO055::BNO055(const I2C& i2c):
 }
 
 std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity<Unit::T>,AngularVelocity<Unit::rad_s>> BNO055::read(){
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     //線形加速度を読み取る
     // i2c_write_blocking(I2C_PORT, addr, &accel_val, 1, true);
     // i2c_read_blocking(I2C_PORT, addr, accel, 6, false);
@@ -133,6 +139,9 @@ std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity
 
 // Initialise Accelerometer Function
 void BNO055::accel_init(void){
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     // Check to see if connection is correct
     sleep_ms(1000); // Add a short delay to help BNO005 boot up
     uint8_t reg = 0x00;

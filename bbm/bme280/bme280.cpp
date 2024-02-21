@@ -17,6 +17,9 @@ namespace sc{
 BME280::BME280(const I2C& i2c):
     _i2c(i2c)
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
 
     // this->i2c_no            = i2c_no;
     // this->sda_pin           = sda_pin;
@@ -58,12 +61,18 @@ BME280::BME280(const I2C& i2c):
 };
 
 void BME280::set_origin(float _pressure0=1013.25, float _temperature0=20, float _altitude0=0){
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     pressure0    = _pressure0;
     temperature0 = _temperature0;
     altitude0    = _altitude0;
 }
 
 std::tuple<Pressure<Unit::Pa>,Humidity<Unit::percent>,Temperature<Unit::K>> BME280::read() {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     int32_t pressure, humidity, temperature;
     if (measurement_reg.mode == BME280::MODE::MODE_FORCED) {
         write_register(0xf4, measurement_reg.get());
@@ -105,6 +114,9 @@ uint8_t BME280::get_chipID() {
 
 // for the compensate_functions read the Bosch information on the BME280
 int32_t BME280::compensate_temp(int32_t adc_T) {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     int32_t var1, var2, T;
     var1 = ((((adc_T >> 3) - ((int32_t) dig_T1 << 1))) * ((int32_t) dig_T2)) >> 11;
     var2 = (((((adc_T >> 4) - ((int32_t) dig_T1)) * ((adc_T >> 4) - ((int32_t) dig_T1))) >> 12) * ((int32_t) dig_T3))
@@ -116,6 +128,9 @@ int32_t BME280::compensate_temp(int32_t adc_T) {
 }
 
 uint32_t BME280::compensate_pressure(int32_t adc_P) {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     int32_t var1, var2;
     uint32_t p;
     var1 = (((int32_t) t_fine) >> 1) - (int32_t) 64000;
@@ -141,6 +156,9 @@ uint32_t BME280::compensate_pressure(int32_t adc_P) {
 }
 
 uint32_t BME280::compensate_humidity(int32_t adc_H) {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     int32_t v_x1_u32r;
     v_x1_u32r = (t_fine - ((int32_t) 76800));
     v_x1_u32r = (((((adc_H << 14) - (((int32_t) dig_H4) << 20) - (((int32_t) dig_H5) * v_x1_u32r)) +
@@ -156,6 +174,9 @@ uint32_t BME280::compensate_humidity(int32_t adc_H) {
 }
 
 void BME280::write_register(uint8_t reg, uint8_t data) {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     uint8_t buf[2];
     //buf[0] = reg & 0x7f;  // remove read bit as this is a write
     buf[0] = reg;
@@ -166,6 +187,9 @@ void BME280::write_register(uint8_t reg, uint8_t data) {
 }
 
 void BME280::read_registers(uint8_t reg, uint8_t *buf, uint16_t len) {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     // For this particular device, we send the device the register we want to read
     // first, then subsequently read from the device. The register is auto incrementing
     // so we don't need to keep sending the register we want, just the first.
@@ -181,7 +205,9 @@ void BME280::read_registers(uint8_t reg, uint8_t *buf, uint16_t len) {
 
 /* This function reads the manufacturing assigned compensation parameters from the device */
 void BME280::read_compensation_parameters() {
-   
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif  
 
     read_registers(0x88, buffer, 26);
 
@@ -212,6 +238,9 @@ void BME280::read_compensation_parameters() {
 
 // this functions reads the raw data values from the sensor
 void BME280::bme280_read_raw(int32_t *humidity, int32_t *pressure, int32_t *temperature) {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     uint8_t readBuffer[8];
     read_registers(0xF7, readBuffer, 8);
     *pressure = ((uint32_t) readBuffer[0] << 12) | ((uint32_t) readBuffer[1] << 4) | (readBuffer[2] >> 4);

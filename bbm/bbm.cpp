@@ -27,7 +27,7 @@ try
     printf("7");
     // GPIO 12~15 はSDカード
     // GPIO16は未使用
-    GPIO<In> para_separate(Pin(17), Pull::Up);  // パラシュート分離の検知用ピン (分離したらHigh)
+    GPIO<In> para_separate(Pin(17), Pull::Up);  // パラシュート分離の検知用ピン (分離したらHigh(1))
     printf("8");
     // GPIO18は未使用
     HCSR04 hcsr04(Pin(28), Pin(19));  // 超音波センサHCSR04

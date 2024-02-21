@@ -677,7 +677,7 @@ public:
     explicit constexpr operator double() const
         {return number();}
 
-    //! @brief
+    //! @brief 気圧気温から標高を計算
     static void set_origin(double pressure0=1013.25, double temperature0=20, double altitude0=0)
     {
         _pressure0    = pressure0;

@@ -72,15 +72,6 @@ try
         try
         {
             
-        flush.write("aiueo\n");
-        flush.write("kakikukeko\n");
-        // flush.write(Binary(std::array<uint8_t, 250U>{}));
-        sleep(1_s);
-        if (yobi_spresense.read())
-            flush.print();
-        if (!para_separate.read())
-            flush.clear();
-
         /***** 受信 *****/
 
         auto bme_data = bme280.read();  // BME280(温湿圧)から受信

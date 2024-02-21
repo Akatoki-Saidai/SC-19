@@ -13,6 +13,8 @@
 
 #include "pico/stdlib.h"
 
+#define DEBUG
+
 #define _USE_MATH_DEFINES  // 円周率などの定数を使用する  math.hを読み込む前に定義する必要がある (math.hはcmathやiostreamに含まれる)
 #include <algorithm>
 #include <cfloat>  // double型の最小値など
@@ -27,53 +29,15 @@
 namespace sc
 {
 
-template<typename... Args> std::string format_str(const std::string&, Args...) noexcept;
-
-//! @brief エラーを記録し保持
-//! エラーを記録します．例外としてこのクラスを投げることができます．
-//! @note エラーを発生させる場合は次のようにしてください
-//!     throw sc::Error(__FILE__, __LINE__, "error message");
-class Error : public std::exception
-{
-    const std::string _message;  // エラーメッセージ
-public:
-    //! @brief エラーを記録します
-    //! @param FILE __FILE__としてください (自動でファイル名に置き換わります)
-    //! @param LINE __LINE__としてください (自動で行番号に置き換わります)
-    //! @param message 出力したいエラーメッセージ (自動で改行)
-    Error(const std::string& FILE, int LINE, const std::string& message) noexcept:
-        _message("<<ERROR>>  FILE : " + std::string(FILE) + "  LINE : " + std::to_string(LINE) + "\n           MESSAGE : " + _message + "\n") {}
-
-    //! @brief キャッチしたエラーを記録ます
-    //! @param FILE ＿FILE＿としてください (自動でファイル名に置き換わります)
-    //! @param LINE ＿LINE＿としてください (自動で行番号に置き換わります)
-    //! @param e キャッチした例外
-    //! @param message 出力したいエラーメッセージ (自動で改行)
-    Error(const std::string& FILE, int LINE, const std::exception& e, const std::string& message) noexcept:
-        _message(std::string(e.what()) + "required from here\n" + "<<ERROR>>  FILE : " + std::string(FILE) + "  LINE : " + std::to_string(LINE) + "\n           MESSAGE : " + _message + "\n") {}
-
-    //! @brief printfの形式でエラーメッセージを記録します
-    //! @param FILE __FILE__としてください (自動でファイル名に置き換わります)
-    //! @param LINE __LINE__としてください (自動で行番号に置き換わります)
-    //! @param format フォーマット文字列
-    //! @param args フォーマット文字列に埋め込む値
-    template<typename... Args>
-    Error(const std::string& FILE, int LINE, const std::string& format, Args... args) noexcept:
-        Error(FILE, LINE, format_str(format, args...)) {}
-
-    //! @brief エラーについての説明文を返します
-    //! @return エラーの説明
-    const char* what() const noexcept override
-        {return _message.c_str();}
-};
-
-
 //! @brief printfの形式で文字列をフォーマット
 //! @param format フォーマット文字列
 //! @param args フォーマット文字列に埋め込む値
 template<typename... Args>
 std::string format_str(const std::string& format, Args... args) noexcept
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     try
     {
         const std::size_t formatted_chars_num = std::snprintf(nullptr, 0, format.c_str(), args...);  // フォーマット後の文字数を計算
@@ -81,12 +45,40 @@ std::string format_str(const std::string& format, Args... args) noexcept
         std::snprintf(&formatted_chars[0], formatted_chars_num + 1, format.c_str(), args...);  // フォーマットを実行
 return std::string(formatted_chars);  // フォーマット済み文字列を出力
     }
-    catch(const std::exception& e) {Error(__FILE__, __LINE__, e, "Failed to format string");}  // ログの保存に失敗しました
-    catch(...) {Error(__FILE__, __LINE__, "Failed to format string");}  // ログの保存に失敗しました
+    catch(const std::exception& e) {std::cout << "           From  FILE : " << __FILE__ << "  LINE : " << __LINE__ << "\n                 MESSAGE : Failed to format string\n" << e.what() << std::flush;}  // ログの保存に失敗しました
+    catch(...) {std::cout << "<<ERROR>>  FILE : " << __FILE__ << "  LINE : " << __LINE__ << "\n           MESSAGE : Failed to format string" << std::endl;}  // ログの保存に失敗しました
     return "ERROR";
 }
 // この関数は以下の資料を参考にて作成しました
 // https://pyopyopyo.hatenablog.com/entry/2019/02/08/102456
+
+
+//! @brief エラーメッセージのフォーマットを整える
+//! @param FILE __FILE__としてください (自動でファイル名に置き換わります)
+//! @param LINE __LINE__としてください (自動で行番号に置き換わります)
+//! @param message 出力したいエラーメッセージ (自動で改行)
+template<typename... Args>
+std::string f_err(const std::string& FILE, int LINE, const std::string& message, Args... args) noexcept
+{
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
+    return "<<ERROR>>  FILE : " + std::string(FILE) + "  LINE : " + std::to_string(LINE) + "\n           MESSAGE : " + format_str(message, args...) + "\n";
+}
+
+//! @brief エラーメッセージのフォーマットを整える
+//! @param FILE ＿FILE＿としてください (自動でファイル名に置き換わります)
+//! @param LINE ＿LINE＿としてください (自動で行番号に置き換わります)
+//! @param e キャッチした例外
+//! @param message 出力したいエラーメッセージ (自動で改行)
+template<typename... Args>
+std::string f_err(const std::string& FILE, int LINE, const std::exception& e, const std::string& message, Args... args) noexcept
+{
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
+    return "           From  FILE : " + std::string(FILE) + "  LINE : " + std::to_string(LINE) + "\n                 MESSAGE : " + format_str(message, args...) + "\n" + e.what();
+}
 
 
 //! @brief メッセージを出力する関数．
@@ -94,11 +86,14 @@ return std::string(formatted_chars);  // フォーマット済み文字列を出
 //! @param message 出力する文字列
 inline std::function<void(const std::string&)> set_print = [](const std::string& message)
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     try
     {
         std::cout << message << std::flush;
     }
-    catch(const std::exception& e) {printf("Failed to save log\n");}  // ログの保存に失敗しました
+    catch(const std::exception& e) {printf(f_err(__FILE__, __LINE__, "Failed to save log").c_str());}  // ログの保存に失敗しました
 };
 
 //! @brief printfの形式で出力
@@ -107,14 +102,10 @@ inline std::function<void(const std::string&)> set_print = [](const std::string&
 template<typename... Args>
 void print(const std::string& format, Args... args)
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     set_print(format_str(format, args...));
-}
-
-//! @brief エラーメッセージを出力
-//! @param e キャッチしたエラー
-inline void print(const std::exception& e)
-{
-    set_print(e.what());
 }
 
 
@@ -167,10 +158,11 @@ constexpr inline long double not_minus0(const long double& value) {return (value
 class Noncopyable
 {
 protected:
-    Noncopyable() = default;
-    ~Noncopyable() = default;
-    Noncopyable(const Noncopyable&) = delete;
-    Noncopyable& operator=(const Noncopyable&) = delete;
+  Noncopyable(const Noncopyable&) = delete;
+  Noncopyable& operator=(const Noncopyable&) = delete;
+  Noncopyable(Noncopyable&&) = default;
+  Noncopyable() = default;
+  Noncopyable& operator=(Noncopyable&&) = default;
 };
 // Noncopyableクラスは以下の資料を参考にして作成しました
 // https://cpp.aquariuscode.com/uncopyable-mixin
@@ -228,9 +220,12 @@ any_of(const Iterable&)
 template<typename T, typename U>
 constexpr bool operator==(const T& one, const any_of<U>& list)
 {
-    for (auto element : list._compare_list)
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
+        for (auto element : list._compare_list)
     {
-        if (one == element)
+                if (one == element)
 return true;
     }
     return false;
@@ -260,6 +255,9 @@ all_of(const Iterable&)
 template<typename T, typename U>
 constexpr bool operator!=(const T& one, const all_of<U>& list)
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     for (auto element : list._compare_list)
     {
         if (one == element)

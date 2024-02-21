@@ -21,11 +21,14 @@ GPIO<Out>::GPIO(Pin pin):
 GPIO<Out>::GPIO(Pin pin, Pull pull):
     _pin(pin)
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     if (Pin::Status.at(_pin.gpio()) == PinStatus::NoUse)
     {
         Pin::Status.at(_pin.gpio()) = PinStatus::Gpio;
     } else {
-throw Error(__FILE__, __LINE__, "This pin is already in use");  // このピンは既に使用されています
+throw std::logic_error(f_err(__FILE__, __LINE__, "Pin %hhu is already in use", _pin.gpio()));  // このピンは既に使用されています
     }
 
     ::gpio_init(_pin.gpio());  // pico-SDKの関数  ピンの初期化を行う
@@ -35,16 +38,25 @@ throw Error(__FILE__, __LINE__, "This pin is already in use");  // このピン�
 
 void GPIO<Out>::write(bool level) const
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     ::gpio_put(_pin.gpio(), level);  // pico-SDKの関数  ピンにHighかLowを出力する
 }
 
 void GPIO<Out>::on() const
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     this->write(1);
 }
 
 void GPIO<Out>::off() const
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     this->write(0);
 }
 
@@ -57,11 +69,14 @@ GPIO<In>::GPIO(Pin pin):
 GPIO<In>::GPIO(Pin pin, Pull pull):
     _pin(pin)
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     if (Pin::Status.at(_pin.gpio()) == PinStatus::NoUse)
     {
         Pin::Status.at(_pin.gpio()) = PinStatus::Gpio;
     } else {
-throw Error(__FILE__, __LINE__, "This pin is already in use");  // このピンは既に使用されています
+throw std::logic_error(f_err(__FILE__, __LINE__, "Pin %hhu is already in use", _pin.gpio()));  // このピンは既に使用されています
     }
 
     ::gpio_init(_pin.gpio());  // pico-SDKの関数  ピンの初期化を行う
@@ -71,6 +86,9 @@ throw Error(__FILE__, __LINE__, "This pin is already in use");  // このピン�
 
 bool GPIO<In>::read() const
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     return ::gpio_get(_pin.gpio());  // pico-SDKの関数  ピンがHighになっているかLowになっているかを取得する
 }
 

@@ -92,12 +92,12 @@ public:
 // 定義定数
 namespace constant 
 {
-    constexpr Dimension<-1, 0, 0, 0, 0, 0, 0> dNuCs{9'192'631'770.0};  // Δνcs．セシウム133原子の摂動を受けない基底状態の超微細構造遷移周波数
-    constexpr Dimension<-1, 1, 0, 0, 0, 0, 0> c{299'792'458.0};  // c．真空中の光の速さ
-    constexpr Dimension<-1, 2, 1, 0, 0, 0, 0> h{6.626'070'15E-34};  // h．プランク定数
-    constexpr Dimension<1, 0, 0, 1, 0, 0, 0> e{1.602'176'634E-19};  // e．電気素量
-    constexpr Dimension<-2, 2, 1, 0, -1, 0, 0> k{1.380'649E-23};  // k．ボルツマン定数   
-    constexpr Dimension<0, 0, 0, 0, 0, -1, 0> NA{6.022'140'76E23};  // NA．アボガドロ定数
+    constexpr Dimension<-1, 0, 0, 0, 0, 0, 0> dNuCs{9192631770.0};  // Δνcs．セシウム133原子の摂動を受けない基底状態の超微細構造遷移周波数
+    constexpr Dimension<-1, 1, 0, 0, 0, 0, 0> c{299792458.0};  // c．真空中の光の速さ
+    constexpr Dimension<-1, 2, 1, 0, 0, 0, 0> h{6.62607015E-34};  // h．プランク定数
+    constexpr Dimension<1, 0, 0, 1, 0, 0, 0> e{1.602176634E-19};  // e．電気素量
+    constexpr Dimension<-2, 2, 1, 0, -1, 0, 0> k{1.380649E-23};  // k．ボルツマン定数   
+    constexpr Dimension<0, 0, 0, 0, 0, -1, 0> NA{6.02214076E23};  // NA．アボガドロ定数
 }
 
 
@@ -685,7 +685,7 @@ public:
         _altitude0    = altitude0;
     }
 
-    constexpr Altitude(double pressure, double temperature):
+    Altitude(double pressure, double temperature):
         // dimension::m(_altitude0 + ((temperature + 273.15) / 0.0065F) * (std::pow((_pressure0 / pressure), 1.0F / 5.257F) -1.0F)) {}
         dimension::m(_altitude0 + ((_temperature0 + 273.15F) / 0.0065F) * (1 - std::pow((pressure / _pressure0), (1.0F / 5.257F)))) {}
 };

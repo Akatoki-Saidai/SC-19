@@ -23,7 +23,7 @@ namespace sc
 class PicoTemp;
 
 // ADC(アナログ-デジタル変換)
-class ADC
+class ADC : Noncopyable
 {
 public:
     //! @brief PWMのセットアップ
@@ -34,8 +34,7 @@ private:
     const Pin _adc_pin;
     const uint8_t _channel;
 
-    static uint8_t get_channel(Pin pin)
-        {return pin.gpio() - 26;}
+    static uint8_t get_channel(Pin pin);
 
 public:
     //! @brief ADCを読み取り
@@ -47,7 +46,7 @@ public:
 
 
 //! @brief picoの内蔵温度センサ
-class PicoTemp
+class PicoTemp : Noncopyable
 {
 public:
     PicoTemp();
@@ -56,7 +55,7 @@ public:
 };
 
 //! @brief picoのVSYSピンの電圧
-class VsysVoltage 
+class VsysVoltage : Noncopyable
 {
 public:
     VsysVoltage();

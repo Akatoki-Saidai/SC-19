@@ -27,12 +27,28 @@ class MemoryAddr
     unsigned int _memory_addr;
 public:
     explicit MemoryAddr(unsigned int memory_addr):
-        _memory_addr(memory_addr) {}
+        _memory_addr(memory_addr) 
+    {
+        #ifdef DEBUG
+            std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+        #endif
+    }
     
     operator I2C::MemoryAddr() const
-        {return I2C::MemoryAddr(_memory_addr);}
+        {
+            #ifdef DEBUG
+                std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+            #endif
+            return I2C::MemoryAddr(_memory_addr);
+        }
+
     operator SPI::MemoryAddr() const
-        {return SPI::MemoryAddr(_memory_addr);}
+    {
+        #ifdef DEBUG
+            std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+        #endif
+        return SPI::MemoryAddr(_memory_addr);
+    }
 };
 
 }

@@ -20,7 +20,7 @@ TX::TX(int tx_gpio):
 {
     if (gpio() != all_of(EnableUART0_TX) && gpio() != all_of(EnableUART1_TX))
     {
-throw Error(__FILE__, __LINE__, "An incorrect TX pin number was entered");  // 正しくないTXピンの番号が入力されました
+throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect TX pin number was entered"));  // 正しくないTXピンの番号が入力されました
     }
 }
 
@@ -32,7 +32,7 @@ return UART_ID::uart_0;
     } else if (gpio() == any_of(EnableUART1_TX)) {
 return UART_ID::uart_1;
     } else {
-throw Error(__FILE__, __LINE__, "An incorrect TX pin number was entered");  // 正しくないTXピンの番号が入力されました
+throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect TX pin number was entered"));  // 正しくないTXピンの番号が入力されました
     }
 }
 
@@ -43,7 +43,7 @@ RX::RX(int tx_gpio):
 {
     if (gpio() != all_of(EnableUART0_RX) && gpio() != all_of(EnableUART1_RX))
     {
-throw Error(__FILE__, __LINE__, "An incorrect RX pin number was entered");  // 正しくないRXピンの番号が入力されました
+throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect RX pin number was entered"));  // 正しくないRXピンの番号が入力されました
     }
 }
 
@@ -55,7 +55,7 @@ return UART_ID::uart_0;
     } else if (gpio() == any_of(EnableUART1_RX)) {
 return UART_ID::uart_1;
     } else {
-throw Error(__FILE__, __LINE__, "An incorrect RX pin number was entered");  // 正しくないRXピンの番号が入力されました
+throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect RX pin number was entered"));  // 正しくないRXピンの番号が入力されました
     }
 }
 
@@ -67,13 +67,16 @@ throw Error(__FILE__, __LINE__, "An incorrect RX pin number was entered");  // �
 UART::UART(TX tx, RX rx, Frequency<Unit::Hz>  freq):
     _tx(tx), _rx(rx), _freq(freq), _uart_id(tx.get_uart_id())
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     if (tx.get_uart_id() != rx.get_uart_id())
     {
-throw Error(__FILE__, __LINE__, "An incorrect UART pin number was entered");  // 正しくないUARTのピン番号が入力されました
+throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect UART pin number was entered"));  // 正しくないUARTのピン番号が入力されました
     } else if (!(Pin::Status.at(_tx.gpio()) == PinStatus::NoUse && Pin::Status.at(_rx.gpio()) == PinStatus::NoUse)) {
-throw Error(__FILE__, __LINE__, "This pin is already in use");  // このピンは既に使用されています
+throw std::logic_error(f_err(__FILE__, __LINE__, "This pin is already in use"));  // このピンは既に使用されています
     } else if (UART::IsUse[_uart_id]) {
-throw Error(__FILE__, __LINE__, "UART cannot be reinitialized");  // UARTを再度初期化することはできません
+throw std::logic_error(f_err(__FILE__, __LINE__, "UART cannot be reinitialized"));  // UARTを再度初期化することはできません
     }
 
     Pin::Status.at(_tx.gpio()) = PinStatus::UartTx;
@@ -107,11 +110,17 @@ throw Error(__FILE__, __LINE__, "UART cannot be reinitialized");  // UARTを再�
 
 void UART::write(Binary output_data) const
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     ::uart_write_blocking((_uart_id ? uart1 : uart0), output_data, output_data.size());  // pico-SDKの関数  UARTで送信
 }
 
 Binary UART::read() const
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     std::deque<uint8_t> other_data(0);
     std::swap((_uart_id ? uart1_queue : uart0_queue), other_data);
     return sc::Binary(other_data);  // 割り込み処理で一時保存しておいたデータを返す
@@ -121,6 +130,9 @@ Binary UART::read() const
 //! @brief 割り込み処理でUART0の受信をする際に呼び出される関数
 void UART::uart0_handler()
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     while (uart_is_readable(uart0))
     {
         uart0_queue.push_back(uart_getc(uart0));  // 1文字読み込んで末尾に値を追加
@@ -134,6 +146,9 @@ void UART::uart0_handler()
 //! @brief 割り込み処理でUART1の受信をする際に呼び出される関数
 void UART::uart1_handler()
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     while (uart_is_readable(uart1))
     {
         uart1_queue.push_back(uart_getc(uart1));  // 1文字読み込んで末尾に値を追加

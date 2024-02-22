@@ -15,13 +15,18 @@ namespace sc
 
 /***** class TX *****/
 
-TX::TX(int tx_gpio):
+TX::TX(int tx_gpio) try :
     Pin(tx_gpio)
 {
     if (gpio() != all_of(EnableUART0_TX) && gpio() != all_of(EnableUART1_TX))
     {
 throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect TX pin number was entered"));  // 正しくないTXピンの番号が入力されました
     }
+}
+catch (const std::exception& e)
+{
+    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+    print(e.what());
 }
 
 UART_ID TX::get_uart_id() const
@@ -38,13 +43,18 @@ throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect TX pin numbe
 
 /***** class RX *****/
 
-RX::RX(int tx_gpio):
+RX::RX(int tx_gpio) try :
     Pin(tx_gpio)
 {
     if (gpio() != all_of(EnableUART0_RX) && gpio() != all_of(EnableUART1_RX))
     {
 throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect RX pin number was entered"));  // 正しくないRXピンの番号が入力されました
     }
+}
+catch (const std::exception& e)
+{
+    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+    print(e.what());
 }
 
 UART_ID RX::get_uart_id() const
@@ -64,7 +74,7 @@ throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect RX pin numbe
 
 
 
-UART::UART(TX tx, RX rx, Frequency<Unit::Hz>  freq):
+UART::UART(TX tx, RX rx, Frequency<Unit::Hz>  freq) try :
     _tx(tx), _rx(rx), _freq(freq), _uart_id(tx.get_uart_id())
 {
     #ifdef DEBUG
@@ -106,6 +116,11 @@ throw std::logic_error(f_err(__FILE__, __LINE__, "UART cannot be reinitialized")
         irq_set_enabled(UART0_IRQ, true);  // 割り込み処理を有効にする
         uart_set_irq_enables(uart0, true, false);  // UARTの受信のみを割り込み処理で行う
     }
+}
+catch(const std::exception& e)
+{
+    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+    print(e.what());
 }
 
 void UART::write(Binary output_data) const

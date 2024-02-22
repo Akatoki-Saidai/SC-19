@@ -18,7 +18,7 @@ namespace sc
 GPIO<Out>::GPIO(Pin pin):
     GPIO::GPIO(pin, Pull::No) {}
 
-GPIO<Out>::GPIO(Pin pin, Pull pull):
+GPIO<Out>::GPIO(Pin pin, Pull pull) try :
     _pin(pin)
 {
     #ifdef DEBUG
@@ -34,6 +34,11 @@ throw std::logic_error(f_err(__FILE__, __LINE__, "Pin %hhu is already in use", _
     ::gpio_init(_pin.gpio());  // pico-SDKの関数  ピンの初期化を行う
     ::gpio_set_dir(_pin.gpio(), GPIO_OUT);  // pico-SDKの関数  通信方向の設定を行う
     _pin.set_pull(pull);  // プルアップ・ダウン抵抗を設定
+}
+catch(const std::exception& e)
+{
+    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+    print(e.what());
 }
 
 void GPIO<Out>::write(bool level) const
@@ -66,7 +71,7 @@ void GPIO<Out>::off() const
 GPIO<In>::GPIO(Pin pin):
     GPIO::GPIO(pin, Pull::No) {}
 
-GPIO<In>::GPIO(Pin pin, Pull pull):
+GPIO<In>::GPIO(Pin pin, Pull pull) try :
     _pin(pin)
 {
     #ifdef DEBUG
@@ -82,6 +87,11 @@ throw std::logic_error(f_err(__FILE__, __LINE__, "Pin %hhu is already in use", _
     ::gpio_init(_pin.gpio());  // pico-SDKの関数  ピンの初期化を行う
     ::gpio_set_dir(_pin.gpio(), GPIO_IN);  // pico-SDKの関数  通信方向の設定を行う
     _pin.set_pull(pull);  // プルアップ・ダウン抵抗を設定
+}
+catch(const std::exception& e)
+{
+    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+    print(e.what());
 }
 
 bool GPIO<In>::read() const

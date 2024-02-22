@@ -47,7 +47,7 @@ return std::string(formatted_chars);  // フォーマット済み文字列を出
     }
     catch(const std::exception& e) {std::cout << "           From  FILE : " << __FILE__ << "  LINE : " << __LINE__ << "\n                 MESSAGE : Failed to format string\n" << e.what() << std::flush;}  // ログの保存に失敗しました
     catch(...) {std::cout << "<<ERROR>>  FILE : " << __FILE__ << "  LINE : " << __LINE__ << "\n           MESSAGE : Failed to format string" << std::endl;}  // ログの保存に失敗しました
-    return "ERROR";
+    return "format error";
 }
 // この関数は以下の資料を参考にて作成しました
 // https://pyopyopyo.hatenablog.com/entry/2019/02/08/102456
@@ -63,7 +63,15 @@ std::string f_err(const std::string& FILE, int LINE, const std::string& message,
     #ifdef DEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
-    return "<<ERROR>>  FILE : " + std::string(FILE) + "  LINE : " + std::to_string(LINE) + "\n           MESSAGE : " + format_str(message, args...) + "\n";
+    try
+    {
+        return "<<ERROR>>  FILE : " + std::string(FILE) + "  LINE : " + std::to_string(LINE) + "\n           MESSAGE : " + format_str(message, args...) + "\n";
+    }
+    catch(const std::exception& e)
+    {
+        std::cout << "           From  FILE : " << __FILE__ << "  LINE : " << __LINE__ << "\n                 MESSAGE : Failed to format error message\n" << e.what() << std::flush;  // エラーメッセージのフォーマットに失敗しました
+        return "format error";
+    }
 }
 
 //! @brief エラーメッセージのフォーマットを整える
@@ -77,7 +85,16 @@ std::string f_err(const std::string& FILE, int LINE, const std::exception& e, co
     #ifdef DEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
-    return "           From  FILE : " + std::string(FILE) + "  LINE : " + std::to_string(LINE) + "\n                 MESSAGE : " + format_str(message, args...) + "\n" + e.what();
+    try
+    {
+        return "           From  FILE : " + std::string(FILE) + "  LINE : " + std::to_string(LINE) + "\n                 MESSAGE : " + format_str(message, args...) + "\n" + e.what();
+    }
+    catch(const std::exception& e)
+    {
+        std::cout << "           From  FILE : " << __FILE__ << "  LINE : " << __LINE__ << "\n                 MESSAGE : Failed to format error message\n" << e.what() << std::flush;  // エラーメッセージのフォーマットに失敗しました
+        return "format error";
+    }
+    
 }
 
 
@@ -100,20 +117,34 @@ inline std::function<void(const std::string&)> set_print = [](const std::string&
 //! @param format フォーマット文字列
 //! @param args フォーマット文字列に埋め込む値
 template<typename... Args>
-void print(const std::string& format, Args... args)
+void print(const std::string& format, Args... args) noexcept
 {
     #ifdef DEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
-    set_print(format_str(format, args...));
+    try
+    {
+        set_print(format_str(format, args...));
+    }
+    catch(const std::exception& e)
+    {
+        std::cout << "           From  FILE : " << __FILE__ << "  LINE : " << __LINE__ << "\n                 MESSAGE : Failed to print message\n" << e.what() << std::flush;
+    }
 }
 
 
 //! @brief 指定した時間 待機
 //! @param time 待機する時間 (100_ms のように入力)
-inline void sleep(Time<Unit::s> time)
+inline void sleep(Time<Unit::s> time) noexcept
 {
-    ::sleep_us(static_cast<double>(time * (1/micro)));  // pico-sdkの関数  マイクロ秒待機
+    try
+    {
+        ::sleep_us(static_cast<double>(time * (1/micro)));  // pico-sdkの関数  マイクロ秒待機
+    }
+    catch(const std::exception& e)
+    {
+        std::cout << "           From  FILE : " << __FILE__ << "  LINE : " << __LINE__ << "\n                 MESSAGE : Failed to sleep\n" << e.what() << std::flush;
+    }
 }
 
 

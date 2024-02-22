@@ -3,7 +3,7 @@
 namespace sc 
 {
 
-SD::SD()
+SD::SD() try
 {
     #ifdef DEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
@@ -12,7 +12,17 @@ SD::SD()
 
     fr = f_mount(&pSD->fatfs, pSD->pcName, 1);
 
-    if (FR_OK != fr) panic("f_mount error: %s (%d)\n", FRESULT_str(fr), fr);
+    if (FR_OK != fr)
+    {
+        // panic("f_mount error: %s (%d)\n", FRESULT_str(fr), fr);
+        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+        print(f_err(__FILE__, __LINE__, "f_mount error: %s (%d)\n", FRESULT_str(fr), fr));
+    }
+}
+catch(const std::exception& e)
+{
+    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+    print(e.what());
 }
 
 SD::~SD()
@@ -28,7 +38,8 @@ void SD::write(const std::string& write_str)
     FIL fil;
     fr = f_open(&fil, filename, FA_OPEN_APPEND | FA_WRITE);
     if (FR_OK != fr && FR_EXIST != fr)
-        panic("f_open(%s) error: %s (%d)\n", filename, FRESULT_str(fr), fr);
+        // panic("f_open(%s) error: %s (%d)\n", filename, FRESULT_str(fr), fr);
+        print(f_err(__FILE__, __LINE__, "f_open(%s) error: %s (%d)\n", filename, FRESULT_str(fr), fr));
     if (f_printf(&fil, write_str.c_str()) < 0) {
         printf("f_printf failed\n");
     }

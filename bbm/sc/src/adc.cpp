@@ -14,7 +14,7 @@ namespace sc
 
 /***** class ADC *****/
 
-ADC::ADC(Pin adc_pin):
+ADC::ADC(Pin adc_pin) try :
     _adc_pin(adc_pin), _channel(ADC::get_channel(adc_pin))
 {
     #ifdef DEBUG
@@ -38,6 +38,11 @@ throw std::logic_error(f_err(__FILE__, __LINE__, "ADC %hhu cannot be reinitializ
 
     ::adc_gpio_init(_adc_pin.gpio());
 }
+catch (const std::exception& e)
+{
+    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+    print(e.what());
+}
 
 uint8_t ADC::get_channel(Pin pin)
 {
@@ -59,7 +64,7 @@ uint16_t ADC::read() const
 
 /***** class PicoTemp *****/
 
-PicoTemp::PicoTemp()
+PicoTemp::PicoTemp() try
 {
     #ifdef DEBUG
     std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
@@ -72,6 +77,11 @@ PicoTemp::PicoTemp()
     ADC::IsUse[4] = true;
 
     ::adc_set_temp_sensor_enabled(true);  // 温度センサを有効にする
+}
+catch(const std::exception& e)
+{
+    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+    print(e.what());
 }
 
 dimension::degC PicoTemp::read()
@@ -86,7 +96,7 @@ dimension::degC PicoTemp::read()
 
 /***** class VsysVoltage *****/
 
-VsysVoltage::VsysVoltage()
+VsysVoltage::VsysVoltage() try
 {
     #ifdef DEBUG
     std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
@@ -99,6 +109,11 @@ VsysVoltage::VsysVoltage()
     ADC::IsUse[3] = true;
 
     ::adc_gpio_init(29);
+}
+catch(const std::exception& e)
+{
+    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+    print(e.what());
 }
 
 dimension::V VsysVoltage::read()

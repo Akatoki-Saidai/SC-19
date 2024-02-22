@@ -29,7 +29,7 @@ throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect Duty value w
 
 /***** class PWM *****/
 
-PWM::PWM(Pin pin, Frequency<Unit::Hz> freq):
+PWM::PWM(Pin pin, Frequency<Unit::Hz> freq) try :
     _pin(pin), _slice(::pwm_gpio_to_slice_num(pin.gpio())), _channel(::pwm_gpio_to_channel(pin.gpio()) == 1 ? Channel::B : Channel::A), _wrap(to_wrap(freq)), _clk_div(to_clk_div(freq, to_wrap(freq)))
 {
     #ifdef DEBUG
@@ -50,6 +50,11 @@ throw std::logic_error(f_err(__FILE__, __LINE__, "This pin is already in use"));
     ::pwm_set_output_polarity(_slice, false, false);  // pico-SDKの関数  チャンネルAとBの出力値の0と1を反転させるなら，それぞれtrue
 
     ::pwm_set_enabled(_slice, true);  // pico-SDKの関数  PWMをオンにする
+}
+catch (const std::exception& e)
+{
+    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+    print(e.what());
 }
 
 void PWM::write(Duty duty) const

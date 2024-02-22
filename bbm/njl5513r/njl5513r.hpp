@@ -14,8 +14,15 @@ class NJL5513R
     const LED& _green_led;
 
 public:
-    NJL5513R(const ADC& lux_adc, const LED& red_led, const LED& green_led):
-        _lux_adc(lux_adc), _red_led(red_led), _green_led(green_led) {}
+    NJL5513R(const ADC& lux_adc, const LED& red_led, const LED& green_led) try :
+        _lux_adc(lux_adc), _red_led(red_led), _green_led(green_led) 
+    {
+    }
+    catch(const std::exception& e)
+    {
+        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+        print(e.what());
+    }
 
     const LED& green_led()
         {return _green_led;}

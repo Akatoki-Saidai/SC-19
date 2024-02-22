@@ -115,6 +115,13 @@ public:
     //! @note バイト列のサイズ以上のindexを指定した場合，エラーが発生するかは未定義．
     uint8_t operator[](std::size_t index) const;
 
+    //! @brief バイト列のindex番目の値を返す
+    //! @param index 先頭から何番目か．先頭は0
+    //! @return index番目の値．
+    //! @note バイト列のサイズ以上のindexを指定した場合，エラーが発生するかは未定義．
+    uint8_t operator[](int index) const 
+        {return _binary_data[index];}
+
     //! @brief vector型への変換
     //! @return vector型の値
     operator std::vector<uint8_t>() const;

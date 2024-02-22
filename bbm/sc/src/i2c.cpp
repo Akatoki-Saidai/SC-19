@@ -17,13 +17,18 @@ namespace sc
 
 /***** class SDA *****/
 
-SDA::SDA(int sda_gpio):
+SDA::SDA(int sda_gpio) try :
     Pin(sda_gpio)
 {
     if (gpio() != all_of(EnableI2C0_SDA) && gpio() != all_of(EnableI2C1_SDA))
     {
 throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect SDA pin number was entered"));  // 正しくないSDAピンの番号が入力されました
     }
+}
+catch (const std::exception& e)
+{
+    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+    print(e.what());
 }
 
 I2C_ID SDA::get_i2c_id() const
@@ -40,13 +45,18 @@ throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect SDA pin numb
 
 /***** class SCL *****/
 
-SCL::SCL(int sda_gpio):
+SCL::SCL(int sda_gpio) try :
     Pin(sda_gpio)
 {
     if (gpio() != all_of(EnableI2C0_SCL) && gpio() != all_of(EnableI2C1_SCL))
     {
 throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect SCL pin number was entered"));  // 正しくないSCLピンの番号が入力されました
     }
+}
+catch (const std::exception& e)
+{
+    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+    print(e.what());
 }
 
 I2C_ID SCL::get_i2c_id() const
@@ -108,7 +118,7 @@ I2C::I2C(SDA sda, SCL scl):
     #endif
 }
 
-I2C::I2C(SDA sda, SCL scl, Frequency<Unit::Hz> freq):
+I2C::I2C(SDA sda, SCL scl, Frequency<Unit::Hz> freq) try :
     _sda(sda), _scl(scl), _freq(freq), _i2c_id(sda.get_i2c_id())
 {
     #ifdef DEBUG
@@ -134,6 +144,11 @@ throw std::logic_error(f_err(__FILE__, __LINE__, "I2C cannot be reinitialized"))
     ::gpio_pull_up(_sda.gpio());  // pico-SDKの関数  プルアップ抵抗を有効にする
     ::gpio_set_function(_scl.gpio(), GPIO_FUNC_I2C);  // pico-SDKの関数  ピンの機能をI2Cモードにする
     ::gpio_pull_up(_scl.gpio());  // pico-SDKの関数  プルアップ抵抗を有効にする
+}
+catch(const std::exception& e)
+{
+    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+    print(e.what());
 }
 
 void I2C::write(Binary output_data, SlaveAddr slave_addr) const

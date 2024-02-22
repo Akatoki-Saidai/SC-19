@@ -3,6 +3,8 @@
 namespace sc
 {
 
+static uint8_t exit_pin_gpio_num = 16;  // 強制終了させるためのピン番号
+void exit_callback(uint, uint32_t);  // 強制終了させるための関数
 
 int main()
 {
@@ -27,6 +29,7 @@ int main()
         printf("7");
         // GPIO 12~15 はSDカード
         GPIO<In> program_exit(Pin(16), Pull::Down);  // 外部からプログラムを終了させる
+        exit_pin_gpio_num = program_exit.gpio();
         GPIO<In> not_separate_para(Pin(17), Pull::Up);  // パラシュート分離の検知用ピン (分離したらHigh(1))
         printf("8");
         // GPIO18は未使用
@@ -60,6 +63,9 @@ int main()
         if (usb_conect.read() == true)
         {
             flush.print();
+            #ifdef DEBUG
+                flush.clear();
+            #endif
         } else {
             flush.clear();  // フラッシュメモリを削除(削除しないと書き込めない)
         }
@@ -67,13 +73,13 @@ int main()
         // print関数を設定
         set_print = [&](const std::string & message)
         {
-            std::cout << message << std::endl;
-            sd.write(message);
-            flush.write(message);
+            try {std::cout << message << std::endl;} catch(const std::exception& e){printf(e.what());}
+            try {flush.write(message);} catch(const std::exception& e){printf(e.what());}
+            try {sd.write(message);} catch(const std::exception& e){printf(e.what());}
         };
 
         // program_exit(16)ピンが1のとき，プログラムを強制終了する
-        // gpio_set_irq_enabled_with_callback(program_exit.gpio(), GPIO_IRQ_EDGE_RISE, true, exit_16_callback);
+        gpio_set_irq_enabled_with_callback(program_exit.gpio(), GPIO_IRQ_EDGE_RISE, true, exit_callback);
 
 
     /***** loop *****/
@@ -130,7 +136,7 @@ int main()
                 led_pico.on();  // pico内蔵LEDを点ける
                 led_pico.off();
 
-                // speaker.play_windows7();  // windows7?を再生
+                speaker.play_windows7();  // windows7?を再生
 
                 motor.forward(1.0);  // 前に進む
                 motor.right(1.0);  // 右に進む
@@ -154,11 +160,24 @@ int main()
     catch(const std::exception& e)
     {
         // エラー時の出力
-        std::cerr << e.what() << std::endl;
+        print(e.what());
+        print("\nOut of the loop\n");
         sleep(100_ms);
         exit(EXIT_FAILURE);
     }
 }
+
+
+
+void exit_callback(uint gpio, uint32_t emask)
+{
+    if (gpio != exit_pin_gpio_num) return;
+    try {sc::print("\nIRQ Exit\n");}
+    catch (...) {printf("\nIRQ Exit\n");}
+    sleep_ms(100);
+    exit((volatile int)0);
+}
+
 
 }  // namespace sc
 

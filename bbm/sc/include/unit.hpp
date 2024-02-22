@@ -311,7 +311,7 @@ class Vector3
 public:
     //! @brief 3つの値からベクトルを構築
     constexpr Vector3(Element x, Element y, Element z):
-        _data({x, y, z}) {}
+        _data{x, y, z} {}
 
     constexpr Element x() const
         {return _data[0];}

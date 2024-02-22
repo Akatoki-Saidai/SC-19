@@ -48,7 +48,7 @@ uint8_t accel_val = 0x28; //LIA_DATA_X_LSB 0x28
 
 //以下class BNO055で定義した関数とかの中身
 
-BNO055::BNO055(const I2C& i2c):
+BNO055::BNO055(const I2C& i2c) try :
     _i2c(i2c)
 {
     #ifdef DEBUG
@@ -65,6 +65,11 @@ BNO055::BNO055(const I2C& i2c):
     // Call accelerometer initialisation function
     accel_init();
 
+}
+catch(const std::exception& e)
+{
+    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+    print(e.what());
 }
 
 std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity<Unit::T>,AngularVelocity<Unit::rad_s>> BNO055::read(){
@@ -148,58 +153,74 @@ void BNO055::accel_init(void){
     uint8_t chipID[1];
     // i2c_write_blocking(i2c1, addr, &reg, 1, true);
     // i2c_read_blocking(i2c1, addr, chipID, 1, false);
-    chipID[0] = _i2c.read_memory(size_t(1), SlaveAddr(addr), MemoryAddr(reg)).at(0);
-
-//while文を削除した
-    if(chipID[0] != 0xA0){
+    try
+    {
+        chipID[0] = _i2c.read_memory(size_t(1), SlaveAddr(addr), MemoryAddr(reg)).at(0);
+        if(chipID[0] != 0xA0)
+        {
             printf("Chip ID Not Correct - Check Connection!");
+        }
     }
+    catch(const std::exception& e)
+    {
+        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+        print(e.what());
+        chipID[0] = 0xA0;
+    }
+    
+    try
+    {
+        // Use internal oscillator
+        uint8_t data[2];
+        data[0] = 0x3F;
+        data[1] = 0x40;
+        // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
+        _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
 
-    // Use internal oscillator
-    uint8_t data[2];
-    data[0] = 0x3F;
-    data[1] = 0x40;
-    // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
-    _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
+        // Reset all interrupt status bits
+        data[0] = 0x3F;
+        data[1] = 0x01;
+        // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
+        _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
 
-    // Reset all interrupt status bits
-    data[0] = 0x3F;
-    data[1] = 0x01;
-    // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
-    _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
+        // Configure Power Mode
+        data[0] = 0x3E;
+        data[1] = 0x00;
+        // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
+        _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
+        sleep_ms(50);
 
-    // Configure Power Mode
-    data[0] = 0x3E;
-    data[1] = 0x00;
-    // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
-    _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
-    sleep_ms(50);
+        // Defaul Axis Configuration
+        data[0] = 0x41;
+        data[1] = 0x24;
+        // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
+        _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
 
-    // Defaul Axis Configuration
-    data[0] = 0x41;
-    data[1] = 0x24;
-    // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
-    _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
+        // Default Axis Signs
+        data[0] = 0x42;
+        data[1] = 0x00;
+        // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
+        _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
 
-    // Default Axis Signs
-    data[0] = 0x42;
-    data[1] = 0x00;
-    // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
-    _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
+        // Set units to m/s^2
+        data[0] = 0x3B;
+        data[1] = 0b0001000;
+        // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
+        _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
+        sleep_ms(30);
 
-    // Set units to m/s^2
-    data[0] = 0x3B;
-    data[1] = 0b0001000;
-    // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
-    _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
-    sleep_ms(30);
-
-    // Set operation to AMG(Accel Mag Gyro)
-    data[0] = 0x3D;
-    data[1] = 0b1100;
-    // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
-    _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
-    sleep_ms(100);
+        // Set operation to AMG(Accel Mag Gyro)
+        data[0] = 0x3D;
+        data[1] = 0b1100;
+        // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
+        _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
+        sleep_ms(100);    
+    }
+    catch(const std::exception& e)
+    {
+        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+        print(e.what());
+    }
 }
 
 }

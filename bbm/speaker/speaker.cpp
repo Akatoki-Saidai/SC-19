@@ -9,7 +9,7 @@ namespace sc
 
 
 
-Speaker::Speaker(const Pin& pin):
+Speaker::Speaker(const Pin& pin) try :
     _pin(pin)
 {
     #ifdef DEBUG
@@ -30,7 +30,11 @@ Speaker::Speaker(const Pin& pin):
     pwm_config_set_clkdiv( &_speaker_pwm_slice_config, _speaker_pwm_clkdiv );
 
     pwm_set_enabled(_speaker_pwm_slice_num, true);
-
+}
+catch(const std::exception& e)
+{
+    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+    print(e.what());
 }
 
 void Speaker::play_starwars(){
@@ -41,15 +45,15 @@ void Speaker::play_starwars(){
     //使用する音の周波数の宣言(低いラ～高いド) 0は無音(休符)
     const double sound_rest = 0;
     const double sound_G4 = 391.995;
-    const double sound_A4 = 440; //ラ
-    const double sound_B4 = 493.883;
+    // const double sound_A4 = 440; //ラ
+    // const double sound_B4 = 493.883;
     const double sound_C5 = 523.251;
     const double sound_D5 = 587.330;
     const double sound_E5 = 659.255;
     const double sound_F5 = 698.456;
     const double sound_G5 = 783.991;
-    const double sound_A5 = 880;
-    const double sound_B5 = 987.767;
+    // const double sound_A5 = 880;
+    // const double sound_B5 = 987.767;
     const double sound_C6 = 1046.502;
 
 
@@ -98,7 +102,7 @@ void Speaker::play_starwars(){
         
         
         // 次の音
-        starwars_melody_now_itr = ++starwars_melody_now_itr;
+        ++starwars_melody_now_itr;
         
         // 音の継続
         /*
@@ -127,7 +131,7 @@ void Speaker::play_windows7(){
     const double sound_B4 = 493.883;
     const double sound_E5 = 659.255;
     const double sound_Fs5 = 761.672;
-    const double sound_B5 = 987.767;
+    // const double sound_B5 = 987.767;
 
     const double windows7_bps = 120 / 60;
     const double windows7_spb = 1 / windows7_bps;
@@ -153,7 +157,7 @@ void Speaker::play_windows7(){
         pwm_set_gpio_level( _pin.gpio(), ( speaker_pwm_wrap * speaker_duty ) );
         
         // 次の音
-        windows7_melody_now_itr = ++windows7_melody_now_itr;
+        ++windows7_melody_now_itr;
         
         // 音の継続
         if (windows7_melody_order == 1 || windows7_melody_order == 3){   

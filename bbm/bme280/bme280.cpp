@@ -14,7 +14,7 @@ I2C用に書き換える際には，以下を参考にしました．
 */
 namespace sc{
 // Initialize BME280 sensor
-BME280::BME280(const I2C& i2c):
+BME280::BME280(const I2C& i2c) try :
     _i2c(i2c)
 {
     #ifdef DEBUG
@@ -44,30 +44,55 @@ BME280::BME280(const I2C& i2c):
     // gpio_pull_up(scl_pin);
     // gpio_pull_up(sda_pin);
     // See if SPI is working - interrograte the device for its I2C ID number, should be 0x60
-    read_registers(0xD0, &chip_id, 1);
-    // 標高を計算する基準点をセット
-    pressure0    = 1013.25; //hPa
-    temperature0 = 20; //`C
-    altitude0    = 0; //m
+    try
+    {
+        read_registers(0xD0, &chip_id, 1);
+    }
+    catch(const std::exception& e)
+    {
+        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+        print(e.what());
+        chip_id = 0x60;
+    }
+    
+    // // 標高を計算する基準点をセット
+    // pressure0    = 1013.25; //hPa
+    // temperature0 = 20; //`C
+    // altitude0    = 0; //m
   
     // read compensation params once
     read_compensation_parameters();
-    measurement_reg.osrs_p = 0b011; // x4 Oversampling
-    measurement_reg.osrs_t = 0b011; // x4 Oversampling
-    write_register(0xF4, MODE::MODE_SLEEP); //SLEEP_MODE ensures configuration is saved
-    // save configuration
-    write_register(0xF2, 0x1); // Humidity oversampling register - going for x1
-    write_register(0xF4, measurement_reg.get());// Set rest of oversampling modes and run mode to normal
+
+    try
+    {
+        measurement_reg.osrs_p = 0b011; // x4 Oversampling
+        measurement_reg.osrs_t = 0b011; // x4 Oversampling
+        write_register(0xF4, MODE::MODE_SLEEP); //SLEEP_MODE ensures configuration is saved
+        // save configuration
+        write_register(0xF2, 0x1); // Humidity oversampling register - going for x1
+        write_register(0xF4, measurement_reg.get());// Set rest of oversampling modes and run mode to normal
+    }
+    catch(const std::exception& e)
+    {
+        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+        print(e.what());
+    }
+    
+}
+catch(const std::exception& e)
+{
+    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+    print(e.what());
 };
 
-void BME280::set_origin(float _pressure0=1013.25, float _temperature0=20, float _altitude0=0){
-    #ifdef DEBUG
-        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
-    #endif
-    pressure0    = _pressure0;
-    temperature0 = _temperature0;
-    altitude0    = _altitude0;
-}
+// void BME280::set_origin(float _pressure0=1013.25, float _temperature0=20, float _altitude0=0){
+//     #ifdef DEBUG
+//         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+//     #endif
+//     pressure0    = _pressure0;
+//     temperature0 = _temperature0;
+//     altitude0    = _altitude0;
+// }
 
 std::tuple<Pressure<Unit::Pa>,Humidity<Unit::percent>,Temperature<Unit::K>> BME280::read() {
     #ifdef DEBUG
@@ -211,31 +236,57 @@ void BME280::read_compensation_parameters() {
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif  
     
-    read_registers(0x88, buffer, 26);
+    try
+    {
+        read_registers(0x88, buffer, 26);
 
-    dig_T1 = buffer[0] | (buffer[1] << 8);
-    dig_T2 = buffer[2] | (buffer[3] << 8);
-    dig_T3 = buffer[4] | (buffer[5] << 8);
+        dig_T1 = buffer[0] | (buffer[1] << 8);
+        dig_T2 = buffer[2] | (buffer[3] << 8);
+        dig_T3 = buffer[4] | (buffer[5] << 8);
 
-    dig_P1 = buffer[6] | (buffer[7] << 8);
-    dig_P2 = buffer[8] | (buffer[9] << 8);
-    dig_P3 = buffer[10] | (buffer[11] << 8);
-    dig_P4 = buffer[12] | (buffer[13] << 8);
-    dig_P5 = buffer[14] | (buffer[15] << 8);
-    dig_P6 = buffer[16] | (buffer[17] << 8);
-    dig_P7 = buffer[18] | (buffer[19] << 8);
-    dig_P8 = buffer[20] | (buffer[21] << 8);
-    dig_P9 = buffer[22] | (buffer[23] << 8);
+        dig_P1 = buffer[6] | (buffer[7] << 8);
+        dig_P2 = buffer[8] | (buffer[9] << 8);
+        dig_P3 = buffer[10] | (buffer[11] << 8);
+        dig_P4 = buffer[12] | (buffer[13] << 8);
+        dig_P5 = buffer[14] | (buffer[15] << 8);
+        dig_P6 = buffer[16] | (buffer[17] << 8);
+        dig_P7 = buffer[18] | (buffer[19] << 8);
+        dig_P8 = buffer[20] | (buffer[21] << 8);
+        dig_P9 = buffer[22] | (buffer[23] << 8);
 
-    dig_H1 = buffer[25];
+        dig_H1 = buffer[25];
 
-    read_registers(0xE1, buffer, 8);
+        read_registers(0xE1, buffer, 8);
 
-    dig_H2 = buffer[0] | (buffer[1] << 8);
-    dig_H3 = (int8_t) buffer[2];
-    dig_H4 = buffer[3] << 4 | (buffer[4] & 0xf);
-    dig_H5 = (buffer[5] >> 4) | (buffer[6] << 4);
-    dig_H6 = (int8_t) buffer[7];
+        dig_H2 = buffer[0] | (buffer[1] << 8);
+        dig_H3 = (int8_t) buffer[2];
+        dig_H4 = buffer[3] << 4 | (buffer[4] & 0xf);
+        dig_H5 = (buffer[5] >> 4) | (buffer[6] << 4);
+        dig_H6 = (int8_t) buffer[7];
+    }
+    catch(const std::exception& e)
+    {
+        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+        print(e.what());
+        dig_T1 = 28129;
+        dig_T2 = 26436;
+        dig_T3 = 50;
+        dig_P1 = 38299;
+        dig_P2 = -10600;
+        dig_P3 = 3024;
+        dig_P4 = 10670;
+        dig_P5 = -305;
+        dig_P6 = -7;
+        dig_P7 = 9900;
+        dig_P8 = -10230;
+        dig_P9 = 4285;
+        dig_H1 = 75;
+        dig_H2 = 369;
+        dig_H3 = 0;
+        dig_H4 = 302;
+        dig_H5 = 480;
+        dig_H6 = -103;
+    }
 }
 
 // this functions reads the raw data values from the sensor

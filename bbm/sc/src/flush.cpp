@@ -12,11 +12,16 @@
 namespace sc
 {
 
-Flush::Flush()
+Flush::Flush() try
 {
     #ifdef DEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
+}
+catch(const std::exception& e)
+{
+    sc::print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+    sc::print(e.what());
 }
 
 void Flush::clear()

@@ -24,12 +24,17 @@ public:
     // in1_pwm : モータードライバのIN1
     // in2_pwm : モータードライバのIN2
     // 左右のモーターを扱う場合はMotor2クラスを使用してください
-    Motor1(const PWM& in1_pwm, const PWM& in2_pwm):
+    Motor1(const PWM& in1_pwm, const PWM& in2_pwm) try :
         _in1_pwm(in1_pwm), _in2_pwm(in2_pwm)
     {
         #ifdef DEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
+    }
+    catch(const std::exception& e)
+    {
+        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+        print(e.what());
     }
 
     // モーターを動かす
@@ -54,13 +59,18 @@ public:
     //! @param left_motor 左のモーター
     //! @param right_motor 右のモーター
     // 左右のモーターを扱う場合はMotor2クラスを使用してください
-    Motor2(const Motor1& left_motor, const Motor1& right_motor):
+    Motor2(const Motor1& left_motor, const Motor1& right_motor) try :
         _left_motor(left_motor),
         _right_motor(right_motor) 
     {
         #ifdef DEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
+    }
+    catch (const std::exception& e)
+    {
+        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+        print(e.what());
     }
 
     // 左右のモーターを同時に動かす

@@ -27,7 +27,7 @@ public:
     Motor1(const PWM& in1_pwm, const PWM& in2_pwm) try :
         _in1_pwm(in1_pwm), _in2_pwm(in2_pwm)
     {
-        #ifdef DEBUG
+        #ifndef NODEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
     }
@@ -63,7 +63,7 @@ public:
         _left_motor(left_motor),
         _right_motor(right_motor) 
     {
-        #ifdef DEBUG
+        #ifndef NODEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
     }
@@ -78,7 +78,7 @@ public:
     // right_speed : 右モーターの出力  -1.0以上+1.0以下の値  負の値のとき逆回転
     void run(float left_speed, float right_speed) const
     {
-        #ifdef DEBUG
+        #ifndef NODEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
         _left_motor.run(left_speed);
@@ -89,7 +89,7 @@ public:
     // speed : モーターの出力  -1.0以上+1.0以下の値  負の値のとき逆回転
     void forward(float speed) const 
     {
-        #ifdef DEBUG
+        #ifndef NODEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
         run(speed, speed);
@@ -99,7 +99,7 @@ public:
     // speed : モーターの出力  -1.0以上+1.0以下の値  負の値のとき逆回転
     void left(float speed) const
     {
-        #ifdef DEBUG
+        #ifndef NODEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
         run(0.0F, speed);
@@ -109,7 +109,7 @@ public:
     // speed : モーターの出力  -1.0以上+1.0以下の値  負の値のとき逆回転
     void right(float speed) const
     {
-        #ifdef DEBUG
+        #ifndef NODEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
         run(speed, 0.0F);
@@ -118,7 +118,7 @@ public:
     // ブレーキをかける
     void brake() const
     {
-        #ifdef DEBUG
+        #ifndef NODEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
         _left_motor.brake();

@@ -21,7 +21,7 @@ GPIO<Out>::GPIO(Pin pin):
 GPIO<Out>::GPIO(Pin pin, Pull pull) try :
     _pin(pin)
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     if (Pin::Status.at(_pin.gpio()) == PinStatus::NoUse)
@@ -43,7 +43,7 @@ catch(const std::exception& e)
 
 void GPIO<Out>::write(bool level) const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     ::gpio_put(_pin.gpio(), level);  // pico-SDKの関数  ピンにHighかLowを出力する
@@ -51,7 +51,7 @@ void GPIO<Out>::write(bool level) const
 
 void GPIO<Out>::on() const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     this->write(1);
@@ -59,7 +59,7 @@ void GPIO<Out>::on() const
 
 void GPIO<Out>::off() const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     this->write(0);
@@ -74,7 +74,7 @@ GPIO<In>::GPIO(Pin pin):
 GPIO<In>::GPIO(Pin pin, Pull pull) try :
     _pin(pin)
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     if (Pin::Status.at(_pin.gpio()) == PinStatus::NoUse)
@@ -96,7 +96,7 @@ catch(const std::exception& e)
 
 bool GPIO<In>::read() const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     return ::gpio_get(_pin.gpio());  // pico-SDKの関数  ピンがHighになっているかLowになっているかを取得する

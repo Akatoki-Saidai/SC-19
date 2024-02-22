@@ -77,7 +77,7 @@ throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect RX pin numbe
 UART::UART(TX tx, RX rx, Frequency<Unit::Hz>  freq) try :
     _tx(tx), _rx(rx), _freq(freq), _uart_id(tx.get_uart_id())
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     if (tx.get_uart_id() != rx.get_uart_id())
@@ -125,7 +125,7 @@ catch(const std::exception& e)
 
 void UART::write(Binary output_data) const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     ::uart_write_blocking((_uart_id ? uart1 : uart0), output_data, output_data.size());  // pico-SDKの関数  UARTで送信
@@ -133,7 +133,7 @@ void UART::write(Binary output_data) const
 
 Binary UART::read() const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     std::deque<uint8_t> other_data(0);
@@ -145,7 +145,7 @@ Binary UART::read() const
 //! @brief 割り込み処理でUART0の受信をする際に呼び出される関数
 void UART::uart0_handler()
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     while (uart_is_readable(uart0))
@@ -161,7 +161,7 @@ void UART::uart0_handler()
 //! @brief 割り込み処理でUART1の受信をする際に呼び出される関数
 void UART::uart1_handler()
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     while (uart_is_readable(uart1))

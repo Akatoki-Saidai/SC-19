@@ -32,6 +32,8 @@ public:
     ~SD();
 
     void write(const std::string& write_str);
+
+    static inline bool save = true;  // 正常に動作しているか
 };
 
 }

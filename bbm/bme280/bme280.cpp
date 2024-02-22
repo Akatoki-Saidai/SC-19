@@ -17,7 +17,7 @@ namespace sc{
 BME280::BME280(const I2C& i2c) try :
     _i2c(i2c)
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
 
@@ -71,6 +71,8 @@ BME280::BME280(const I2C& i2c) try :
         // save configuration
         write_register(0xF2, 0x1); // Humidity oversampling register - going for x1
         write_register(0xF4, measurement_reg.get());// Set rest of oversampling modes and run mode to normal
+
+        read();  // 最初の測定は誤差が大きいので，ここで測定しておく
     }
     catch(const std::exception& e)
     {
@@ -86,7 +88,7 @@ catch(const std::exception& e)
 };
 
 // void BME280::set_origin(float _pressure0=1013.25, float _temperature0=20, float _altitude0=0){
-//     #ifdef DEBUG
+//     #ifndef NODEBUG
 //         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
 //     #endif
 //     pressure0    = _pressure0;
@@ -95,7 +97,7 @@ catch(const std::exception& e)
 // }
 
 std::tuple<Pressure<Unit::Pa>,Humidity<Unit::percent>,Temperature<Unit::K>> BME280::read() {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     int32_t pressure, humidity, temperature;
@@ -141,7 +143,7 @@ uint8_t BME280::get_chipID() {
 
 // for the compensate_functions read the Bosch information on the BME280
 int32_t BME280::compensate_temp(int32_t adc_T) {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     int32_t var1, var2, T;
@@ -155,7 +157,7 @@ int32_t BME280::compensate_temp(int32_t adc_T) {
 }
 
 uint32_t BME280::compensate_pressure(int32_t adc_P) {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     int32_t var1, var2;
@@ -183,7 +185,7 @@ uint32_t BME280::compensate_pressure(int32_t adc_P) {
 }
 
 uint32_t BME280::compensate_humidity(int32_t adc_H) {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     int32_t v_x1_u32r;
@@ -201,7 +203,7 @@ uint32_t BME280::compensate_humidity(int32_t adc_H) {
 }
 
 void BME280::write_register(uint8_t reg, uint8_t data) {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     uint8_t buf[2];
@@ -214,7 +216,7 @@ void BME280::write_register(uint8_t reg, uint8_t data) {
 }
 
 void BME280::read_registers(uint8_t reg, uint8_t *buf, uint16_t len) {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     // For this particular device, we send the device the register we want to read
@@ -232,7 +234,7 @@ void BME280::read_registers(uint8_t reg, uint8_t *buf, uint16_t len) {
 
 /* This function reads the manufacturing assigned compensation parameters from the device */
 void BME280::read_compensation_parameters() {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif  
     
@@ -291,7 +293,7 @@ void BME280::read_compensation_parameters() {
 
 // this functions reads the raw data values from the sensor
 void BME280::bme280_read_raw(int32_t *humidity, int32_t *pressure, int32_t *temperature) {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     uint8_t readBuffer[8];

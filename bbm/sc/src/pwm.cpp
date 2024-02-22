@@ -32,7 +32,7 @@ throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect Duty value w
 PWM::PWM(Pin pin, Frequency<Unit::Hz> freq) try :
     _pin(pin), _slice(::pwm_gpio_to_slice_num(pin.gpio())), _channel(::pwm_gpio_to_channel(pin.gpio()) == 1 ? Channel::B : Channel::A), _wrap(to_wrap(freq)), _clk_div(to_clk_div(freq, to_wrap(freq)))
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     if (Pin::Status.at(_pin.gpio()) != PinStatus::NoUse)
@@ -59,7 +59,7 @@ catch (const std::exception& e)
 
 void PWM::write(Duty duty) const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     ::pwm_set_gpio_level(_pin.gpio(), _wrap * duty);  // pico-SDKの関数  あるGPIOピンのPWMの出力レベルを設定する
@@ -68,7 +68,7 @@ void PWM::write(Duty duty) const
 
 void PWM::write(Time<Unit::s> high_time) const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     ::pwm_set_gpio_level(_pin.gpio(), static_cast<double>(high_time)*SysClock*SysClock/(_clk_div*_clk_div*(_wrap+1)));  // pico-SDKの関数  あるGPIOピンのPWMの出力レベルを設定する
@@ -77,7 +77,7 @@ void PWM::write(Time<Unit::s> high_time) const
 
 uint16_t PWM::to_wrap(Frequency<Unit::Hz> freq)
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     if (freq < MinFreq || MaxFreq < freq)
@@ -95,7 +95,7 @@ return (SysClock / not0(static_cast<double>(freq))) - 1;
 
 float PWM::to_clk_div(Frequency<Unit::Hz> freq, uint16_t wrap)
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     if (freq < MinFreq || MaxFreq < freq)

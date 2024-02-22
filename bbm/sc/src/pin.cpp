@@ -43,7 +43,7 @@ Pin::operator uint8_t() const
 
 void Pin::set_pull(Pull pull) const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     switch (pull)

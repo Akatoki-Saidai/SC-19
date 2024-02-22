@@ -12,7 +12,7 @@ namespace sc
 Speaker::Speaker(const Pin& pin) try :
     _pin(pin)
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     //pwmの設定
@@ -38,7 +38,7 @@ catch(const std::exception& e)
 }
 
 void Speaker::play_starwars(){
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     
@@ -124,7 +124,7 @@ void Speaker::play_starwars(){
 }
 
 void Speaker::play_windows7(){
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     // 使用する音

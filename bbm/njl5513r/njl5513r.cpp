@@ -16,7 +16,7 @@
 #define GPIO_GREEN_LED 28 // 緑LED用GPIO
 
 void bio_adc_init(){
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     adc_init();
@@ -26,7 +26,7 @@ void bio_adc_init(){
 }
 
 void bio_LED_init(){
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     gpio_init(GPIO_RED_LED);

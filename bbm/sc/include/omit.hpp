@@ -29,14 +29,14 @@ public:
     explicit MemoryAddr(unsigned int memory_addr):
         _memory_addr(memory_addr) 
     {
-        #ifdef DEBUG
+        #ifndef NODEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
     }
     
     operator I2C::MemoryAddr() const
         {
-            #ifdef DEBUG
+            #ifndef NODEBUG
                 std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
             #endif
             return I2C::MemoryAddr(_memory_addr);
@@ -44,7 +44,7 @@ public:
 
     operator SPI::MemoryAddr() const
     {
-        #ifdef DEBUG
+        #ifndef NODEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
         return SPI::MemoryAddr(_memory_addr);

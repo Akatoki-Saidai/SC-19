@@ -121,7 +121,7 @@ SPI::MemoryAddr::operator uint8_t() const
 SPI::SPI(MISO miso, CS cs, SCK sck, MOSI mosi):
     SPI(miso, cs, sck, mosi, 10000_hz)
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
 }
@@ -129,7 +129,7 @@ SPI::SPI(MISO miso, CS cs, SCK sck, MOSI mosi):
 SPI::SPI(MISO miso, CS cs, SCK sck, MOSI mosi, Frequency<Unit::Hz>  freq):
     _miso(miso), _sck(sck), _mosi(mosi), _freq(freq), _spi_id(miso.get_spi_id())
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     if (!(miso.get_spi_id() == sck.get_spi_id() && sck.get_spi_id() == mosi.get_spi_id()))
@@ -165,7 +165,7 @@ throw std::logic_error(f_err(__FILE__, __LINE__, "SPI cannot be reinitialized"))
 
 void SPI::write(Binary output_data, CS cs_pin) const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     if (cs_pin.size() > 1)
@@ -184,7 +184,7 @@ throw std::runtime_error(f_err(__FILE__, __LINE__, "Failed to transmit via SPI. 
 
 Binary SPI::read(std::size_t size, CS cs_pin) const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     if (cs_pin.size() > 1)
@@ -207,7 +207,7 @@ throw std::runtime_error(f_err(__FILE__, __LINE__, "Failed to receive via SPI. C
 
 void SPI::write_memory(Binary output_data, CS cs_pin, MemoryAddr memory_addr) const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     if (cs_pin.size() > 1)
@@ -227,7 +227,7 @@ throw std::runtime_error(f_err(__FILE__, __LINE__, "Failed to transmit via SPI. 
 
 Binary SPI::read_memory(std::size_t size, CS cs_pin, MemoryAddr memory_addr) const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     if (cs_pin.size() > 1)

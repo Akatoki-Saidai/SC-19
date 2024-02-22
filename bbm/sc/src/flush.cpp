@@ -14,7 +14,7 @@ namespace sc
 
 Flush::Flush() try
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
 }
@@ -26,7 +26,7 @@ catch(const std::exception& e)
 
 void Flush::clear()
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     // 割り込み無効にする
@@ -43,7 +43,7 @@ void Flush::clear()
 
 void Flush::write(const Binary& write_binary)
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     static std::size_t _write_index = 0;
@@ -79,7 +79,7 @@ void Flush::write(const Binary& write_binary)
 
 Flush::~Flush()
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     this->write(std::string("\nlog end ") + __DATE__ + __TIME__);
@@ -88,7 +88,7 @@ Flush::~Flush()
 
 void Flush::print()
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     std::cout << "\n#################### Log Data ####################" << std::endl;

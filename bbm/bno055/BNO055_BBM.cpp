@@ -51,7 +51,7 @@ uint8_t accel_val = 0x28; //LIA_DATA_X_LSB 0x28
 BNO055::BNO055(const I2C& i2c) try :
     _i2c(i2c)
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
 
@@ -73,7 +73,7 @@ catch(const std::exception& e)
 }
 
 std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity<Unit::T>,AngularVelocity<Unit::rad_s>> BNO055::read(){
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     //線形加速度を読み取る
@@ -136,6 +136,15 @@ std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity
 
     AngularVelocity<Unit::rad_s>gyro_vector{dimension::rad_s(f_gyroX),dimension::rad_s(f_gyroY),dimension::rad_s(f_gyroZ)};
 
+    // 測定値がおかしくなったら再び初期化
+    if (accelX==0 && accelY==0 && accelZ==0 && grvX==0 && grvY==0 && grvZ==0 && magX==0 && magY==0 && magZ==0 && gyroX==0 && gyroY==0 && gyroZ==0)
+    {
+        print("!!reinitialize BNO!!\n");  // BNOを再び初期化します
+        accel_init();
+        sleep(100_ms);
+        throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is abnormal"));  // BNO055の測定値が異常です
+    }
+
     return {accel_vector,grav_vector,Mag_vector,gyro_vector};
 }
 
@@ -144,7 +153,7 @@ std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity
 
 // Initialise Accelerometer Function
 void BNO055::accel_init(void){
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     // Check to see if connection is correct

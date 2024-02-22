@@ -17,7 +17,7 @@ namespace sc
 ADC::ADC(Pin adc_pin) try :
     _adc_pin(adc_pin), _channel(ADC::get_channel(adc_pin))
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
     std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif    
     if (!(Pin::Status.at(_adc_pin.gpio()) == PinStatus::NoUse))
@@ -46,7 +46,7 @@ catch (const std::exception& e)
 
 uint8_t ADC::get_channel(Pin pin)
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
     std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     return pin.gpio() - 26;
@@ -54,7 +54,7 @@ uint8_t ADC::get_channel(Pin pin)
 
 uint16_t ADC::read() const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
     std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     ::adc_select_input(_channel);
@@ -66,7 +66,7 @@ uint16_t ADC::read() const
 
 PicoTemp::PicoTemp() try
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
     std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     if (ADC::IsUse[0]==false && ADC::IsUse[1]==false && ADC::IsUse[2]==false && ADC::IsUse[3]==false && ADC::IsUse[4]==false)
@@ -86,7 +86,7 @@ catch(const std::exception& e)
 
 dimension::degC PicoTemp::read()
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
     std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     ::adc_select_input(4);
@@ -98,7 +98,7 @@ dimension::degC PicoTemp::read()
 
 VsysVoltage::VsysVoltage() try
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
     std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     if (ADC::IsUse[0]==false && ADC::IsUse[1]==false && ADC::IsUse[2]==false && ADC::IsUse[3]==false && ADC::IsUse[4]==false)
@@ -118,7 +118,7 @@ catch(const std::exception& e)
 
 dimension::V VsysVoltage::read()
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
     std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     ::adc_select_input(3);

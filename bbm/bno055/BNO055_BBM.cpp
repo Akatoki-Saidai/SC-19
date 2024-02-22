@@ -51,7 +51,7 @@ uint8_t accel_val = 0x28; //LIA_DATA_X_LSB 0x28
 BNO055::BNO055(const I2C& i2c) try :
     _i2c(i2c)
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
 
@@ -73,7 +73,7 @@ catch(const std::exception& e)
 }
 
 std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity<Unit::T>,AngularVelocity<Unit::rad_s>> BNO055::read(){
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     //線形加速度を読み取る
@@ -153,7 +153,7 @@ std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity
 
 // Initialise Accelerometer Function
 void BNO055::accel_init(void){
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     // Check to see if connection is correct

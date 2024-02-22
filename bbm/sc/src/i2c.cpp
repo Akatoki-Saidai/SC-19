@@ -113,7 +113,7 @@ I2C::MemoryAddr::operator uint8_t() const
 I2C::I2C(SDA sda, SCL scl):
     I2C(sda, scl, 10000_hz)
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
 }
@@ -121,7 +121,7 @@ I2C::I2C(SDA sda, SCL scl):
 I2C::I2C(SDA sda, SCL scl, Frequency<Unit::Hz> freq) try :
     _sda(sda), _scl(scl), _freq(freq), _i2c_id(sda.get_i2c_id())
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     if (sda.get_i2c_id() != scl.get_i2c_id())
@@ -153,7 +153,7 @@ catch(const std::exception& e)
 
 void I2C::write(Binary output_data, SlaveAddr slave_addr) const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     int output_size = 0;  // 実際には何バイト送信したか
@@ -166,7 +166,7 @@ throw std::runtime_error(f_err(__FILE__, __LINE__, "Failed to transmit via I2C. 
 
 Binary I2C::read(std::size_t size, SlaveAddr slave_addr) const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     std::vector<uint8_t> input_data(size);
@@ -184,7 +184,7 @@ throw std::runtime_error(f_err(__FILE__, __LINE__, "Failed to receive via I2C. S
 
 void I2C::write_memory(Binary output_data, SlaveAddr slave_addr, MemoryAddr memory_addr) const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     Binary corrected_data = memory_addr + output_data;
@@ -198,7 +198,7 @@ throw std::runtime_error(f_err(__FILE__, __LINE__, "Failed to transmit via I2C. 
 
 Binary I2C::read_memory(std::size_t size, SlaveAddr slave_addr, MemoryAddr memory_addr) const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     std::vector<uint8_t> input_data(size);

@@ -59,7 +59,7 @@ int main()
         if (usb_conect.read() == true)
         {
             flush.print();
-            #ifdef DEBUG
+            #ifndef NODEBUG
                 flush.clear();
             #endif
         } else {
@@ -69,7 +69,7 @@ int main()
         // print関数を設定
         set_print = [&](const std::string & message)
         {
-            try {std::cout << message << std::endl;} catch(const std::exception& e){printf(e.what());}
+            try {std::cout << message << std::flush;} catch(const std::exception& e){printf(e.what());}
             try {flush.write(message);} catch(const std::exception& e){printf(e.what());}
             try {sd.write(message);} catch(const std::exception& e){printf(e.what());}
         };

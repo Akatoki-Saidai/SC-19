@@ -16,7 +16,7 @@ namespace sc
 HCSR04::HCSR04(Pin trig_pin, Pin echo_pin) try :
     _out_pin(trig_pin, Pull::Down), _in_pin(echo_pin)
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     // gpio_init(28);
@@ -36,7 +36,7 @@ catch(const std::exception& e)
 
 Length<Unit::m> HCSR04::read()
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     int temperature=20,humidity=60;

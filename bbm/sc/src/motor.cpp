@@ -15,7 +15,7 @@ namespace sc
 
 void Motor1::run(float speed) const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     if (speed < -1.0F || +1.0F < speed) 
@@ -38,7 +38,7 @@ void Motor1::run(float speed) const
 // ブレーキをかける
 void Motor1::brake() const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     _in1_pwm.write(1.0F);

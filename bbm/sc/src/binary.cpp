@@ -16,7 +16,7 @@ namespace sc
 
 std::size_t Binary::size() const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     return _binary_data.size();
@@ -24,7 +24,7 @@ std::size_t Binary::size() const
 
 uint8_t Binary::at(std::size_t index) const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     return _binary_data.at(index);
@@ -32,7 +32,7 @@ uint8_t Binary::at(std::size_t index) const
 
 std::string Binary::str() const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     return std::string(_binary_data.begin(), _binary_data.end());
@@ -40,7 +40,7 @@ std::string Binary::str() const
 
 uint8_t Binary::operator[](std::size_t index) const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     return _binary_data[index];
@@ -48,7 +48,7 @@ uint8_t Binary::operator[](std::size_t index) const
 
 Binary::operator std::vector<uint8_t>() const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     return std::vector<uint8_t>(_binary_data.begin(), _binary_data.end());
@@ -56,7 +56,7 @@ Binary::operator std::vector<uint8_t>() const
 
 Binary::operator std::string() const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     return std::string(_binary_data.begin(), _binary_data.end());
@@ -64,7 +64,7 @@ Binary::operator std::string() const
 
 Binary::operator const uint8_t*() const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     return _binary_data.c_str();
@@ -72,7 +72,7 @@ Binary::operator const uint8_t*() const
 
 const uint8_t* Binary::operator&() const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     return _binary_data.c_str();
@@ -80,7 +80,7 @@ const uint8_t* Binary::operator&() const
 
 Binary Binary::operator+ (const Binary& other_binary) const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     return Binary(this->_binary_data + other_binary._binary_data);
@@ -88,7 +88,7 @@ Binary Binary::operator+ (const Binary& other_binary) const
 
 void Binary::to_assign(uint8_t* reg_ptr) const
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     for (std::size_t i=0; i<_binary_data.size(); ++i)
@@ -100,7 +100,7 @@ void Binary::to_assign(uint8_t* reg_ptr) const
 
 Binary operator+ (uint8_t first_byte, const Binary& binary)
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     return Binary{first_byte} + binary;
@@ -108,7 +108,7 @@ Binary operator+ (uint8_t first_byte, const Binary& binary)
 
 Binary operator+ (const Binary& binary, uint8_t end_byte)
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     return binary + Binary{end_byte};
@@ -117,7 +117,7 @@ Binary operator+ (const Binary& binary, uint8_t end_byte)
 
 std::ostream& operator<<(std::ostream& os, const Binary& binary)
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     os << binary._binary_data.c_str();

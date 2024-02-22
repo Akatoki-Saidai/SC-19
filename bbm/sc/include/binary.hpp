@@ -42,7 +42,7 @@ public:
     Binary(const Iterable& data):
         _binary_data(std::begin(data), std::end(data))
     {
-        #ifdef DEBUG
+        #ifndef NODEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
     }
@@ -69,7 +69,7 @@ public:
     Binary(const std::initializer_list<uint8_t>& init_list):
         _binary_data(init_list) 
     {
-        #ifdef DEBUG
+        #ifndef NODEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
     }
@@ -81,7 +81,7 @@ public:
     Binary(const UINT8* array_ptr, std::size_t size):
         _binary_data(array_ptr, array_ptr + size) 
     {
-        #ifdef DEBUG
+        #ifndef NODEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
     }
@@ -90,7 +90,7 @@ public:
     Binary(const uint8_t& bite_data):
         _binary_data({bite_data}) 
     {
-        #ifdef DEBUG
+        #ifndef NODEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
     }

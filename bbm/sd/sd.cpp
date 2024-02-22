@@ -5,7 +5,7 @@ namespace sc
 
 SD::SD() try
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     pSD = sd_get_by_num(0);
@@ -33,7 +33,7 @@ SD::~SD()
 
 void SD::write(const std::string& write_str)
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     if (SD::save == false)

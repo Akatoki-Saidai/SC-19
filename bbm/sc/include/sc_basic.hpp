@@ -13,7 +13,7 @@
 
 #include "pico/stdlib.h"
 
-#define DEBUG
+// #define NODEBUG
 
 #define _USE_MATH_DEFINES  // 円周率などの定数を使用する  math.hを読み込む前に定義する必要がある (math.hはcmathやiostreamに含まれる)
 #include <algorithm>
@@ -35,7 +35,7 @@ namespace sc
 template<typename... Args>
 std::string format_str(const std::string& format, Args... args) noexcept
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     try
@@ -60,7 +60,7 @@ return std::string(formatted_chars);  // フォーマット済み文字列を出
 template<typename... Args>
 std::string f_err(const std::string& FILE, int LINE, const std::string& message, Args... args) noexcept
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     try
@@ -82,7 +82,7 @@ std::string f_err(const std::string& FILE, int LINE, const std::string& message,
 template<typename... Args>
 std::string f_err(const std::string& FILE, int LINE, const std::exception& e, const std::string& message, Args... args) noexcept
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     try
@@ -103,7 +103,7 @@ std::string f_err(const std::string& FILE, int LINE, const std::exception& e, co
 //! @param message 出力する文字列
 inline std::function<void(const std::string&)> set_print = [](const std::string& message)
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     try
@@ -119,7 +119,7 @@ inline std::function<void(const std::string&)> set_print = [](const std::string&
 template<typename... Args>
 void print(const std::string& format, Args... args) noexcept
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     try
@@ -251,7 +251,7 @@ any_of(const Iterable&)
 template<typename T, typename U>
 constexpr bool operator==(const T& one, const any_of<U>& list)
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
         for (auto element : list._compare_list)
@@ -286,7 +286,7 @@ all_of(const Iterable&)
 template<typename T, typename U>
 constexpr bool operator!=(const T& one, const all_of<U>& list)
 {
-    #ifdef DEBUG
+    #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     for (auto element : list._compare_list)

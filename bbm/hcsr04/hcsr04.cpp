@@ -66,8 +66,6 @@ Length<Unit::m> HCSR04::read()
 
 // function: callback of hcsr04 echo signal intrrupt
 void hcsr_callback(uint gpio, uint32_t emask) {
-    if (gpio != echo_pin_gpio_num) return;  // 違うピンのときは何もしない
-
     gpio_set_irq_enabled(gpio, (GPIO_IRQ_EDGE_RISE + GPIO_IRQ_EDGE_FALL), false);
 
     if (emask == GPIO_IRQ_EDGE_RISE) {

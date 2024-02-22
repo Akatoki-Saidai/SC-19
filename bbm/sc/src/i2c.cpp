@@ -187,23 +187,17 @@ Binary I2C::read_memory(std::size_t size, SlaveAddr slave_addr, MemoryAddr memor
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     std::vector<uint8_t> input_data(size);
-    printf("r0 ");
     int output_size = 0;  // 実際には何バイト送信したか
     int input_size = 0;  // 実際には何バイト受信したか
     uint8_t output_data = memory_addr;
-    printf("r1 ");
     output_size = ::i2c_write_blocking_until((_i2c_id ? i2c1 : i2c0), slave_addr, &output_data, 1, true, make_timeout_time_us(100*1000));  // まず，メモリアドレスを送信
-    printf("r2 ");
     input_size = ::i2c_read_blocking_until((_i2c_id ? i2c1 : i2c0), slave_addr, input_data.data(), size, false, make_timeout_time_us(100*1000));  // pico-SDKの関数  I2Cで受信
-    printf("r3 is:%d, os:%d ", input_size, output_size);
     if (input_size < 0 || output_size < 0)
     {
         // input_size = 0;
 throw std::runtime_error(f_err(__FILE__, __LINE__, "Failed to receive via I2C. SlaveAddr:%hhx, MemoryAddr:%hhx", slave_addr, memory_addr));  // I2Cによる受信に失敗しました
     }
-    printf("r4 ");
     input_data.resize(input_size);
-    printf("r5 ");
     return Binary(input_data);
 }
 

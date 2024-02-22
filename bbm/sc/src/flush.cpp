@@ -21,6 +21,9 @@ Flush::Flush()
 
 void Flush::clear()
 {
+    #ifdef DEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     // 割り込み無効にする
     uint32_t ints = save_and_disable_interrupts();
     // Flash消去。
@@ -62,6 +65,7 @@ void Flush::write(const Binary& write_binary)
             }
 
             _write_data.fill(0U);
+            _write_data.at(0) = *(ptr + 0);
             _write_index = 0;
         }
         ++_write_index;
@@ -83,12 +87,12 @@ void Flush::print()
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     std::cout << "\n#################### Log Data ####################" << std::endl;
-    for (std::size_t i=_target_begin; i<_target_end; ++i)
+    for (uint32_t i=_target_begin; i<_target_end; ++i)
     {
         std::cout << *(const uint8_t *) (XIP_BASE + i);
     }
     std::cout << std::endl;
-    std::cout << "##################################################" << std::endl;
+    std::cout << "##################################################\n" << std::endl;
 }
 
 }

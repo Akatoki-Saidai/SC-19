@@ -10,4 +10,13 @@
 #include "sd/sd.hpp"
 #include "speaker/speaker.hpp"
 
+void exit_16_callback(uint gpio, uint32_t emask)
+{
+    if (gpio != (volatile int)16) return;
+    try {sc::print("\nIRQ Exit\n");}
+    catch (...) {printf("\nIRQ Exit\n");}
+    sleep_ms(100);
+    exit((volatile int)0);
+}
+
 #endif  // SC19_PICO_BBM_HPP_

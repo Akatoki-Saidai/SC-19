@@ -33,10 +33,13 @@ public:
     //! @brief フラッシュメモリのセットアップ
     Flush();
 
+    //! @brief フラッシュメモリに書き込み
     void write(const Binary& write_data);
 
+    //! @brief フラッシュメモリのデータを出力
     void print();
 
+    //! @brief フラッシュメモリのデータを削除
     void clear();
 
     ~Flush();

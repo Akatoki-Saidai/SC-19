@@ -76,10 +76,12 @@ std::tuple<Pressure<Unit::Pa>,Humidity<Unit::percent>,Temperature<Unit::K>> BME2
     int32_t pressure, humidity, temperature;
     if (measurement_reg.mode == BME280::MODE::MODE_FORCED) {
         write_register(0xf4, measurement_reg.get());
+        int count = 0;
         uint8_t buffer;
         do {
             read_registers(0xf3, &buffer, 1);
             sleep_ms(1);
+            if (++count > 100) break;
         } while (buffer & 0x08); // loop until measurement completed
     }
     // read raw sensor data from BME280
@@ -208,7 +210,7 @@ void BME280::read_compensation_parameters() {
     #ifdef DEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif  
-
+    
     read_registers(0x88, buffer, 26);
 
     dig_T1 = buffer[0] | (buffer[1] << 8);

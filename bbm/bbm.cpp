@@ -18,7 +18,7 @@ int main()
         printf("2");
         GPIO<In> yobi_twelite(Pin(3));  // TWELITEに出力する予備の通信ピン
         printf("3");
-        UART uart_spresense(TX(4), RX(5), 115200_hz);  // Spresenseとの通信を行うUART
+        UART uart_spresense(TX(4), RX(5), 31250_hz);  // Spresenseとの通信を行うUART
         printf("4");
         I2C i2c_bme_bno(SDA(6), SCL(7));  // BMEとBNOからの受信を行うI2C
         printf("5");

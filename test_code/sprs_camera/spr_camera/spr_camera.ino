@@ -8,7 +8,7 @@ camera.ino - Simple camera example sketch
 #include <Camera.h>
 
 #define BAUDRATE (1000000)
-#define BAUDRATE1 (115200)
+#define BAUDRATE1 (31250)
 
 CamImage img;
 
@@ -111,18 +111,25 @@ void CamCB(CamImage img)
     Serial.print(hdr);
     Serial.println();
     */
+
+    Serial.print(":Cam");    
+    Serial2.print(":Cam");
     
     uint8_t red_result = red_detect(img);
-    // Serial.println(red_result);
+    Serial.println(red_result);
+    Serial2.println(red_result);
 
 
     // 画像の転送(USB)
-    digitalWrite(LED0, HIGH);
-    Serial.flush();
-    sendByteImage(img);
-    Serial.flush();
-    digitalWrite(LED0, LOW);
-      
+
+    if (Serial){
+      digitalWrite(LED0, HIGH);
+      Serial.flush();
+      sendByteImage(img);
+      Serial.flush();
+      digitalWrite(LED0, LOW);
+    }
+
     }
 
   else {
@@ -479,9 +486,9 @@ uint8_t red_detect(CamImage &img) {
 
 void setup(){
   Serial.begin(BAUDRATE);
-  // Serial1.begin(BAUDRATE1);
+  // Serial2.begin(BAUDRATE1);
   delay(500);
-  while (!Serial);
+  // while (!Serial);
   
   initCamera();
   delay(10);
@@ -520,7 +527,6 @@ void loop(){
       Serial.print(",HDR ");
       Serial.print(hdr);
       Serial.println();
-      */
       
       uint8_t red_result = red_detect(img);
       // Serial.println(red_result);

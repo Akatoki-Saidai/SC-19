@@ -38,7 +38,8 @@ void SD::write(const std::string& write_str)
     #endif
     if (SD::save == false)
     {
-        throw std::runtime_error(f_err(__FILE__, __LINE__, "SD card is not working properly"));  // SDカードは正常に動作していません
+        // throw std::runtime_error(f_err(__FILE__, __LINE__, "SD card is not working properly"));  // SDカードは正常に動作していません
+        return;
     }
 
     FIL fil;
@@ -51,13 +52,13 @@ void SD::write(const std::string& write_str)
     }
     if (f_printf(&fil, write_str.c_str()) < 0) {
         SD::save = false;
-        printf("f_printf failed\n");
+        print(f_err(__FILE__, __LINE__, "f_printf failed\n"));
         return;
     }
     fr = f_close(&fil);
     if (FR_OK != fr) {
         SD::save = false;
-        printf("f_close error: %s (%d)\n", FRESULT_str(fr), fr);
+        print(f_err(__FILE__, __LINE__, "f_close error: %s (%d)\n", FRESULT_str(fr), fr));
         return;
     }
 }

@@ -41,6 +41,7 @@ add_subdirectory(hcsr04)
 add_subdirectory(njl5513r)
 add_subdirectory(sd)
 add_subdirectory(speaker)
+add_subdirectory(spresense)
 
 # 実行ファイルを作成
 add_executable(BBM
@@ -58,6 +59,7 @@ target_link_libraries(BBM
     NJL5513R
     SD
     SPEAKER
+    SPRESENSE
 )
 
 # USB出力を有効にし，UART出力を無効にする

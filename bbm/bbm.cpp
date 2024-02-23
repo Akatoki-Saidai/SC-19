@@ -44,7 +44,6 @@ int main()
         PicoTemp pico_temp;
         VsysVoltage vsys;
 
-
         BME280 bme280(i2c_bme_bno);  // 温湿度気圧センサのBME280
         printf("e");
         BNO055 bno055(i2c_bme_bno);  // 9軸センサのBNO055;
@@ -54,6 +53,7 @@ int main()
         SD sd;  // SDカード
         printf("h");
         Flush flush;
+        Spresense sprs(uart_spresense);
 
         // USBでの接続時はフラッシュメモリのデータを出力
         if (usb_conect.read() == true)
@@ -140,6 +140,15 @@ int main()
                 } else {
                     print("bunri mada\n");
                 }
+                
+                std::tuple<sc::Latitude<sc::Unit::deg>, sc::Longitude<sc::Unit::deg>> g = sprs.gps();
+                std::cout << double(std::get<0>(g)) << " " << double(std::get<1>(g)) << std::endl;
+                std::tm t = sprs.time();
+                std::cout << std::asctime(&t) << std::endl;
+                Cam c = sprs.camera();
+                std::cout << int(c) << std::endl;
+
+                sleep(10_ms);
             }
             catch(const std::exception& e)
             {

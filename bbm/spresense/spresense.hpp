@@ -13,7 +13,7 @@ namespace sc
     
 enum class Cam
 {
-    Left,
+    Left = 1,
     Center,
     Right
 };

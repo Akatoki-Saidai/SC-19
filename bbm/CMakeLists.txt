@@ -42,6 +42,7 @@ add_subdirectory(njl5513r)
 add_subdirectory(sd)
 add_subdirectory(speaker)
 add_subdirectory(spresense)
+add_subdirectory(twelite)
 
 # 実行ファイルを作成
 add_executable(BBM
@@ -60,6 +61,7 @@ target_link_libraries(BBM
     SD
     SPEAKER
     SPRESENSE
+    TWELITE
 )
 
 # USB出力を有効にし，UART出力を無効にする

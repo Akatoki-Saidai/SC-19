@@ -53,7 +53,8 @@ int main()
         SD sd;  // SDカード
         printf("h");
         Flush flush;
-        Spresense sprs(uart_spresense);
+        Spresense spresense(uart_spresense);
+        Twelite twelite(uart_twelite);
 
         // USBでの接続時はフラッシュメモリのデータを出力
         if (usb_conect.read() == true)
@@ -72,6 +73,7 @@ int main()
             try {std::cout << message << std::flush;} catch(const std::exception& e){printf(e.what());}
             try {flush.write(message);} catch(const std::exception& e){printf(e.what());}
             try {sd.write(message);} catch(const std::exception& e){printf(e.what());}
+            try {twelite.write(0x00, message);} catch(const std::exception& e){printf(e.what());}
         };
 
     /***** loop *****/
@@ -92,6 +94,12 @@ int main()
                 auto pico_temp_data = pico_temp.read();  // pico内蔵温度計で計測
 
                 auto vsys_data = vsys.read();  // picoの入力電圧を計測
+
+                // auto gps_data = spresense.gps();  // GPSのデータを取得
+
+                // auto time_data = spresense.time();  // 現在時刻のデータを取得
+
+                // auto camera_data = spresense.camera();  // カメラのデータを取得
 
                 /***** 表示 *****/
 
@@ -116,7 +124,29 @@ int main()
                 print("temp : %f degC\n", pico_temp_data);  // pico内蔵の温度センサ
 
                 print("vsys : %f V\n", vsys_data);  // picoの入力電圧
+                
+                if (not_separate_para.read() == true)  // ピンの接続でパラシュートの分離を検知
+                {
+                    print("bunri ok!\n");
+                } else {
+                    print("bunri mada\n");
+                }
 
+                // print("gps latitude : %f deg\n", double(std::get<0>(gps_data)));  // 緯度
+                // print("gps longitude : %f deg\n", double(std::get<1>(gps_data)));  // 経度
+
+                // std::string time_str(20, '\0');
+                // strftime(time_str.data(), 20, "%F\n", &time_data);
+                // print(time_str);  // 時刻
+
+                // if (camera_data == Cam::Left)  // カメラのデータ
+                // {
+                //     print("camera hidari\n");
+                // } else if (camera_data == Cam::Center) {
+                //     print("camera mannaka\n");
+                // } else if (camera_data == Cam::Left) {
+                //     print("camera migi\n");
+                // }
 
 
                 /***** 動作 *****/
@@ -133,20 +163,6 @@ int main()
                 motor.forward(1.0);  // 前に進む
                 motor.right(1.0);  // 右に進む
                 motor.forward(-1.0);  // 後ろに進む
-
-                if (not_separate_para.read() == true)  // ピンの接続でパラシュートの分離を検知
-                {
-                    print("bunri ok!\n");
-                } else {
-                    print("bunri mada\n");
-                }
-                
-                std::tuple<sc::Latitude<sc::Unit::deg>, sc::Longitude<sc::Unit::deg>> g = sprs.gps();
-                std::cout << double(std::get<0>(g)) << " " << double(std::get<1>(g)) << std::endl;
-                std::tm t = sprs.time();
-                std::cout << std::asctime(&t) << std::endl;
-                Cam c = sprs.camera();
-                std::cout << int(c) << std::endl;
 
                 sleep(10_ms);
             }

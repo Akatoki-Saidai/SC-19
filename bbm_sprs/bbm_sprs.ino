@@ -108,7 +108,7 @@ static void print_pos(SpNavData *pNavData)
   snprintf(StringBuffer, STRING_BUFFER_SIZE, ":Tim%04d%02d%02d", pNavData->time.year, pNavData->time.month, pNavData->time.day);
   Serial2.print(StringBuffer);
 
-  snprintf(StringBuffer, STRING_BUFFER_SIZE, "%02d%02d%02", pNavData->time.hour, pNavData->time.minute, pNavData->time.sec);
+  snprintf(StringBuffer, STRING_BUFFER_SIZE, "%02d%02d%02d", pNavData->time.hour, pNavData->time.minute, pNavData->time.sec);
   Serial.println(StringBuffer);
   snprintf(StringBuffer, STRING_BUFFER_SIZE, "%02d%02d%02d", pNavData->time.hour, pNavData->time.minute, pNavData->time.sec);
   Serial2.println(StringBuffer);
@@ -132,9 +132,9 @@ static void print_pos(SpNavData *pNavData)
   {
     Serial.println("No Position");
     Serial.println(":Lat0.00000000");
-    Serial2.println(":Lat0.00000000");
+    // Serial2.println(":Lat0.00000000");
     Serial.println(":Lon0.00000000");
-    Serial2.println(":Lon0.00000000");
+    // Serial2.println(":Lon0.00000000");
   }
   else
   {
@@ -289,12 +289,15 @@ void CamCB(CamImage img)
     Serial.println();
     */
 
-    Serial.print(":Cam");    
-    Serial2.print(":Cam");
+    Serial.print(":Cam");
     
     uint8_t red_result = red_detect(img);
     Serial.println(red_result);
-    Serial2.println(red_result);
+
+    if (1 <= red_result || red_result <= 3){
+        Serial2.print(":Cam");
+        Serial2.println(red_result);
+    }
 
 
     // 画像の転送(USB)

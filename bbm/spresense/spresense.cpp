@@ -24,8 +24,8 @@ void Spresense::read()
     {
         int start_index = read_binary.data().find(':', index);
         int end_index = read_binary.data().find('\n', start_index);
-        if (start_index==-1 || end_index==-1)
-    break;
+        if (start_index<0 || end_index<0)
+    return;
         std::string head = std::string(read_binary.data().begin()+start_index, read_binary.data().begin()+start_index+4);
         double number = stod(std::string(read_binary.data().begin()+start_index+4, read_binary.data().begin()+end_index));
         if (head == ":Lat")
@@ -86,6 +86,8 @@ Cam Spresense::camera()
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     if (absolute_time_diff_us(_cam_update, _start_time) == 0)
+        _uart.write("CameraStart\n");
+        sleep(1_s);
         read();
     if (absolute_time_diff_us(_cam_update, get_absolute_time()) > 5*1000*1000)
         read();

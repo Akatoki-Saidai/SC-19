@@ -13,7 +13,7 @@ int main()
         printf("1");
         GPIO<In> yobi_spresense(Pin(2), Pull::Down);  // Spresenseとの通信を行う予備のピン
         printf("2");
-        GPIO<In> yobi_twelite(Pin(3));  // TWELITEに出力する予備の通信ピン
+        GPIO<Out> yobi_twelite(Pin(3));  // TWELITEに出力する予備の通信ピン
         printf("3");
         UART uart_spresense(TX(4), RX(5), 31250_hz);  // Spresenseとの通信を行うUART
         printf("4");
@@ -77,102 +77,150 @@ int main()
         };
 
     /***** loop *****/
+        while (true) { 
+        try {
         while (true)
         {
             try
             {
-                /***** 受信 *****/
-
-                auto bme_data = bme280.read();  // BME280(温湿圧)から受信
-
-                auto bno_data = bno055.read();  // BNO055(9軸)から受信
-
-                auto hcsr_data = hcsr04.read();  // HCSR04(超音波)から受信
-
-                auto njl_data = njl5513r.read();  // NJL5513R(照度)から受信
-
-                auto pico_temp_data = pico_temp.read();  // pico内蔵温度計で計測
-
-                auto vsys_data = vsys.read();  // picoの入力電圧を計測
-
-                // auto gps_data = spresense.gps();  // GPSのデータを取得
-
-                // auto time_data = spresense.time();  // 現在時刻のデータを取得
-
-                // auto camera_data = spresense.camera();  // カメラのデータを取得
-
-                /***** 表示 *****/
-
-                Pressure<Unit::Pa> pressure = std::get<0>(bme_data);  // 気圧
-                Humidity<Unit::percent> humidity = std::get<1>(bme_data);  // 湿度
-                Temperature<Unit::K> temperature = std::get<2>(bme_data);  // 気温
-                print("pressure:%f Pa, humidity:%f %, temperature:%f K\n", pressure, humidity, temperature);
-
-                Acceleration<Unit::m_s2> line_acceleration = std::get<0>(bno_data);  // 線形加速度
-                Acceleration<Unit::m_s2> gravity_acceleration = std::get<1>(bno_data);  // 重力加速度
-                MagneticFluxDensity<Unit::T> magnetic = std::get<2>(bno_data);  // 磁束密度
-                AngularVelocity<Unit::rad_s> gyro = std::get<3>(bno_data);  // 角加速度
-                print("line acceleration x:%f, y:%f, z:%f m/s2\n", line_acceleration.x(), line_acceleration.y(), line_acceleration.z());
-                print("gravity acceleration x:%f, y:%f, z:%f m/s2\n", gravity_acceleration.x(), gravity_acceleration.y(), gravity_acceleration.z());
-                print("magnetic x:%f, y:%f, z:%f T\n", magnetic.x(), magnetic.y(), magnetic.z());
-                print("gyro x:%f, y:%f, z:%f rad/s2\n", gyro.x(), gyro.y(), gyro.z());
-
-                print("kyori:%f m\n", hcsr_data);  // 超音波距離センサ
-
-                print("syoudo:%f lx\n\n", njl_data);  // 照度センサ
-
-                print("temp : %f degC\n", pico_temp_data);  // pico内蔵の温度センサ
-
-                print("vsys : %f V\n", vsys_data);  // picoの入力電圧
-                
-                if (not_separate_para.read() == true)  // ピンの接続でパラシュートの分離を検知
+                try
                 {
-                    print("bunri ok!\n");
-                } else {
-                    print("bunri mada\n");
+                    auto bme_data = bme280.read();  // BME280(温湿圧)から受信
+
+                    Pressure<Unit::Pa> pressure = std::get<0>(bme_data);  // 気圧
+                    Humidity<Unit::percent> humidity = std::get<1>(bme_data);  // 湿度
+                    Temperature<Unit::degC> temperature = std::get<2>(bme_data);  // 気温
+                    print("pressure:%f hPa, humidity:%f %, temperature:%f degC\n", pressure*hecto, humidity, temperature);
                 }
+                catch(const std::exception& e){printf(e.what());}
+                
+                try
+                {
+                    auto bno_data = bno055.read();  // BNO055(9軸)から受信
 
-                // print("gps latitude : %f deg\n", double(std::get<0>(gps_data)));  // 緯度
-                // print("gps longitude : %f deg\n", double(std::get<1>(gps_data)));  // 経度
+                    Acceleration<Unit::m_s2> line_acceleration = std::get<0>(bno_data);  // 線形加速度
+                    Acceleration<Unit::m_s2> gravity_acceleration = std::get<1>(bno_data);  // 重力加速度
+                    MagneticFluxDensity<Unit::T> magnetic = std::get<2>(bno_data);  // 磁束密度
+                    AngularVelocity<Unit::rad_s> gyro = std::get<3>(bno_data);  // 角加速度
+                    print("line acceleration x:%f, y:%f, z:%f m/s2\n", line_acceleration.x(), line_acceleration.y(), line_acceleration.z());
+                    print("gravity acceleration x:%f, y:%f, z:%f m/s2\n", gravity_acceleration.x(), gravity_acceleration.y(), gravity_acceleration.z());
+                    print("magnetic x:%f, y:%f, z:%f mT\n", magnetic.x()/milli, magnetic.y()/milli, magnetic.z()/milli);
+                    print("gyro x:%f, y:%f, z:%f rad/s2\n", gyro.x(), gyro.y(), gyro.z());
+                }
+                catch(const std::exception& e){printf(e.what());}
+                
+                try
+                {
+                    auto hcsr_data = hcsr04.read();  // HCSR04(超音波)から受信
 
-                // std::string time_str(20, '\0');
-                // strftime(time_str.data(), 20, "%F\n", &time_data);
-                // print(time_str);  // 時刻
+                    print("kyori:%f m\n", hcsr_data);  // 超音波距離センサ
+                }
+                catch(const std::exception& e){printf(e.what());}
+                
+                try
+                {
+                    auto njl_data = njl5513r.read();  // NJL5513R(照度)から受信
 
-                // if (camera_data == Cam::Left)  // カメラのデータ
-                // {
-                //     print("camera hidari\n");
-                // } else if (camera_data == Cam::Center) {
-                //     print("camera mannaka\n");
-                // } else if (camera_data == Cam::Left) {
-                //     print("camera migi\n");
-                // }
+                    print("syoudo:%f lx\n\n", njl_data);  // 照度センサ
+                }
+                catch(const std::exception& e){printf(e.what());}
 
+                try
+                {
+                    auto pico_temp_data = pico_temp.read();  // pico内蔵温度計で計測
 
-                /***** 動作 *****/
+                    print("temp : %f degC\n", pico_temp_data);  // pico内蔵の温度センサ
+                }
+                catch(const std::exception& e){printf(e.what());}
+                
+                try
+                {
+                    auto vsys_data = vsys.read();  // picoの入力電圧を計測
 
-                led_red.on();  // 赤色LEDを点ける
-                led_red.off();
-                led_green.on();  // 緑色LEDを点ける
-                led_green.off();
-                led_pico.on();  // pico内蔵LEDを点ける
-                led_pico.off();
+                    print("vsys : %f V\n", vsys_data);  // picoの入力電圧
+                }
+                catch(const std::exception& e){printf(e.what());}
+                
+                try
+                {
+                    if (not_separate_para.read() == true)  // ピンの接続でパラシュートの分離を検知
+                    {
+                        print("bunri ok!\n");
+                    } else {
+                        print("bunri mada\n");
+                    }
+                }
+                catch(const std::exception& e){printf(e.what());}
+                
+                try
+                {
+                    auto gps_data = spresense.gps();  // GPSのデータを取得
+                    print("gps latitude : %f deg\n", double(std::get<0>(gps_data)));  // 緯度
+                    print("gps longitude : %f deg\n", double(std::get<1>(gps_data)));  // 経度
+                }
+                catch(const std::exception& e){printf(e.what());}
+                
+                try
+                {
+                    auto time_data = spresense.time();  // 現在時刻のデータを取得
 
-                speaker.play_windows7();  // windows7?を再生
+                    std::string time_str(20, '\0');
+                    strftime(time_str.data(), 20, "%FT%TZ\n", &time_data);
+                    print(time_str);  // 時刻
+                }
+                catch(const std::exception& e){printf(e.what());}
+                
+                try
+                {
+                    auto camera_data = spresense.camera();  // カメラのデータを取得
 
-                motor.forward(1.0);  // 前に進む
-                motor.right(1.0);  // 右に進む
-                motor.forward(-1.0);  // 後ろに進む
+                    if (camera_data == Cam::Left)  // カメラのデータ
+                    {
+                        print("camera hidari\n");
+                    } else if (camera_data == Cam::Center) {
+                        print("camera mannaka\n");
+                    } else if (camera_data == Cam::Left) {
+                        print("camera migi\n");
+                    }
+                }
+                catch(const std::exception& e){printf(e.what());}
+                
+                try
+                {
+                    led_red.on();  // 赤色LEDを点ける
+                    led_green.on();  // 緑色LEDを点ける
+                    led_pico.on();  // pico内蔵LEDを点ける
+                    sleep(1_ms);
+                    led_red.off();
+                    led_green.off();
+                    led_pico.off();
+                }
+                catch(const std::exception& e){printf(e.what());}
 
-                sleep(10_ms);
+                try
+                {
+                    speaker.play_windows7();  // windows7?を再生
+                }
+                catch(const std::exception& e){printf(e.what());}
+                
+                try
+                {                    
+                    motor.forward(1.0);  // 前に進む
+                    sleep(0.5_s);
+                    motor.right(1.0);  // 右に進む
+                    sleep(0.5_s);
+                    motor.forward(-1.0);  // 後ろに進む
+                    sleep(0.5_s);
+                }
+                catch(const std::exception& e){printf(e.what());}
             }
             catch(const std::exception& e)
             {
                 print(e.what());
             }
         }
-
-        return 0;
+        } catch(const std::exception& e){printf(e.what());}
+        }
     }
     catch(const std::exception& e)
     {

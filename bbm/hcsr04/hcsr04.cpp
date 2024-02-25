@@ -40,6 +40,7 @@ Length<Unit::m> HCSR04::read()
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
     int temperature=20,humidity=60;
+    static double old_distance;
     double distance;
     // trigger
     // gpio_put(28, 1);
@@ -56,8 +57,16 @@ Length<Unit::m> HCSR04::read()
         throw std::runtime_error(f_err(__FILE__, __LINE__, "Distance measurement failed"));  // 距離の測定に失敗しました
     }
     
-   distance=((331.4+(0.606*temperature)+(0.0124*humidity))*(dtime*milli/2.0)*milli);
-   return Length<Unit::m>(distance);
+    distance=((331.4+(0.606*temperature)+(0.0124*humidity))*(dtime*milli/2.0)*milli);
+
+    // 前回と全く同じ値だったら測定に失敗したとみなす
+    if (old_distance == distance)
+    {
+        throw std::runtime_error(f_err(__FILE__, __LINE__, "Distance measurement failed"));  // 距離の測定に失敗しました
+    }
+    old_distance = distance;
+    
+    return Length<Unit::m>(distance);
 }
 
 

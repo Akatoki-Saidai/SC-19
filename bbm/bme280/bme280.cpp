@@ -96,7 +96,7 @@ catch(const std::exception& e)
 //     altitude0    = _altitude0;
 // }
 
-std::tuple<Pressure<Unit::Pa>,Humidity<Unit::percent>,Temperature<Unit::K>> BME280::read() {
+std::tuple<Pressure<Unit::Pa>,Humidity<Unit::percent>,Temperature<Unit::degC>> BME280::read() {
     #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
@@ -120,9 +120,9 @@ std::tuple<Pressure<Unit::Pa>,Humidity<Unit::percent>,Temperature<Unit::K>> BME2
     pressure = compensate_pressure(pressure);
     humidity = compensate_humidity(humidity);
     temperature = compensate_temp(temperature);
-    Pressure<Unit::Pa>pressure_Pa(double(pressure/100.0));
+    Pressure<Unit::Pa>pressure_Pa(double(pressure/100.0) / hecto);
     Humidity<Unit::percent>humidity_percent(double(humidity/1024.0));
-    Temperature<Unit::K>temperature_K(double(temperature/100.0));
+    Temperature<Unit::degC>temperature_degC(double(temperature/100.0));
     // measurement.pressure = Pressure / 100.0;
     // measurement.humidity = Humidity / 1024.0;
     // measurement.temperature = Temperature / 100.0;
@@ -133,7 +133,7 @@ std::tuple<Pressure<Unit::Pa>,Humidity<Unit::percent>,Temperature<Unit::K>> BME2
     // measurement.altitude_1 = altitude0 + ((temperature0 + 273.15F) / 0.0065F) * (1 - std::pow((measurement.pressure / pressure0), (1.0F / 5.257F)));
     // measurement.altitude_2 = altitude0 + ((measurement.temperature + 273.15F) / 0.0065F) * (std::pow((pressure0 / measurement.pressure), 1.0F / 5.257F) -1.0F);
 
-    return std::tuple<Pressure<Unit::Pa>,Humidity<Unit::percent>,Temperature<Unit::K>>(pressure_Pa,humidity_percent,temperature_K);
+    return {pressure_Pa,humidity_percent,temperature_degC};
 
 }
 

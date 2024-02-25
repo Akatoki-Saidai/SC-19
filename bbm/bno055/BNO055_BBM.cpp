@@ -115,9 +115,9 @@ std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity
     magY = ((mag[3] << 8) | mag[2]);
     magZ = ((mag[5] << 8) | mag[4]);
 
-    f_magX = magX / 16.00;
-    f_magY = magY / 16.00;
-    f_magZ = magZ / 16.00;
+    f_magX = milli * magX / 16.00;
+    f_magY = milli * magY / 16.00;
+    f_magZ = milli * magZ / 16.00;
     
     MagneticFluxDensity<Unit::T>Mag_vector{dimension::T(f_magX),dimension::T(f_magY),dimension::T(f_magZ)};
     

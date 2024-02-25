@@ -72,7 +72,7 @@ std::tuple<Latitude<Unit::deg>, Longitude<Unit::deg> > Spresense::gps()
         read();
     if (absolute_time_diff_us(_lat_update, get_absolute_time()) > 5*1000*1000 || absolute_time_diff_us(_lon_update, get_absolute_time()) > 5*1000*1000)
         read();
-    if (absolute_time_diff_us(_lat_update, get_absolute_time()) > 10*1000*1000 || absolute_time_diff_us(_lon_update, get_absolute_time()) > 10*1000*1000)
+    if (absolute_time_diff_us(_lat_update, get_absolute_time()) > 10*1000*1000 || absolute_time_diff_us(_lon_update, get_absolute_time()) > 10*1000*1000 || absolute_time_diff_us(_lat_update, _start_time) == 0 || absolute_time_diff_us(_lon_update, _start_time) == 0)
     {
 throw std::runtime_error(f_err(__FILE__, __LINE__, "Latest GPS data not available"));  // 最新のGPSのデータがありません
     }
@@ -93,7 +93,7 @@ Cam Spresense::camera()
     }
     if (absolute_time_diff_us(_cam_update, get_absolute_time()) > 5*1000*1000)
         read();
-    if (absolute_time_diff_us(_cam_update, get_absolute_time()) > 5*1000*1000)
+    if (absolute_time_diff_us(_cam_update, get_absolute_time()) > 5*1000*1000 || absolute_time_diff_us(_cam_update, _start_time) == 0)
     {
 throw std::runtime_error(f_err(__FILE__, __LINE__, "Latest camera data not available"));  // 最新のカメラのデータがありません
     }

@@ -74,7 +74,7 @@ public:
 
 
 //! @brief I2C通信
-class I2C
+class I2C : Noncopyable
 {
 public:
     //! @brief 通信先のデバイス内のメモリのアドレス

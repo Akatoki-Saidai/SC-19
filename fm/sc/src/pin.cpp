@@ -17,14 +17,18 @@ namespace sc
 
 /***** class Pin *****/
 
-Pin::Pin(int pin_gpio):
+Pin::Pin(int pin_gpio) try :
     _pin_gpio(pin_gpio)
 {
     if (pin_gpio < Pin::MinGpio || Pin::MaxGpio < pin_gpio)
     {
-        throw Error(__FILE__, __LINE__, "This GPIO number is not available");  // このGPIO番号は利用できません
-    }
-    
+        throw std::invalid_argument(f_err(__FILE__, __LINE__, "GPIO number %d is not available", pin_gpio));  // このGPIO番号は利用できません
+    }   
+}
+catch (const std::exception& e)
+{
+    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+    print(e.what());
 }
 
 uint8_t Pin::gpio() const
@@ -39,6 +43,9 @@ Pin::operator uint8_t() const
 
 void Pin::set_pull(Pull pull) const
 {
+    #ifndef NODEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     switch (pull)
     {
         case Pull::Up:
@@ -58,7 +65,5 @@ void Pin::set_pull(Pull pull) const
         }
     }
 }
-
-std::vector<PinStatus> Pin::Status(28, PinStatus::NoUse);
 
 }

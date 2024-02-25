@@ -28,7 +28,7 @@ template<IO> class GPIO;
 
 //! @brief ピンによる出力を行うクラス
 template<>
-class GPIO<Out>
+class GPIO<Out> : Noncopyable
 {
     const Pin _pin;  //! 使用するピンのGPIO番号
 public:
@@ -61,7 +61,7 @@ using LED = GPIO<Out>;  // LEDによる出力
 
 //! @brief ピンによる入力を行うクラス
 template<>
-class GPIO<In>
+class GPIO<In> : Noncopyable
 {
     const Pin _pin;  //! 使用するピンのGPIO番号
 public:

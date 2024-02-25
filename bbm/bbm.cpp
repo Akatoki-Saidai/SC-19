@@ -92,7 +92,7 @@ int main()
                     Temperature<Unit::degC> temperature = std::get<2>(bme_data);  // 気温
                     print("pressure:%f hPa, humidity:%f %, temperature:%f degC\n", pressure*hecto, humidity, temperature);
                 }
-                catch(const std::exception& e){print(e.what());}
+                catch(const std::exception& e){printf(e.what());}
                 
                 try
                 {
@@ -107,7 +107,7 @@ int main()
                     print("magnetic x:%f, y:%f, z:%f mT\n", magnetic.x()/milli, magnetic.y()/milli, magnetic.z()/milli);
                     print("gyro x:%f, y:%f, z:%f rad/s2\n", gyro.x(), gyro.y(), gyro.z());
                 }
-                catch(const std::exception& e){print(e.what());}
+                catch(const std::exception& e){printf(e.what());}
                 
                 try
                 {
@@ -115,7 +115,7 @@ int main()
 
                     print("kyori:%f m\n", hcsr_data);  // 超音波距離センサ
                 }
-                catch(const std::exception& e){print(e.what());}
+                catch(const std::exception& e){printf(e.what());}
                 
                 try
                 {
@@ -123,7 +123,7 @@ int main()
 
                     print("syoudo:%f lx\n\n", njl_data);  // 照度センサ
                 }
-                catch(const std::exception& e){print(e.what());}
+                catch(const std::exception& e){printf(e.what());}
 
                 try
                 {
@@ -131,7 +131,7 @@ int main()
 
                     print("temp : %f degC\n", pico_temp_data);  // pico内蔵の温度センサ
                 }
-                catch(const std::exception& e){print(e.what());}
+                catch(const std::exception& e){printf(e.what());}
                 
                 try
                 {
@@ -139,7 +139,7 @@ int main()
 
                     print("vsys : %f V\n", vsys_data);  // picoの入力電圧
                 }
-                catch(const std::exception& e){print(e.what());}
+                catch(const std::exception& e){printf(e.what());}
                 
                 try
                 {
@@ -150,7 +150,7 @@ int main()
                         print("bunri mada\n");
                     }
                 }
-                catch(const std::exception& e){print(e.what());}
+                catch(const std::exception& e){printf(e.what());}
                 
                 try
                 {
@@ -158,7 +158,7 @@ int main()
                     print("gps latitude : %f deg\n", double(std::get<0>(gps_data)));  // 緯度
                     print("gps longitude : %f deg\n", double(std::get<1>(gps_data)));  // 経度
                 }
-                catch(const std::exception& e){print(e.what());}
+                catch(const std::exception& e){printf(e.what());}
                 
                 try
                 {
@@ -168,7 +168,7 @@ int main()
                     strftime(time_str.data(), 20, "%FT%TZ\n", &time_data);
                     print(time_str);  // 時刻
                 }
-                catch(const std::exception& e){print(e.what());}
+                catch(const std::exception& e){printf(e.what());}
                 
                 try
                 {
@@ -183,7 +183,7 @@ int main()
                         print("camera migi\n");
                     }
                 }
-                catch(const std::exception& e){print(e.what());}
+                catch(const std::exception& e){printf(e.what());}
                 
                 try
                 {
@@ -195,13 +195,13 @@ int main()
                     led_green.off();
                     led_pico.off();
                 }
-                catch(const std::exception& e){print(e.what());}
+                catch(const std::exception& e){printf(e.what());}
 
                 try
                 {
                     speaker.play_windows7();  // windows7?を再生
                 }
-                catch(const std::exception& e){print(e.what());}
+                catch(const std::exception& e){printf(e.what());}
                 
                 try
                 {                    
@@ -212,11 +212,14 @@ int main()
                     motor.forward(-1.0);  // 後ろに進む
                     sleep(0.5_s);
                 }
-                catch(const std::exception& e){print(e.what());}
+                catch(const std::exception& e){printf(e.what());}
             }
-            catch(const std::exception& e){print(e.what());}
+            catch(const std::exception& e)
+            {
+                print(e.what());
+            }
         }
-        } catch(const std::exception& e){print(e.what());}
+        } catch(const std::exception& e){printf(e.what());}
         }
     }
     catch(const std::exception& e)

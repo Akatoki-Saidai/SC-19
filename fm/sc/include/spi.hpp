@@ -107,7 +107,7 @@ public:
 
 
 //! @brief SPI通信
-class SPI
+class SPI : Noncopyable
 {
 public:
 

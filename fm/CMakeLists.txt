@@ -39,14 +39,13 @@ add_subdirectory(bno055)
 add_subdirectory(drv8835)
 add_subdirectory(hcsr04)
 add_subdirectory(njl5513r)
+add_subdirectory(sd)
 add_subdirectory(speaker)
+add_subdirectory(spresense)
+add_subdirectory(twelite)
 
 # 実行ファイルを作成
 add_executable(FM
-    fm_fall.cpp
-    fm_long.cpp 
-    fm_short.cpp 
-    fm_wait.cpp
     fm.cpp
 )
 
@@ -59,7 +58,10 @@ target_link_libraries(FM
     DRV8835
     HCSR04
     NJL5513R
+    SD
     SPEAKER
+    SPRESENSE
+    TWELITE
 )
 
 # USB出力を有効にし，UART出力を無効にする

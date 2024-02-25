@@ -17,24 +17,27 @@ namespace sc
 
 /***** class Duty *****/
 
-constexpr Duty::Duty(float duty):
+Duty::Duty(float duty):
     _duty(duty)
 {
     if (_duty < MinDuty || MaxDuty < _duty)
     {
-throw Error(__FILE__, __LINE__, "An incorrect Duty value was entered");  // 正しくないDuty比が入力されました
+throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect Duty value was entered"));  // 正しくないDuty比が入力されました
     }
 }
 
 
 /***** class PWM *****/
 
-PWM::PWM(Pin pin, Frequency<Unit::Hz> freq):
+PWM::PWM(Pin pin, Frequency<Unit::Hz> freq) try :
     _pin(pin), _slice(::pwm_gpio_to_slice_num(pin.gpio())), _channel(::pwm_gpio_to_channel(pin.gpio()) == 1 ? Channel::B : Channel::A), _wrap(to_wrap(freq)), _clk_div(to_clk_div(freq, to_wrap(freq)))
 {
+    #ifndef NODEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     if (Pin::Status.at(_pin.gpio()) != PinStatus::NoUse)
     {
-throw Error(__FILE__, __LINE__, "This pin is already in use");  // このピンは既に使用されています
+throw std::logic_error(f_err(__FILE__, __LINE__, "This pin is already in use"));  // このピンは既に使用されています
     }
 
     ::gpio_set_function(_pin.gpio(), GPIO_FUNC_PWM);  // pico-SDKの関数  ピンの機能をPWMにする
@@ -48,24 +51,38 @@ throw Error(__FILE__, __LINE__, "This pin is already in use");  // このピン�
 
     ::pwm_set_enabled(_slice, true);  // pico-SDKの関数  PWMをオンにする
 }
+catch (const std::exception& e)
+{
+    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+    print(e.what());
+}
 
 void PWM::write(Duty duty) const
 {
+    #ifndef NODEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     ::pwm_set_gpio_level(_pin.gpio(), _wrap * duty);  // pico-SDKの関数  あるGPIOピンのPWMの出力レベルを設定する
     // ::pwm_set_chan_level(_slice, (_channel==Channel::A ? PWM_CHAN_A : PWM_CHAN_B), _wrap * duty);  // pico-SDKの関数  sliceとchannelで指定したGPIOピンのPWMの出力レベルを設定する
 }
 
 void PWM::write(Time<Unit::s> high_time) const
 {
+    #ifndef NODEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     ::pwm_set_gpio_level(_pin.gpio(), static_cast<double>(high_time)*SysClock*SysClock/(_clk_div*_clk_div*(_wrap+1)));  // pico-SDKの関数  あるGPIOピンのPWMの出力レベルを設定する
     // ::pwm_set_chan_level(_slice, (_channel==Channel::A ? PWM_CHAN_A : PWM_CHAN_B), static_cast<double>(static_cast<_s>(high_time))*SysClock*SysClock/(_clk_div*_clk_div*(_wrap+1)));  // pico-SDKの関数  sliceとchannelで指定したGPIOピンのPWMの出力レベルを設定する
 }
 
 uint16_t PWM::to_wrap(Frequency<Unit::Hz> freq)
 {
+    #ifndef NODEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     if (freq < MinFreq || MaxFreq < freq)
     {
-throw Error(__FILE__, __LINE__, "Invalid frequency entered");  // 無効な周波数が入力されました
+throw std::invalid_argument(f_err(__FILE__, __LINE__, "Invalid frequency entered"));  // 無効な周波数が入力されました
     }
 
     if ((SysClock / not0(static_cast<double>(freq))) > (0xffff + 1))  // 分解能はできる限り高くなるように設定
@@ -78,11 +95,14 @@ return (SysClock / not0(static_cast<double>(freq))) - 1;
 
 float PWM::to_clk_div(Frequency<Unit::Hz> freq, uint16_t wrap)
 {
+    #ifndef NODEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     if (freq < MinFreq || MaxFreq < freq)
     {
-throw Error(__FILE__, __LINE__, "Invalid frequency entered");  // 無効な周波数が入力されました
+throw std::invalid_argument(f_err(__FILE__, __LINE__, "Invalid frequency entered"));  // 無効な周波数が入力されました
     } else if (wrap < MinWrap || MaxWrap < wrap) {
-throw Error(__FILE__, __LINE__, "Invalid wrap entered");  // 無効なWrapが入力されました
+throw std::invalid_argument(f_err(__FILE__, __LINE__, "Invalid wrap entered"));  // 無効なWrapが入力されました
     }
 
     float clk_div = SysClock / not0(static_cast<double>(freq) * (wrap + 1));  // 分解能の値をもとに分周比の値を計算

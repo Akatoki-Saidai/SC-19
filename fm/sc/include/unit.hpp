@@ -13,6 +13,8 @@
 
 // #include "sc_basic.hpp"
 
+#include <cmath>
+
 
 namespace sc
 {
@@ -90,12 +92,12 @@ public:
 // 定義定数
 namespace constant 
 {
-    constexpr Dimension<-1, 0, 0, 0, 0, 0, 0> dNuCs{9'192'631'770.0};  // Δνcs．セシウム133原子の摂動を受けない基底状態の超微細構造遷移周波数
-    constexpr Dimension<-1, 1, 0, 0, 0, 0, 0> c{299'792'458.0};  // c．真空中の光の速さ
-    constexpr Dimension<-1, 2, 1, 0, 0, 0, 0> h{6.626'070'15E-34};  // h．プランク定数
-    constexpr Dimension<1, 0, 0, 1, 0, 0, 0> e{1.602'176'634E-19};  // e．電気素量
-    constexpr Dimension<-2, 2, 1, 0, -1, 0, 0> k{1.380'649E-23};  // k．ボルツマン定数   
-    constexpr Dimension<0, 0, 0, 0, 0, -1, 0> NA{6.022'140'76E23};  // NA．アボガドロ定数
+    constexpr Dimension<-1, 0, 0, 0, 0, 0, 0> dNuCs{9192631770.0};  // Δνcs．セシウム133原子の摂動を受けない基底状態の超微細構造遷移周波数
+    constexpr Dimension<-1, 1, 0, 0, 0, 0, 0> c{299792458.0};  // c．真空中の光の速さ
+    constexpr Dimension<-1, 2, 1, 0, 0, 0, 0> h{6.62607015E-34};  // h．プランク定数
+    constexpr Dimension<1, 0, 0, 1, 0, 0, 0> e{1.602176634E-19};  // e．電気素量
+    constexpr Dimension<-2, 2, 1, 0, -1, 0, 0> k{1.380649E-23};  // k．ボルツマン定数   
+    constexpr Dimension<0, 0, 0, 0, 0, -1, 0> NA{6.02214076E23};  // NA．アボガドロ定数
 }
 
 
@@ -309,7 +311,7 @@ class Vector3
 public:
     //! @brief 3つの値からベクトルを構築
     constexpr Vector3(Element x, Element y, Element z):
-        _data({x, y, z}) {}
+        _data{x, y, z} {}
 
     constexpr Element x() const
         {return _data[0];}
@@ -608,23 +610,23 @@ public:
 };
 
 
-template<Unit> class LuminousIntensity;  // 光度
-template<class T> LuminousIntensity(const T& t) -> LuminousIntensity<Unit::cd>;  // デフォルトをcdにする
+template<Unit> class Illuminance;  // 照度
+template<class T> Illuminance(const T& t) -> Illuminance<Unit::lx>;  // デフォルトをlxにする
 
-//! @brief 光度(cd)
+//! @brief 照度(lx)
 template<>
-class LuminousIntensity<Unit::cd> : public dimension::cd
+class Illuminance<Unit::lx> : public dimension::lx
 {
 public:
-    //! @brief 光度(cd)
-    explicit constexpr LuminousIntensity(const double& num):
-        dimension::cd(num) {}
+    //! @brief 照度(lx)
+    explicit constexpr Illuminance(const double& num):
+        dimension::lx(num) {}
 
-    //! @brief 光度(cd)
-    constexpr LuminousIntensity(const dimension::cd& num):
-        dimension::cd(num) {}
+    //! @brief 照度(lx)
+    constexpr Illuminance(const dimension::lx& num):
+        dimension::lx(num) {}
 
-    //! @brief 光度(cd)をdoubleに変換
+    //! @brief 照度(lx)をdoubleに変換
     explicit constexpr operator double() const
         {return number();}
 };
@@ -659,6 +661,9 @@ template<class T> Altitude(const T& t) -> Altitude<Unit::m>;  // デフォルト
 template<>
 class Altitude<Unit::m> : public dimension::m
 {
+    static double _pressure0;
+    static double _temperature0;
+    static double _altitude0;
 public:
     //! @brief 標高(m)
     explicit constexpr Altitude(const double& num):
@@ -671,6 +676,18 @@ public:
     //! @brief 標高(m)をdoubleに変換
     explicit constexpr operator double() const
         {return number();}
+
+    //! @brief 気圧気温から標高を計算
+    static void set_origin(double pressure0=1013.25, double temperature0=20, double altitude0=0)
+    {
+        _pressure0    = pressure0;
+        _temperature0 = temperature0;
+        _altitude0    = altitude0;
+    }
+
+    Altitude(double pressure, double temperature):
+        // dimension::m(_altitude0 + ((temperature + 273.15) / 0.0065F) * (std::pow((_pressure0 / pressure), 1.0F / 5.257F) -1.0F)) {}
+        dimension::m(_altitude0 + ((_temperature0 + 273.15F) / 0.0065F) * (1 - std::pow((pressure / _pressure0), (1.0F / 5.257F)))) {}
 };
 
 

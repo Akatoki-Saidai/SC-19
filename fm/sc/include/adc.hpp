@@ -20,8 +20,10 @@
 namespace sc
 {
 
+class PicoTemp;
+
 // ADC(アナログ-デジタル変換)
-class ADC
+class ADC : Noncopyable
 {
 public:
     //! @brief PWMのセットアップ
@@ -32,15 +34,33 @@ private:
     const Pin _adc_pin;
     const uint8_t _channel;
 
-    static inline bool IsUse[5] = {false, false, false, false, false};  // 既にADCを使用しているか
-
-    static uint8_t get_channel(Pin pin)
-        {return pin.gpio() - 26;}
+    static uint8_t get_channel(Pin pin);
 
 public:
     //! @brief ADCを読み取り
     uint16_t read() const;
 
+    static inline bool IsUse[5] = {false, false, false, false, false};  // 既にADCを使用しているか
+
+};
+
+
+//! @brief picoの内蔵温度センサ
+class PicoTemp : Noncopyable
+{
+public:
+    PicoTemp();
+
+    dimension::degC read();
+};
+
+//! @brief picoのVSYSピンの電圧
+class VsysVoltage : Noncopyable
+{
+public:
+    VsysVoltage();
+
+    dimension::V read();
 };
 
 }

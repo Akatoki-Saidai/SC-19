@@ -39,41 +39,64 @@ public:
     //! @brief 配列やvectorなどのコンテナからバイト列を作成
     //! @param data コンテナ形式のデータ
     template<typename Iterable, typename std::enable_if<IsIterable<Iterable>::value, std::nullptr_t>::type = nullptr>  // コンテナ形式の型でなければエラーになる
-    Binary(const Iterable& data):
-        _binary_data(std::begin(data), std::end(data)) {}
-
-    // //! @brief バイト列を作成
-    // //! @param text string型のデータ
-    // Binary(std::string text):
-    //     _binary_data(text.begin(), text.end()) {}
-
-    // //! @brief 配列への参照からバイト列を作成
-    // //! @param array_ref 長さの情報を持った配列
-    // template<class UINT8, std::size_t Size>
-    // Binary(const UINT8 (&array_ref)[Size]):
-    //     _binary_data(array_ref, array_ref + Size) {}
-
-    // //! @brief コンテナからバイト列を作成
-    // //! @param input_itr vectorやarrayなど
-    // template<class InputItr>
-    // Binary(InputItr input_itr):
-    //     _binary_data(input_itr.begin(), input_itr.end()) {}
+    Binary(const Iterable& data) try :
+        _binary_data(std::begin(data), std::end(data))
+    {
+        #ifndef NODEBUG
+            std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+        #endif
+    }
+    catch(const std::exception& e)
+    {
+        sc::print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+        sc::print(e.what());
+    }
 
     //! @brief { }からバイト列を作成
     //! @param init_list {1, 2, 3}などのデータ
-    Binary(const std::initializer_list<uint8_t>& init_list):
-        _binary_data(init_list) {}
+    Binary(const std::initializer_list<uint8_t>& init_list) try :
+        _binary_data(init_list) 
+    {
+        #ifndef NODEBUG
+            std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+        #endif
+    }
+    catch(const std::exception& e)
+    {
+        sc::print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+        sc::print(e.what());
+    }
 
     //! @brief 配列からバイト列を作成
     //! @param array_ptr 配列
     //! @param size 配列の長さ
     template<class UINT8>
-    Binary(const UINT8* array_ptr, std::size_t size):
-        _binary_data(array_ptr, array_ptr + size) {}
+    Binary(const UINT8* array_ptr, std::size_t size) try :
+        _binary_data(array_ptr, array_ptr + size) 
+    {
+        #ifndef NODEBUG
+            std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+        #endif
+    }
+    catch(const std::exception& e)
+    {
+        sc::print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+        sc::print(e.what());
+    }
 
     //! @brief 1バイトの値からバイト列を作成
-    Binary(const uint8_t& bite_data):
-        _binary_data({bite_data}) {}
+    Binary(const uint8_t& bite_data) try :
+        _binary_data({bite_data}) 
+    {
+        #ifndef NODEBUG
+            std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+        #endif
+    }
+    catch(const std::exception& e)
+    {
+        sc::print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+        sc::print(e.what());
+    }
 
     //! @brief バイト列のサイズを返す
     //! @return バイト列のサイズ
@@ -95,6 +118,13 @@ public:
     //! @note バイト列のサイズ以上のindexを指定した場合，エラーが発生するかは未定義．
     uint8_t operator[](std::size_t index) const;
 
+    //! @brief バイト列のindex番目の値を返す
+    //! @param index 先頭から何番目か．先頭は0
+    //! @return index番目の値．
+    //! @note バイト列のサイズ以上のindexを指定した場合，エラーが発生するかは未定義．
+    uint8_t operator[](int index) const 
+        {return _binary_data[index];}
+
     //! @brief vector型への変換
     //! @return vector型の値
     operator std::vector<uint8_t>() const;
@@ -112,17 +142,21 @@ public:
     const uint8_t* operator&() const;
     
     //! @brief バイナリデータを結合
-    Binary operator+ (Binary other_binary) const;
+    Binary operator+ (const Binary& other_binary) const;
 
     //! @brief 配列の先頭へのポインタにデータを代入
     void to_assign(uint8_t* reg_ptr) const;
+
+    //! @brief 生データにアクセス
+    const std::basic_string<uint8_t>& data() const
+        {return _binary_data;}
 };
 
 //! @brief バイナリデータの先頭に1バイト追加
-Binary operator+ (uint8_t first_byte, Binary binary);
+Binary operator+ (uint8_t first_byte, const Binary& binary);
 
 //! @brief バイナリデータの末尾に1バイト追加
-Binary operator+ (Binary binary, uint8_t end_byte);
+Binary operator+ (const Binary& binary, uint8_t end_byte);
 
 }
 

@@ -62,7 +62,7 @@ public:
 
 
 //! @brief UART通信
-class UART
+class UART : Noncopyable
 {
 private:
     const TX _tx;  // UARTで使用するTXピン
@@ -87,11 +87,11 @@ public:
 
 private:
     static inline bool IsUse[2] = {false, false};  // 既にUART0とUART1を使用しているか
-    static constexpr std::size_t MaxInputLen = 100;  // 受信したデータを最大で何バイトまで保管しておくか
+    static constexpr std::size_t MaxInputLen = 255;  // 受信したデータを最大で何バイトまで保管しておくか
 
 public:
-    static inline std::deque<uint8_t> uart0_queue{MaxInputLen, 0};
-    static inline std::deque<uint8_t> uart1_queue{MaxInputLen, 0};
+    static inline std::deque<uint8_t> uart0_queue{0};
+    static inline std::deque<uint8_t> uart1_queue{0};
     static void uart0_handler();
     static void uart1_handler();
 };

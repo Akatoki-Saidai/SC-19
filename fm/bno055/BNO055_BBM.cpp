@@ -48,9 +48,12 @@ uint8_t accel_val = 0x28; //LIA_DATA_X_LSB 0x28
 
 //以下class BNO055で定義した関数とかの中身
 
-BNO055::BNO055(const I2C& i2c):
+BNO055::BNO055(const I2C& i2c) try :
     _i2c(i2c)
 {
+    #ifndef NODEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
 
     // // Configure the I2C Communication
     // // i2c_init(I2C_PORT, 400 * 1000);
@@ -63,8 +66,16 @@ BNO055::BNO055(const I2C& i2c):
     accel_init();
 
 }
+catch(const std::exception& e)
+{
+    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+    print(e.what());
+}
 
 std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity<Unit::T>,AngularVelocity<Unit::rad_s>> BNO055::read(){
+    #ifndef NODEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     //線形加速度を読み取る
     // i2c_write_blocking(I2C_PORT, addr, &accel_val, 1, true);
     // i2c_read_blocking(I2C_PORT, addr, accel, 6, false);
@@ -104,9 +115,9 @@ std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity
     magY = ((mag[3] << 8) | mag[2]);
     magZ = ((mag[5] << 8) | mag[4]);
 
-    f_magX = magX / 16.00;
-    f_magY = magY / 16.00;
-    f_magZ = magZ / 16.00;
+    f_magX = milli * magX / 16.00;
+    f_magY = milli * magY / 16.00;
+    f_magZ = milli * magZ / 16.00;
     
     MagneticFluxDensity<Unit::T>Mag_vector{dimension::T(f_magX),dimension::T(f_magY),dimension::T(f_magZ)};
     
@@ -125,7 +136,16 @@ std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity
 
     AngularVelocity<Unit::rad_s>gyro_vector{dimension::rad_s(f_gyroX),dimension::rad_s(f_gyroY),dimension::rad_s(f_gyroZ)};
 
-    return std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity<Unit::T>,AngularVelocity<Unit::rad_s>> {accel_vector,grav_vector,Mag_vector,gyro_vector};
+    // 測定値がおかしくなったら再び初期化
+    if (accelX==0 && accelY==0 && accelZ==0 && grvX==0 && grvY==0 && grvZ==0 && magX==0 && magY==0 && magZ==0 && gyroX==0 && gyroY==0 && gyroZ==0)
+    {
+        print("!!reinitialize BNO!!\n");  // BNOを再び初期化します
+        accel_init();
+        sleep(100_ms);
+        throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is abnormal"));  // BNO055の測定値が異常です
+    }
+
+    return {accel_vector,grav_vector,Mag_vector,gyro_vector};
 }
 
 
@@ -133,64 +153,83 @@ std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity
 
 // Initialise Accelerometer Function
 void BNO055::accel_init(void){
+    #ifndef NODEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     // Check to see if connection is correct
     sleep_ms(1000); // Add a short delay to help BNO005 boot up
     uint8_t reg = 0x00;
     uint8_t chipID[1];
     // i2c_write_blocking(i2c1, addr, &reg, 1, true);
     // i2c_read_blocking(i2c1, addr, chipID, 1, false);
-    chipID[0] = _i2c.read_memory(size_t(1), SlaveAddr(addr), MemoryAddr(reg)).at(0);
-
-//while文を削除した
-    if(chipID[0] != 0xA0){
+    try
+    {
+        chipID[0] = _i2c.read_memory(size_t(1), SlaveAddr(addr), MemoryAddr(reg)).at(0);
+        if(chipID[0] != 0xA0)
+        {
             printf("Chip ID Not Correct - Check Connection!");
+        }
     }
+    catch(const std::exception& e)
+    {
+        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+        print(e.what());
+        chipID[0] = 0xA0;
+    }
+    
+    try
+    {
+        // Use internal oscillator
+        uint8_t data[2];
+        data[0] = 0x3F;
+        data[1] = 0x40;
+        // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
+        _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
 
-    // Use internal oscillator
-    uint8_t data[2];
-    data[0] = 0x3F;
-    data[1] = 0x40;
-    // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
-    _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
+        // Reset all interrupt status bits
+        data[0] = 0x3F;
+        data[1] = 0x01;
+        // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
+        _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
 
-    // Reset all interrupt status bits
-    data[0] = 0x3F;
-    data[1] = 0x01;
-    // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
-    _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
+        // Configure Power Mode
+        data[0] = 0x3E;
+        data[1] = 0x00;
+        // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
+        _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
+        sleep_ms(50);
 
-    // Configure Power Mode
-    data[0] = 0x3E;
-    data[1] = 0x00;
-    // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
-    _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
-    sleep_ms(50);
+        // Defaul Axis Configuration
+        data[0] = 0x41;
+        data[1] = 0x24;
+        // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
+        _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
 
-    // Defaul Axis Configuration
-    data[0] = 0x41;
-    data[1] = 0x24;
-    // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
-    _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
+        // Default Axis Signs
+        data[0] = 0x42;
+        data[1] = 0x00;
+        // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
+        _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
 
-    // Default Axis Signs
-    data[0] = 0x42;
-    data[1] = 0x00;
-    // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
-    _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
+        // Set units to m/s^2
+        data[0] = 0x3B;
+        data[1] = 0b0001000;
+        // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
+        _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
+        sleep_ms(30);
 
-    // Set units to m/s^2
-    data[0] = 0x3B;
-    data[1] = 0b0001000;
-    // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
-    _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
-    sleep_ms(30);
-
-    // Set operation to AMG(Accel Mag Gyro)
-    data[0] = 0x3D;
-    data[1] = 0b1100;
-    // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
-    _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
-    sleep_ms(100);
+        // Set operation to AMG(Accel Mag Gyro)
+        data[0] = 0x3D;
+        data[1] = 0b1100;
+        // i2c_write_blocking(I2C_PORT, addr, data, 2, true);
+        _i2c.write_memory(Binary(data[1]), SlaveAddr(addr), MemoryAddr(data[0]));
+        sleep_ms(100);    
+    }
+    catch(const std::exception& e)
+    {
+        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+        print(e.what());
+    }
 }
 
 }

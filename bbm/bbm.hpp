@@ -9,5 +9,7 @@
 #include "njl5513r/njl5513r.hpp"
 #include "sd/sd.hpp"
 #include "speaker/speaker.hpp"
+#include "spresense/spresense.hpp"
+#include "twelite/twelite.hpp"
 
 #endif  // SC19_PICO_BBM_HPP_

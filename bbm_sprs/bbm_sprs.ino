@@ -6,45 +6,222 @@ camera.ino - Simple camera example sketch
 #include <SDHCI.h>
 #include <stdio.h>
 #include <Camera.h>
+#include <GNSS.h>
 
 #define BAUDRATE (1000000)
-#define BAUDRATE1 (31250)
+#define BAUDRATE2 (31250)
+
+#define STRING_BUFFER_SIZE  128       /**< %Buffer size */
+#define RESTART_CYCLE       (60 * 5)  /**< positioning test term */
+static SpGnss Gnss;                   /**< SpGnss object */
 
 CamImage img;
 
-const int lineSize = 3*32;
-uint8_t encoded[lineSize * 4/3 + 3];
+
+
+// GPS関数
+
+/**
+ * @enum ParamSat
+ * @brief Satellite system
+ */
+enum ParamSat {
+  eSatGps,            /**< GPS                     World wide coverage  */
+  eSatGlonass,        /**< GLONASS                 World wide coverage  */
+  eSatGpsSbas,        /**< GPS+SBAS                North America        */
+  eSatGpsGlonass,     /**< GPS+Glonass             World wide coverage  */
+  eSatGpsBeidou,      /**< GPS+BeiDou              World wide coverage  */
+  eSatGpsGalileo,     /**< GPS+Galileo             World wide coverage  */
+  eSatGpsQz1c,        /**< GPS+QZSS_L1CA           East Asia & Oceania  */
+  eSatGpsGlonassQz1c, /**< GPS+Glonass+QZSS_L1CA   East Asia & Oceania  */
+  eSatGpsBeidouQz1c,  /**< GPS+BeiDou+QZSS_L1CA    East Asia & Oceania  */
+  eSatGpsGalileoQz1c, /**< GPS+Galileo+QZSS_L1CA   East Asia & Oceania  */
+  eSatGpsQz1cQz1S,    /**< GPS+QZSS_L1CA+QZSS_L1S  Japan                */
+};
+
+/* Set this parameter depending on your current region. */
+static enum ParamSat satType =  eSatGps;
+
+/**
+ * @brief Turn on / off the LED0 for CPU active notification.
+ */
+static void Led_isActive(void)
+{
+  static int state = 1;
+  if (state == 1)
+  {
+    ledOn(PIN_LED0);
+    state = 0;
+  }
+  else
+  {
+    ledOff(PIN_LED0);
+    state = 1;
+  }
+}
+
+/**
+ * @brief Turn on / off the LED1 for positioning state notification.
+ *
+ * @param [in] state Positioning state
+ */
+static void Led_isPosfix(bool state)
+{
+  if (state)
+  {
+    ledOn(PIN_LED1);
+  }
+  else
+  {
+    ledOff(PIN_LED1);
+  }
+}
+
+/**
+ * @brief Turn on / off the LED3 for error notification.
+ *
+ * @param [in] state Error state
+ */
+static void Led_isError(bool state)
+{
+  if (state)
+  {
+    ledOn(PIN_LED3);
+  }
+  else
+  {
+    ledOff(PIN_LED3);
+  }
+}
+
+
+/**
+ * @brief %Print position information.
+ */
+static void print_pos(SpNavData *pNavData)
+{
+  char StringBuffer[STRING_BUFFER_SIZE];
+
+  /* print time */
+  snprintf(StringBuffer, STRING_BUFFER_SIZE, ":Tim%04d%02d%02d", pNavData->time.year, pNavData->time.month, pNavData->time.day);
+  Serial.print(StringBuffer);
+  snprintf(StringBuffer, STRING_BUFFER_SIZE, ":Tim%04d%02d%02d", pNavData->time.year, pNavData->time.month, pNavData->time.day);
+  Serial2.print(StringBuffer);
+
+  snprintf(StringBuffer, STRING_BUFFER_SIZE, "%02d%02d%02d", pNavData->time.hour, pNavData->time.minute, pNavData->time.sec);
+  Serial.println(StringBuffer);
+  snprintf(StringBuffer, STRING_BUFFER_SIZE, "%02d%02d%02d", pNavData->time.hour, pNavData->time.minute, pNavData->time.sec);
+  Serial2.println(StringBuffer);
+
+  /* print satellites count */
+  // snprintf(StringBuffer, STRING_BUFFER_SIZE, "numSat:%2d, ", pNavData->numSatellites);
+  // Serial.print(StringBuffer);
+
+  /* print position data */
+
+  
+  if (pNavData->posFixMode == FixInvalid)
+  {
+    Serial.println("No-Fix");
+  }
+  else
+  {
+    Serial.println("Fix");
+  }
+  if (pNavData->posDataExist == 0)
+  {
+    Serial.println("No Position");
+    Serial.println(":Lat0.00000000");
+    // Serial2.println(":Lat0.00000000");
+    Serial.println(":Lon0.00000000");
+    // Serial2.println(":Lon0.00000000");
+  }
+  else
+  {
+    snprintf(StringBuffer, STRING_BUFFER_SIZE, ":Lat%08f", pNavData->latitude);
+    Serial.println(StringBuffer);
+    Serial2.println(StringBuffer);
+    snprintf(StringBuffer, STRING_BUFFER_SIZE, ":Lon%08f", pNavData->longitude);
+    Serial.println(StringBuffer);
+    Serial2.println(StringBuffer);
+  }
+}
+
+/**
+ * @brief %Print satellite condition.
+ */
+static void print_condition(SpNavData *pNavData)
+{
+  char StringBuffer[STRING_BUFFER_SIZE];
+  unsigned long cnt;
+
+  /* Print satellite count. */
+  snprintf(StringBuffer, STRING_BUFFER_SIZE, "numSatellites:%2d\n", pNavData->numSatellites);
+  Serial.print(StringBuffer);
+
+  for (cnt = 0; cnt < pNavData->numSatellites; cnt++)
+  {
+    const char *pType = "---";
+    SpSatelliteType sattype = pNavData->getSatelliteType(cnt);
+
+    /* Get satellite type. */
+    /* Keep it to three letters. */
+    switch (sattype)
+    {
+      case GPS:
+        pType = "GPS";
+        break;
+
+      case GLONASS:
+        pType = "GLN";
+        break;
+
+      case QZ_L1CA:
+        pType = "QCA";
+        break;
+
+      case SBAS:
+        pType = "SBA";
+        break;
+
+      case QZ_L1S:
+        pType = "Q1S";
+        break;
+
+      case BEIDOU:
+        pType = "BDS";
+        break;
+
+      case GALILEO:
+        pType = "GAL";
+        break;
+
+      default:
+        pType = "UKN";
+        break;
+    }
+
+    /* Get print conditions. */
+    unsigned long Id  = pNavData->getSatelliteId(cnt);
+    unsigned long Elv = pNavData->getSatelliteElevation(cnt);
+    unsigned long Azm = pNavData->getSatelliteAzimuth(cnt);
+    float sigLevel = pNavData->getSatelliteSignalLevel(cnt);
+
+    /* Print satellite condition. */
+    snprintf(StringBuffer, STRING_BUFFER_SIZE, "[%2ld] Type:%s, Id:%2ld, Elv:%2ld, Azm:%3ld, CN0:", cnt, pType, Id, Elv, Azm );
+    Serial.print(StringBuffer);
+    Serial.println(sigLevel, 6);
+  }
+}
+
+
+
+
+
+// カメラ関数
+
 bool CameraStart;
 bool Launch;
-
-// base64 encoder
-const uint8_t base64Table[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-void base64Encode(uint8_t* encoded, uint8_t* data, int dataLength){
-  while(dataLength > 0){
-    if(dataLength >= 3){
-      encoded[0] = base64Table[data[0] >> 2];
-      encoded[1] = base64Table[((data[0]&0x3) << 4) | (data[1] >> 4)];
-      encoded[2] = base64Table[((data[1]&0xF) << 2) | (data[2] >> 6)];
-      encoded[3] = base64Table[data[2] & 0x3F]; 
-      data+=3;
-      dataLength -= 3;
-    }else if(dataLength == 2){
-      encoded[0] = base64Table[data[0] >> 2];
-      encoded[1] = base64Table[((data[0]&0x3) << 4) | (data[1] >> 4)];
-      encoded[2] = base64Table[(data[1]&0xF) << 2];
-      encoded[3] = '=';
-      dataLength = 0;
-    }else{
-      encoded[0] = base64Table[data[0] >> 2];
-      encoded[1] = base64Table[(data[0]&0x3) << 4];
-      encoded[2] = '=';
-      encoded[3] = '=';
-      dataLength = 0;
-    }
-    encoded += 4;
-  }
-  *encoded = '\0';
-}
 
 /**
  * Print error message
@@ -112,12 +289,15 @@ void CamCB(CamImage img)
     Serial.println();
     */
 
-    Serial.print(":Cam");    
-    Serial2.print(":Cam");
+    Serial.print(":Cam");
     
     uint8_t red_result = red_detect(img);
     Serial.println(red_result);
-    Serial2.println(red_result);
+
+    if (1 <= red_result || red_result <= 3){
+        Serial2.print(":Cam");
+        Serial2.println(red_result);
+    }
 
 
     // 画像の転送(USB)
@@ -194,26 +374,6 @@ void initCamera(){
       printError(err);
   }
 
-}
-
-void sendImageToSerial (CamImage &img) {
-    int inputLen = img.getImgSize();
-    uint8_t* p = img.getImgBuff();
-    Serial.println("#Image");
-    Serial.flush();
-    delay(2000);
-    while(inputLen > 0)
-    {
-      
-      int len = inputLen > lineSize ? lineSize : inputLen;
-      inputLen = inputLen - len;
-      base64Encode(encoded, p, len); 
-      p += len;
-      Serial.println((char*)encoded);
-    }
-    Serial.println("#End");
-    delay(1000);
-    // free(p);
 }
 
 void sendByteImage (CamImage &img) {
@@ -486,10 +646,142 @@ uint8_t red_detect(CamImage &img) {
 
 void setup(){
   Serial.begin(BAUDRATE);
-  // Serial2.begin(BAUDRATE1);
+  Serial2.begin(BAUDRATE2);
   delay(500);
   // while (!Serial);
+
+
+  // GPSセットアップ
   
+  int error_flag = 0;
+
+  /* Set serial baudrate. */
+  Serial.begin(1000000);
+
+  /* Wait HW initialization done. */
+  sleep(3);
+
+  /* Turn on all LED:Setup start. */
+  ledOn(PIN_LED0);
+  ledOn(PIN_LED1);
+  ledOn(PIN_LED2);
+  ledOn(PIN_LED3);
+
+  /* Set Debug mode to Info */
+  Gnss.setDebugMode(PrintInfo);
+
+  int result;
+
+  /* Activate GNSS device */
+  result = Gnss.begin();
+
+  if (result != 0)
+  {
+    Serial.println("Gnss begin error!!");
+    error_flag = 1;
+  }
+  else
+  {
+    /* Setup GNSS
+     *  It is possible to setup up to two GNSS satellites systems.
+     *  Depending on your location you can improve your accuracy by selecting different GNSS system than the GPS system.
+     *  See: https://developer.sony.com/develop/spresense/developer-tools/get-started-using-nuttx/nuttx-developer-guide#_gnss
+     *  for detailed information.
+    */
+    switch (satType)
+    {
+    case eSatGps:
+      Gnss.select(GPS);
+      break;
+
+    case eSatGpsSbas:
+      Gnss.select(GPS);
+      Gnss.select(SBAS);
+      break;
+
+    case eSatGlonass:
+      Gnss.select(GLONASS);
+      Gnss.deselect(GPS);
+      break;
+
+    case eSatGpsGlonass:
+      Gnss.select(GPS);
+      Gnss.select(GLONASS);
+      break;
+
+    case eSatGpsBeidou:
+      Gnss.select(GPS);
+      Gnss.select(BEIDOU);
+      break;
+
+    case eSatGpsGalileo:
+      Gnss.select(GPS);
+      Gnss.select(GALILEO);
+      break;
+
+    case eSatGpsQz1c:
+      Gnss.select(GPS);
+      Gnss.select(QZ_L1CA);
+      break;
+
+    case eSatGpsQz1cQz1S:
+      Gnss.select(GPS);
+      Gnss.select(QZ_L1CA);
+      Gnss.select(QZ_L1S);
+      break;
+
+    case eSatGpsBeidouQz1c:
+      Gnss.select(GPS);
+      Gnss.select(BEIDOU);
+      Gnss.select(QZ_L1CA);
+      break;
+
+    case eSatGpsGalileoQz1c:
+      Gnss.select(GPS);
+      Gnss.select(GALILEO);
+      Gnss.select(QZ_L1CA);
+      break;
+
+    case eSatGpsGlonassQz1c:
+    default:
+      Gnss.select(GPS);
+      Gnss.select(GLONASS);
+      Gnss.select(QZ_L1CA);
+      break;
+    }
+
+    /* Start positioning */
+    result = Gnss.start(COLD_START);
+    if (result != 0)
+    {
+      Serial.println("Gnss start error!!");
+      error_flag = 1;
+    }
+    else
+    {
+      Serial.println("Gnss setup OK");
+    }
+  }
+
+  /* Start 1PSS output to PIN_D02 */
+  //Gnss.start1PPS();
+
+  /* Turn off all LED:Setup done. */
+  ledOff(PIN_LED0);
+  ledOff(PIN_LED1);
+  ledOff(PIN_LED2);
+  ledOff(PIN_LED3);
+
+  /* Set error LED. */
+  if (error_flag == 1)
+  {
+    Led_isError(true);
+    exit(0);
+  }
+
+
+  // カメラセットアップ
+
   initCamera();
   delay(10);
 
@@ -498,6 +790,106 @@ void setup(){
 }
 
 void loop(){
+
+  // UART受信
+  Serial.print("UART: ");
+  if (Serial2.available() > 0){
+    String pico_message = Serial2.readStringUntil('\n'); 
+    Serial.println(pico_message);
+  }
+
+
+  // GPSループ
+  
+  static int LoopCount = 0;
+  static int LastPrintMin = 0;
+
+  /* Blink LED. */
+  Led_isActive();
+
+  /* Check update. */
+  if (Gnss.waitUpdate(-1))
+  {
+    /* Get NaviData. */
+    SpNavData NavData;
+    Gnss.getNavData(&NavData);
+
+    /* Set posfix LED. */
+    bool LedSet = (NavData.posDataExist && (NavData.posFixMode != FixInvalid));
+    Led_isPosfix(LedSet);
+
+    /* Print satellite information every minute. */
+    if (NavData.time.minute != LastPrintMin)
+    {
+      print_condition(&NavData);
+      LastPrintMin = NavData.time.minute;
+    }
+
+    /* Print position information. */
+    print_pos(&NavData);
+  }
+  else
+  {
+    /* Not update. */
+    Serial.println("data not update");
+  }
+
+  /* Check loop count. */
+  LoopCount++;
+  if (LoopCount >= RESTART_CYCLE)
+  {
+    int error_flag = 0;
+
+    /* Turn off LED0 */
+    ledOff(PIN_LED0);
+
+    /* Set posfix LED. */
+    Led_isPosfix(false);
+
+    /* Restart GNSS. */
+    if (Gnss.stop() != 0)
+    {
+      Serial.println("Gnss stop error!!");
+      error_flag = 1;
+    }
+    else if (Gnss.end() != 0)
+    {
+      Serial.println("Gnss end error!!");
+      error_flag = 1;
+    }
+    else
+    {
+      Serial.println("Gnss stop OK.");
+    }
+
+    if (Gnss.begin() != 0)
+    {
+      Serial.println("Gnss begin error!!");
+      error_flag = 1;
+    }
+    else if (Gnss.start(HOT_START) != 0)
+    {
+      Serial.println("Gnss start error!!");
+      error_flag = 1;
+    }
+    else
+    {
+      Serial.println("Gnss restart OK.");
+    }
+
+    LoopCount = 0;
+
+    /* Set error LED. */
+    if (error_flag == 1)
+    {
+      Led_isError(true);
+      exit(0);
+    }
+  }
+
+
+  // カメラループ
+
   /*
   if (Serial1.available() > 0){
     char pico_order = Serial1.read();
@@ -509,41 +901,8 @@ void loop(){
     Launch = true;
   }
 
-/*
-  initCamera();
-  delay(10);
-  for (uint8_t i = 0; i < 50; i++){
-    img = theCamera.takePicture();
-    if (img.isAvailable())
-    {
-      /*
-      int iso = theCamera.getISOSensitivity();
-      int exposure = theCamera.getAbsoluteExposure();
-      int hdr = theCamera.getHDR();
-      Serial.print("ISO ");
-      Serial.print(iso);
-      Serial.print(",Exposure ");
-      Serial.print(exposure);
-      Serial.print(",HDR ");
-      Serial.print(hdr);
-      Serial.println();
-      
-      uint8_t red_result = red_detect(img);
-      // Serial.println(red_result);
 
+  Serial2.flush();
+  delay(500);
 
-      // 画像の転送(USB)
-      // digitalWrite(LED0, HIGH);
-      // Serial.flush();
-      // sendImageToSerial(img);
-      // Serial.flush();
-      // digitalWrite(LED0, LOW);
-      img.~CamImage();
-        
-      }
-  }
-  theCamera.end();
-
-  delay(3000);
-*/
 }

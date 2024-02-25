@@ -17,20 +17,22 @@ namespace sc
 
 //正規化する関数を作っとく
 Vector3<double> Normalization(Vector3<double> vec){
-    double magnitude = sqrt(pow(vec[0],2) + pow(vec[1],2) + pow(vec[2],2));
-    if (magnitude != 0.0){
-        vec = vec / magnitude;
-    }
-    return vec;
+    double magnitude = std::sqrt(std::pow(vec[0],2) + std::pow(vec[1],2) + std::pow(vec[2],2));
+    // if (magnitude != 0.0){
+    //     vec = vec / magnitude;
+    // }
+    if (magnitude == 0.0)
+        throw std::range_error(f_err(__FILE__, __LINE__, "Divide by zero error"));  // ゼロ除算エラー
+    return vec / magnitude;
 }
 
 // ベクトルをxy平面で反時計回りに回転する関数
 Vector3<double> Rotation_counter_xy(Vector3<double> vec, Latitude<Unit::rad> Radian) {
-    return Vector3<double>(vec[0] * cos(Radian) - vec[1] * sin(Radian),vec[0] * sin(Radian) + vec[1] * cos(Radian),vec[2]);
+    return Vector3<double>(vec[0] * cos(double(Radian)) - vec[1] * sin(double(Radian)),vec[0] * sin(double(Radian)) + vec[1] * cos(double(Radian)),vec[2]);
 }
 // ベクトルをxy平面で時計回りに回転する関数
 Vector3<double> Rotation_clockwise_xy(Vector3<double> vec, Latitude<Unit::rad> Radian) {
-    return Vector3<double>(vec[0] * cos(Radian) + vec[1] * sin(Radian),vec[1] * cos(Radian) - vec[0] * sin(Radian) ,vec[2]);
+    return Vector3<double>(vec[0] * cos(double(Radian)) + vec[1] * sin(double(Radian)),vec[1] * cos(double(Radian)) - vec[0] * sin(double(Radian)) ,vec[2]);
 }
 
 //球面上の距離を測る関数(一旦)

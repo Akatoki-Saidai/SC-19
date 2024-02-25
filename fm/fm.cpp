@@ -29,7 +29,7 @@ int main()
         Motor1 motor_left(PWM(11), PWM(10));  // 左のモーター
         // GPIO 12~15 はSDカード
         // GPIO16は未使用
-        GPIO<In> not_separate_para(Pin(17), Pull::Up);  // パラシュート分離の検知用ピン (分離したらHigh(1))
+        GPIO<In> para_separate(Pin(17), Pull::Up);  // パラシュート分離の検知用ピン (分離したらHigh(1))
         // GPIO18は未使用
         HCSR04 hcsr04(Pin(28), Pin(19));  // 超音波センサHCSR04
         Motor1 motor_right(PWM(20), PWM(21));  // 右のモーター
@@ -87,7 +87,7 @@ int main()
                         try
                         {
                             auto njl_data = njl5513r.read();
-                            if(njl_date>100)//照度によりキャリア展開検知　→落下フェーズへ
+                            if(njl_data>100_lx)//照度によりキャリア展開検知　→落下フェーズへ
                             {
                                 fase=Fase::Fall;
                                 break;
@@ -109,11 +109,14 @@ int main()
                         try
                         {
                             int separate;
+                            auto bme_data = bme280.read();  // BME280(温湿圧)から受信
+                            Pressure<Unit::Pa> pressure = std::get<0>(bme_data);  // 気圧
+                            Temperature<Unit::degC> temperature = std::get<2>(bme_data);  // 気温
                             Altitude<Unit::m> altitude(pressure, temperature);
-                            if(altitude<10.0)//地面からの標高が10m以内
+                            if(altitude<10.0_m)//地面からの標高が10m以内
                             {
                                 sleep(10_s);//念のため待機しておく
-                                separete=para_separate.read;
+                                separate=para_separate.read();
                                 if(separate!=1)//パラシュートが取れていない場合、動いてみる？
                                 {
                                     motor.forward(1.0);
@@ -121,9 +124,10 @@ int main()
                                     motor.forward(0);
                                     break;
                                 }
+                                auto bno_data = bno055.read();  // BNO055(9軸)から受信
                                 Acceleration<Unit::m_s2> gravity_acceleration = std::get<1>(bno_data);//重力加速度取得
                                 //Z軸の重力加速度が正かどうかで機体の体制修正
-                                if(gravity_acceleration.z()>0)//z軸が正なら正常
+                                if(gravity_acceleration.z()>0_m_s2)//z軸が正なら正常
                                 {
                                     fase=Fase::Ldistance;
                                     break;
@@ -154,29 +158,30 @@ int main()
                         try
                         {
                             //------ちゃんと動くか確認するためのコード-----
-                            Vector3<double> magnetic = (0.0,0.0,0.0);
+                            Vector3<double> magnetic(0.0,0.0,0.0);
                             double t_lon = 0.0000;//ゴールの経度
                             double t_lat = 0.0000;//ゴールの緯度
                             double m_lon = 0.0000;//自分の経度
                             double m_lat = 0.0000;//自分の緯度
-                            double t_lon_rad = deg_to_rad(t_lon);
-                            double t_lat_rad = deg_to_rad(t_lat);
-                            double m_lon_rad = deg_to_rad(m_lon);
-                            double m_lat_rad = deg_to_rad(m_lat);
+                            double t_lon_rad = Angle<Unit::deg>::deg_to_rad(t_lon);
+                            double t_lat_rad = Angle<Unit::deg>::deg_to_rad(t_lat);
+                            double m_lon_rad = Angle<Unit::deg>::deg_to_rad(m_lon);
+                            double m_lat_rad = Angle<Unit::deg>::deg_to_rad(m_lat);
                             //-------------------------------------------
 
                             //機体の正面のベクトルを作る.ただし、bnoの都合上、後ろがxの正の向きで左がyの正の向き、下がzの正の向きとなっている
                             // Vector3<double> front_vetor_basic = (-1.0, 0.0, 0.0);//機体正面の単位ベクトル
 
                             //北を見つける
-                            Vector3<double> North_vector = (magnetic.x(),magnetic.y(),0);//磁気センサから求める北の向き
+                            Vector3<double> North_vector(magnetic.x(),magnetic.y(),0);//磁気センサから求める北の向き
                             // Vector3<double> North_vector_basic = Normalization(North_vector);//正規化
                             double North_angle_rad;//後で使う北の角度
 
                             // 北がBnoの座標軸において何度回転した位置にあるか求める
                             // 但しθは[0,2Pi)とした
                             North_angle_rad = atan2(magnetic.y(),magnetic.x());
-                            if(North_angle_rad < 0){
+                            if(North_angle_rad < 0)
+                            {
                                 North_angle_rad += 2 * PI;
                             }
 
@@ -190,35 +195,39 @@ int main()
                             double distance_horizontal = distance_sphere(t_lon_rad,m_lat_rad,m_lon_rad,m_lat_rad);//横の長さを求める(緯度を同じにすることで)
 
                             //自分の緯度のほうが高い場合、南向きに進む必要があるため、－符号をかける(北が正のため)
-                            if(m_lat_rad > t_lat_rad){
+                            if(m_lat_rad > t_lat_rad)
+                            {
                                 distance_vertical = -1*distance_vertical;
                                 return distance_vertical;
                             }
                             //自分の経度のほうが小さい場合、東に向かう必要があるため(以下略)
-                            if(m_lon_rad < t_lon_rad){
+                            if(m_lon_rad < t_lon_rad)
+                            {
                                 distance_horizontal = -1*distance_horizontal;
                                 return distance_horizontal;
                             }
 
-                            Vector3<double> direction = (distance_vertical,distance_horizontal,0);
+                            Vector3<double> direction(distance_vertical,distance_horizontal,0);
                             //----------------------------
 
-                            Vector3<double> direction_vector_1 = (direction.x(),direction.y(),0);//東西南北を基底としたベクトルでベクトルを表現(北がx軸,西がy軸)
-                            Vector3<double> direction_vector_2 = Rotation_counter_xy(direction_vector_1,North_angle_rad);//東西南北の基底から機体のxyを基底とした座標に回転.
+                            Vector3<double> direction_vector_1(direction.x(),direction.y(),0);//東西南北を基底としたベクトルでベクトルを表現(北がx軸,西がy軸)
+                            Vector3<double> direction_vector_2 = Rotation_counter_xy(direction_vector_1,Latitude<sc::Unit::rad>(North_angle_rad));//東西南北の基底から機体のxyを基底とした座標に回転.
                             double direction_angle_rad;
 
                             direction_angle_rad = atan2(direction_vector_2[1],direction_vector_2[0]);
                             direction_angle_rad = direction_angle_rad - PI;//正面がxの負の向きなので180°回転
-                            if(direction_angle_rad < 0){
+                            if(direction_angle_rad < 0)
+                            {
                                 direction_angle_rad += 2 * PI;
                             }
 
-                            double direction_angle_degree = rad_to_deg(direction_angle_rad);
+                            double direction_angle_degree = Angle<Unit::deg>::rad_to_deg(direction_angle_rad);
 
                             //ここからdirection_angleをもとに機体を動かす
                             //一旦SC-17のコードを引っ張ってきたよ
                             //sleep_msよりsleep使ったほうがいい?
-                                if(direction_angle_degree < 45 || direction_angle_degree > 315){
+                            if(direction_angle_degree < 45 || direction_angle_degree > 315)
+                            {
                                 printf("forward\n");
                                 // forward(1);
                                 // sleep_ms(3000);
@@ -300,13 +309,13 @@ int main()
                                 sleep(1_s);
                                 motor.forward(0);
                                 //超音波でゴール検知　→ゴール    
-                                double hscr_date_average,i;
-                                for(i=0;i<10;++i)//超音波の値の平均
+                                double hcsr_data_average = 0;
+                                for(int i=0;i<10;++i)//超音波の値の平均
                                 {
-                                    hscr_date_average += hcsr04.read();
+                                    hcsr_data_average += double(hcsr04.read());
                                 }
-                                hscr_date_average/=10.0;
-                                if(hcsr_date_average<0.2)//0.2m以内でゴール
+                                hcsr_data_average/=10.0;
+                                if(hcsr_data_average<0.2)//0.2m以内でゴール
                                 {
                                     print("goal\n");
                                     while(true)

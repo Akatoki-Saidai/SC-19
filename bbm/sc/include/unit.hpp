@@ -352,6 +352,13 @@ constexpr auto operator* (const Scalar& scalar, const Vector3<Element>& vector3)
     return Vector3(scalar*vector3[0], scalar*vector3[1], scalar*vector3[2]);
 }
 
+//! @brief ベクトルのスカラー除算
+template<class Element, class Scalar>
+constexpr auto operator/ (const Vector3<Element>& vector3, const Scalar& scalar) -> Vector3<decltype(vector3[0]/scalar)>
+{
+    return Vector3(vector3[0]/scalar, vector3[1]/scalar, vector3[2]/scalar);
+}
+
 //! @brief ベクトルの足し算
 template<class Element1, class Element2>
 constexpr auto operator+ (Vector3<Element1> vector1, Vector3<Element2> vector2) -> Vector3<decltype(vector1[0]+vector2[0])>
@@ -430,6 +437,7 @@ public:
 template<>
 class Angle<Unit::deg> : public Angle<Unit::rad> 
 {
+public:
     //! @brief 角度(deg)を角度(rad)に変換
     static constexpr double deg_to_rad(const double& num)
         {return num * PI / 180.0;}
@@ -437,7 +445,7 @@ class Angle<Unit::deg> : public Angle<Unit::rad>
     //! @brief 角度(rad)を角度(deg)に変換
     static constexpr double rad_to_deg(const double& num)
         {return num * 180.0 / PI;}
-public:
+
     //! @brief 角度(deg)
     explicit constexpr Angle(const double& num):
         Angle<Unit::rad>(deg_to_rad(num)) {}
@@ -661,9 +669,9 @@ template<class T> Altitude(const T& t) -> Altitude<Unit::m>;  // デフォルト
 template<>
 class Altitude<Unit::m> : public dimension::m
 {
-    static double _pressure0;
-    static double _temperature0;
-    static double _altitude0;
+    inline static double _pressure0 = 1.01325;  // 基準気圧(Pa)
+    inline static double _temperature0 = 20.0;  // 基準温度(℃)
+    inline static double _altitude0 = 0.0;  // 基準標高(m)
 public:
     //! @brief 標高(m)
     explicit constexpr Altitude(const double& num):
@@ -678,16 +686,16 @@ public:
         {return number();}
 
     //! @brief 気圧気温から標高を計算
-    static void set_origin(double pressure0=1013.25, double temperature0=20, double altitude0=0)
+    static void set_origin(Pressure<Unit::Pa> pressure0=Pressure<Unit::Pa>(1013.25/hecto), Temperature<Unit::degC> temperature0=Temperature<Unit::degC>(20.0), Altitude<Unit::m> altitude0=Altitude<Unit::m>(0))
     {
-        _pressure0    = pressure0;
-        _temperature0 = temperature0;
-        _altitude0    = altitude0;
+        _pressure0    = double(pressure0);
+        _temperature0 = double(temperature0);
+        _altitude0    = double(altitude0);
     }
 
-    Altitude(double pressure, double temperature):
-        // dimension::m(_altitude0 + ((temperature + 273.15) / 0.0065F) * (std::pow((_pressure0 / pressure), 1.0F / 5.257F) -1.0F)) {}
-        dimension::m(_altitude0 + ((_temperature0 + 273.15F) / 0.0065F) * (1 - std::pow((pressure / _pressure0), (1.0F / 5.257F)))) {}
+    Altitude(Pressure<Unit::Pa> pressure, Temperature<Unit::degC> temperature):
+        // dimension::m(double(_altitude0) + ((double(temperature) + 273.15) / 0.0065F) * (std::pow(double(_pressure0 / pressure), 1.0F / 5.257F) -1.0F)) {}
+        dimension::m(double(_altitude0) + ((double(_temperature0) + 273.15F) / 0.0065F) * (1 - std::pow((double(pressure / _pressure0)), (1.0F / 5.257F)))) {}
 };
 
 
@@ -869,6 +877,8 @@ inline sc::dimension::s operator"" _min(const char* min_chars) {return sc::dimen
 //! @brief 磁束密度(mT)
 inline sc::dimension::T operator"" _mT(const char* mT_chars) {return sc::dimension::T(std::stod(mT_chars, nullptr) * sc::milli);}
 
+//! @brief 照度(lx)
+inline sc::dimension::lx operator"" _lx(const char* lx_chars) {return sc::dimension::lx(std::stod(lx_chars, nullptr));}
 
 
 #endif  // SC19_PICO_SC_UNIT_HPP_

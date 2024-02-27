@@ -15,7 +15,9 @@ camera.ino - Simple camera example sketch
 #define RESTART_CYCLE       (60 * 5)  /**< positioning test term */
 static SpGnss Gnss;                   /**< SpGnss object */
 
-CamImage img;
+String pico_message;
+bool Launch;
+bool Camflag;
 
 
 
@@ -220,9 +222,6 @@ static void print_condition(SpNavData *pNavData)
 
 // カメラ関数
 
-bool CameraStart;
-bool Launch;
-
 /**
  * Print error message
  */
@@ -271,7 +270,7 @@ void printError(enum CamErr err)
  * Callback from Camera library when video frame is captured.
  */
 
-void CamCB(CamImage img)
+void CamCB(CamImage &img)
 {
   
   if (img.isAvailable())
@@ -290,6 +289,7 @@ void CamCB(CamImage img)
     */
 
     Serial.print(":Cam");
+    
     
     uint8_t red_result = red_detect(img);
     Serial.println(red_result);
@@ -339,6 +339,7 @@ void initCamera(){
       printError(err);
   }
 
+
   // ホワイトバランスの設定
   Serial.println("Set Auto white balance parameter");
   err = theCamera.setAutoWhiteBalanceMode(CAM_WHITE_BALANCE_AUTO);
@@ -387,7 +388,7 @@ void sendByteImage (CamImage &img) {
       byte = img.getImgBuff()[i];
       Serial.write(byte);
     }
-    // Serial.println("#End");
+    Serial.println();
     delay(1000);
     // free(p);
 }
@@ -780,21 +781,19 @@ void setup(){
   }
 
 
-  // カメラセットアップ
+  // カメラフラグ
 
-  initCamera();
-  delay(10);
-
-  bool CameraStart = true;
+  bool Camflag = false;
   bool Launch = false;
 }
 
 void loop(){
 
   // UART受信
-  Serial.print("UART: ");
   if (Serial2.available() > 0){
-    String pico_message = Serial2.readStringUntil('\n'); 
+    pico_message = Serial2.readStringUntil('\n'); 
+    
+    Serial.print("UART: ");
     Serial.println(pico_message);
   }
 
@@ -832,7 +831,7 @@ void loop(){
   {
     /* Not update. */
     Serial.println("data not update");
-  }
+  }              
 
   /* Check loop count. */
   LoopCount++;
@@ -890,17 +889,17 @@ void loop(){
 
   // カメラループ
 
-  /*
-  if (Serial1.available() > 0){
-    char pico_order = Serial1.read();
+  if (pico_message == "Camerastart"){
+    Camflag = true;
   }
-  */
 
-  if ((CameraStart == true) && (Launch == false)){
-    theCamera.startStreaming(true, CamCB);
+  if ((Camflag > 0) && (Launch == 0)){
+    initCamera();
+    delay(10);
+    Serial.println("CameraStart");
+
     Launch = true;
   }
-
 
   Serial2.flush();
   delay(500);

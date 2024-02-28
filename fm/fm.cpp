@@ -184,8 +184,6 @@ int main()
                             {
                                 North_angle_rad += 2 * PI;
                             }
-
-                            printf("%f\n",North_angle_rad);
                             
                             //スタート地点からゴールまでのベクトルを求める
                             //--------------一旦動くかわからんが書いてみる--------------
@@ -225,7 +223,7 @@ int main()
 
 
                             double direction_angle_degree = rad_to_deg(direction_angle_rad);
-
+                            printf("%f\n",direction_angle_degree);
                             //ここからdirection_angleをもとに機体を動かす
                             //一旦SC-17のコードを引っ張ってきたよ
                             //sleep_msよりsleep使ったほうがいい?

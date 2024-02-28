@@ -120,7 +120,7 @@ std::tuple<Pressure<Unit::Pa>,Humidity<Unit::percent>,Temperature<Unit::degC>> B
     pressure = compensate_pressure(pressure);
     humidity = compensate_humidity(humidity);
     temperature = compensate_temp(temperature);
-    Pressure<Unit::Pa>pressure_Pa(double(pressure/100.0) / hecto);
+    Pressure<Unit::Pa>pressure_Pa(pressure);
     Humidity<Unit::percent>humidity_percent(double(humidity/1024.0));
     Temperature<Unit::degC>temperature_degC(double(temperature/100.0));
     // measurement.pressure = Pressure / 100.0;

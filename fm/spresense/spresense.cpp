@@ -102,12 +102,9 @@ Cam Spresense::camera()
     #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
+    _uart.write("CameraStart\n");
     if (absolute_time_diff_us(_cam_update, _start_time) == 0)
-    {
-        _uart.write("CameraStart\n");
-        sleep(1_s);
         read();
-    }
     if (absolute_time_diff_us(_cam_update, get_absolute_time()) > 5*1000*1000)
         read();
     if (absolute_time_diff_us(_cam_update, get_absolute_time()) > 5*1000*1000 || absolute_time_diff_us(_cam_update, _start_time) == 0)

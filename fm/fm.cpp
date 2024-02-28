@@ -199,13 +199,13 @@ int main()
                             if(m_lat_rad > t_lat_rad)
                             {
                                 distance_vertical = -1*distance_vertical;
-                                return distance_vertical;
+                                // return distance_vertical;
                             }
                             //自分の経度のほうが小さい場合、東に向かう必要があるため(以下略)
                             if(m_lon_rad < t_lon_rad)
                             {
                                 distance_horizontal = -1*distance_horizontal;
-                                return distance_horizontal;
+                                // return distance_horizontal;
                             }
                             
                             printf("%f\n",distance);

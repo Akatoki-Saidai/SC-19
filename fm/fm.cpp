@@ -184,6 +184,8 @@ int main()
                             {
                                 North_angle_rad += 2 * PI;
                             }
+
+                            printf("%f\n",North_angle_rad);
                             
                             //スタート地点からゴールまでのベクトルを求める
                             //--------------一旦動くかわからんが書いてみる--------------
@@ -205,22 +207,33 @@ int main()
                                 distance_horizontal = -1*distance_horizontal;
                                 return distance_horizontal;
                             }
-
+                            
+                            printf("%f\n",distance);
+                            printf("%f\n",distance_vertical);
+                            printf("%f\n",distance_horizontal);
+                            
                             Vector3<double> direction(distance_vertical,distance_horizontal,0);
                             //----------------------------
-
                             Vector3<double> direction_vector_1(direction.x(),direction.y(),0);//東西南北を基底としたベクトルでベクトルを表現(北がx軸,西がy軸)
+                            
+                            //ベクトルのprintわかんなかったからChatGPTさんに出力してもらったよ。間違ってたら直してほしい
+                            std::cout << "(" << direction_vector_1.x() << ", " << direction_vector_1.y() << ", " << direction_vector_1.z() << ")" << std::endl;
+                            
                             Vector3<double> direction_vector_2 = Rotation_counter_xy(direction_vector_1,Latitude<sc::Unit::rad>(North_angle_rad));//東西南北の基底から機体のxyを基底とした座標に回転.
                             double direction_angle_rad;
+                            
+                            //ここも
+                            std::cout << "(" << direction_vector_2.x() << ", " << direction_vector_2.y() << ", " << direction_vector_2.z() << ")" << std::endl;
 
                             direction_angle_rad = atan2(direction_vector_2[1],direction_vector_2[0]);
+
+                            printf("%f\n",direction_angle_rad);
                             // direction_angle_rad = direction_angle_rad - PI;//正面がxの負の向きなので180°回転
                             // if(direction_angle_rad < 0)
                             // {
                             //     direction_angle_rad += 2 * PI;
                             // }
                             direction_angle_rad = direction_angle_rad + PI;//正面がxの負の向きなので180°回転
-
 
                             double direction_angle_degree = rad_to_deg(direction_angle_rad);
                             printf("%f\n",direction_angle_degree);

@@ -69,7 +69,6 @@ void long_fase(const BME280& bme280, const BNO055& bno055, const HCSR04& hcsr04,
         North_angle_rad += 2 * PI;
     }
 
-    printf("%f\n",North_angle_rad);
     
     //スタート地点からゴールまでのベクトルを求める
     //--------------一旦動くかわからんが書いてみる--------------

@@ -129,6 +129,11 @@ std::tuple<Pressure<Unit::Pa>,Humidity<Unit::percent>,Temperature<Unit::degC>> B
     humidity_m = compensate_humidity(humidity_m);
     temperature_m = compensate_temp(temperature_m);
 
+    if (pressure_m < 900*100 || 1100*100 < pressure_m || humidity_m/1024 <= 0 || 100 <= humidity_m/1024 || temperature_m/100.0 < -20 || 50 < temperature_m/100.0)
+    {
+throw std::runtime_error(f_err(__FILE__, __LINE__, "BME280 measurement value is abnormal"));  // BME280の測定値が異常です
+    }
+
     Pressure<Unit::Pa>pressure_Pa(pressure_m);
     Humidity<Unit::percent>humidity_percent(humidity_m/1024.0);
     Temperature<Unit::degC>temperature_degC(temperature_m/100.0);

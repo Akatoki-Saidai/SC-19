@@ -1,7 +1,8 @@
 #ifndef SC19_PICO_BNO055_HPP_
 #define SC19_PICO_BNO055_HPP_
 
-#include <stdio.h>
+#include <cmath>
+#include <cstdio>
 #include <tuple>
 #include "sc.hpp"
 

@@ -100,6 +100,11 @@ std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity
     double d_accelY = median(accelY[0], accelY[1], accelY[2]) / 100.00;
     double d_accelZ = median(accelZ[0], accelZ[1], accelZ[2]) / 100.00;
 
+    if (std::abs(d_accelX) > 30 || std::abs(d_accelY) > 30 || std::abs(d_accelZ) > 30)
+    {
+throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is abnormal"));  // BNO055の測定値が異常です
+    }
+
     Acceleration<Unit::m_s2>accel_vector{dimension::m_s2(d_accelX),dimension::m_s2(d_accelY),dimension::m_s2(d_accelZ)};
 
     constexpr uint8_t grv_val = 0x2E; // 重力加速度のメモリアドレス
@@ -120,6 +125,11 @@ std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity
     double d_grvY = median(grvY[0], grvY[1], grvY[2]) / 100.00;
     double d_grvZ = median(grvZ[0], grvZ[1], grvZ[2]) / 100.00;
 
+    if (std::abs(9.8 - std::sqrt(d_grvX*d_grvX + d_grvY*d_grvY + d_grvZ*d_grvZ)) > 0.1)
+    {
+throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is abnormal"));  // BNO055の測定値が異常です
+    }
+
     Acceleration<Unit::m_s2>grav_vector{dimension::m_s2(d_grvX),dimension::m_s2(d_grvY),dimension::m_s2(d_grvZ)};
 
     constexpr uint8_t mag_val = 0x0E;  // 磁気のメモリアドレス
@@ -139,6 +149,12 @@ std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity
     double d_magX = milli * median(magX[0], magX[1], magX[2]) / 16.00;
     double d_magY = milli * median(magY[0], magY[1], magY[2]) / 16.00;
     double d_magZ = milli * median(magZ[0], magZ[1], magZ[2]) / 16.00;
+
+    double all_mag =std::sqrt(d_grvX*d_grvX + d_grvY*d_grvY + d_grvZ*d_grvZ);    
+    if (all_mag < 35*milli || 55*milli < all_mag)  // 日本は47mT～50mTくらい
+    {
+throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is abnormal"));  // BNO055の測定値が異常です
+    }
     
     MagneticFluxDensity<Unit::T>Mag_vector{dimension::T(d_magX),dimension::T(d_magY),dimension::T(d_magZ)};
     
@@ -159,6 +175,11 @@ std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity
     double d_gyroX = median(gyroX[0], gyroX[1], gyroX[2]) / 900.00;
     double d_gyroY = median(gyroY[0], gyroY[1], gyroY[2]) / 900.00;
     double d_gyroZ = median(gyroZ[0], gyroZ[1], gyroZ[2]) / 900.00;
+
+    if (d_gyroX > 20 || d_gyroY > 20 || d_gyroZ > 20)
+    {
+throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is abnormal"));  // BNO055の測定値が異常です
+    }
 
     AngularVelocity<Unit::rad_s>gyro_vector{dimension::rad_s(d_gyroX),dimension::rad_s(d_gyroY),dimension::rad_s(d_gyroZ)};
 

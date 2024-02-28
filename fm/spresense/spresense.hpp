@@ -5,6 +5,7 @@
 
 #include <cstdlib>
 #include <ctime>
+#include <string>
 #include <tuple>
 
 namespace sc 
@@ -36,6 +37,9 @@ class Spresense
 
     double _lon = 0.0;
     absolute_time_t _lon_update = _start_time;  // 受信した時刻
+
+    std::basic_string<uint8_t> _read_binary = {};  // 受信したデータ
+    static constexpr std::size_t _max_size = 100;  // 受信したデータを保存しておく最大のバイト数
 
     void read();
 

@@ -163,10 +163,10 @@ int main()
                             double t_lat = 0.0000;//ゴールの緯度
                             double m_lon = 0.0000;//自分の経度(ここはGPSで手に入れたものが入るように書き換えて)
                             double m_lat = 0.0000;//自分の緯度
-                            double t_lon_rad = Angle<Unit::deg>::deg_to_rad(t_lon);
-                            double t_lat_rad = Angle<Unit::deg>::deg_to_rad(t_lat);
-                            double m_lon_rad = Angle<Unit::deg>::deg_to_rad(m_lon);
-                            double m_lat_rad = Angle<Unit::deg>::deg_to_rad(m_lat);
+                            double t_lon_rad = deg_to_rad(t_lon);
+                            double t_lat_rad = deg_to_rad(t_lat);
+                            double m_lon_rad = deg_to_rad(m_lon);
+                            double m_lat_rad = deg_to_rad(m_lat);
                             //-------------------------------------------
 
                             //機体の正面のベクトルを作る.ただし、bnoの都合上、後ろがxの正の向きで左がyの正の向き、下がzの正の向きとなっている
@@ -224,7 +224,7 @@ int main()
                             direction_angle_rad = direction_angle_rad + PI;//正面がxの負の向きなので180°回転
 
 
-                            double direction_angle_degree = Angle<Unit::deg>::rad_to_deg(direction_angle_rad);
+                            double direction_angle_degree = rad_to_deg(direction_angle_rad);
 
                             //ここからdirection_angleをもとに機体を動かす
                             //一旦SC-17のコードを引っ張ってきたよ

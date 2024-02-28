@@ -376,5 +376,6 @@ int main()
     stdio_init_all();
     sleep_ms(1000);
     printf("init_ok\n");
-    sc::main();
+    while(true) 
+        sc::main();
 }

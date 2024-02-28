@@ -127,28 +127,6 @@ void long_fase(const BME280& bme280, const BNO055& bno055, const HCSR04& hcsr04,
         sleep_ms(100);
         break;
     }else if((direction_angle_degree) <135){
-        printf("right\n");
-        // right(0.5);
-        // sleep_ms(300);
-        // right(0);
-        // sleep_ms(100);
-        motor.right(0.5);
-        sleep_ms(300);
-        motor.right(0);
-        sleep_ms(100);
-        break;
-    }else if(direction_angle_degree < 180){
-        printf("sharp_right\n");
-        // right(0.5);
-        // sleep_ms(600);
-        // right(0);
-        // sleep_ms(100);
-        motor.right(0.5);
-        sleep_ms(600);
-        motor.right(0);
-        sleep_ms(100);
-        break;
-    }else if(direction_angle_degree > 225){
         printf("left\n");
         // left(0.5);
         // sleep_ms(300);
@@ -159,7 +137,7 @@ void long_fase(const BME280& bme280, const BNO055& bno055, const HCSR04& hcsr04,
         motor.left(0);
         sleep_ms(100);
         break;
-    }else{
+    }else if(direction_angle_degree < 180){
         printf("sharp_left\n");
         // left(0.5);
         // sleep_ms(600);
@@ -168,6 +146,28 @@ void long_fase(const BME280& bme280, const BNO055& bno055, const HCSR04& hcsr04,
         motor.left(0.5);
         sleep_ms(600);
         motor.left(0);
+        sleep_ms(100);
+        break;
+    }else if(direction_angle_degree > 225){
+        printf("right\n");
+        // right(0.5);
+        // sleep_ms(300);
+        // right(0);
+        // sleep_ms(100);
+        motor.right(0.5);
+        sleep_ms(300);
+        motor.right(0);
+        sleep_ms(100);
+        break;
+    }else{
+        printf("sharp_right\n");
+        // right(0.5);
+        // sleep_ms(600);
+        // right(0);
+        // sleep_ms(100);
+        motor.right(0.5);
+        sleep_ms(600);
+        motor.right(0);
         sleep_ms(100);
         break;
     }

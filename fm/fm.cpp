@@ -159,9 +159,9 @@ int main()
                         {
                             //------ちゃんと動くか確認するためのコード-----
                             Vector3<double> magnetic(0.0,0.0,0.0);
-                            double t_lon = 0.0000;//ゴールの経度
+                            double t_lon = 0.0000;//ゴールの経度(自分たちで決めて書き換えてね)
                             double t_lat = 0.0000;//ゴールの緯度
-                            double m_lon = 0.0000;//自分の経度
+                            double m_lon = 0.0000;//自分の経度(ここはGPSで手に入れたものが入るように書き換えて)
                             double m_lat = 0.0000;//自分の緯度
                             double t_lon_rad = Angle<Unit::deg>::deg_to_rad(t_lon);
                             double t_lat_rad = Angle<Unit::deg>::deg_to_rad(t_lat);
@@ -194,6 +194,7 @@ int main()
                             double distance_vertical = distance_sphere(m_lon_rad,t_lat_rad,m_lon_rad,m_lat_rad);//縦の距離を求める(経度を同じにすることで)
                             double distance_horizontal = distance_sphere(t_lon_rad,m_lat_rad,m_lon_rad,m_lat_rad);//横の長さを求める(緯度を同じにすることで)
 
+                            //ここが結構怪しい
                             //自分の緯度のほうが高い場合、南向きに進む必要があるため、－符号をかける(北が正のため)
                             if(m_lat_rad > t_lat_rad)
                             {
@@ -215,11 +216,13 @@ int main()
                             double direction_angle_rad;
 
                             direction_angle_rad = atan2(direction_vector_2[1],direction_vector_2[0]);
-                            direction_angle_rad = direction_angle_rad - PI;//正面がxの負の向きなので180°回転
-                            if(direction_angle_rad < 0)
-                            {
-                                direction_angle_rad += 2 * PI;
-                            }
+                            // direction_angle_rad = direction_angle_rad - PI;//正面がxの負の向きなので180°回転
+                            // if(direction_angle_rad < 0)
+                            // {
+                            //     direction_angle_rad += 2 * PI;
+                            // }
+                            direction_angle_rad = direction_angle_rad + PI;//正面がxの負の向きなので180°回転
+
 
                             double direction_angle_degree = Angle<Unit::deg>::rad_to_deg(direction_angle_rad);
 
@@ -247,28 +250,6 @@ int main()
                                 sleep_ms(100);
                                 break;
                             }else if((direction_angle_degree) <135){
-                                printf("right\n");
-                                // right(0.5);
-                                // sleep_ms(300);
-                                // right(0);
-                                // sleep_ms(100);
-                                motor.right(0.5);
-                                sleep_ms(300);
-                                motor.right(0);
-                                sleep_ms(100);
-                                break;
-                            }else if(direction_angle_degree < 180){
-                                printf("sharp_right\n");
-                                // right(0.5);
-                                // sleep_ms(600);
-                                // right(0);
-                                // sleep_ms(100);
-                                motor.right(0.5);
-                                sleep_ms(600);
-                                motor.right(0);
-                                sleep_ms(100);
-                                break;
-                            }else if(direction_angle_degree > 225){
                                 printf("left\n");
                                 // left(0.5);
                                 // sleep_ms(300);
@@ -279,7 +260,7 @@ int main()
                                 motor.left(0);
                                 sleep_ms(100);
                                 break;
-                            }else{
+                            }else if(direction_angle_degree < 180){
                                 printf("sharp_left\n");
                                 // left(0.5);
                                 // sleep_ms(600);
@@ -288,6 +269,28 @@ int main()
                                 motor.left(0.5);
                                 sleep_ms(600);
                                 motor.left(0);
+                                sleep_ms(100);
+                                break;
+                            }else if(direction_angle_degree > 225){
+                                printf("right\n");
+                                // right(0.5);
+                                // sleep_ms(300);
+                                // right(0);
+                                // sleep_ms(100);
+                                motor.right(0.5);
+                                sleep_ms(300);
+                                motor.right(0);
+                                sleep_ms(100);
+                                break;
+                            }else{
+                                printf("sharp_right\n");
+                                // right(0.5);
+                                // sleep_ms(600);
+                                // right(0);
+                                // sleep_ms(100);
+                                motor.right(0.5);
+                                sleep_ms(600);
+                                motor.right(0);
                                 sleep_ms(100);
                                 break;
                             }

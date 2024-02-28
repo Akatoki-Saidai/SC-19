@@ -7,6 +7,7 @@ camera.ino - Simple camera example sketch
 #include <stdio.h>
 #include <Camera.h>
 #include <GNSS.h>
+#include <Watchdog.h>
 
 #define BAUDRATE (1000000)
 #define BAUDRATE2 (31250)
@@ -15,7 +16,9 @@ camera.ino - Simple camera example sketch
 #define RESTART_CYCLE       (60 * 5)  /**< positioning test term */
 static SpGnss Gnss;                   /**< SpGnss object */
 
-CamImage img;
+String pico_message;
+bool Launch;
+uint8_t phase;
 
 
 
@@ -108,7 +111,7 @@ static void print_pos(SpNavData *pNavData)
   snprintf(StringBuffer, STRING_BUFFER_SIZE, ":Tim%04d%02d%02d", pNavData->time.year, pNavData->time.month, pNavData->time.day);
   Serial2.print(StringBuffer);
 
-  snprintf(StringBuffer, STRING_BUFFER_SIZE, "%02d%02d%02d", pNavData->time.hour, pNavData->time.minute, pNavData->time.sec);
+  snprintf(StringBuffer, STRING_BUFFER_SIZE, "%02d%02d%02", pNavData->time.hour, pNavData->time.minute, pNavData->time.sec);
   Serial.println(StringBuffer);
   snprintf(StringBuffer, STRING_BUFFER_SIZE, "%02d%02d%02d", pNavData->time.hour, pNavData->time.minute, pNavData->time.sec);
   Serial2.println(StringBuffer);
@@ -132,9 +135,9 @@ static void print_pos(SpNavData *pNavData)
   {
     Serial.println("No Position");
     Serial.println(":Lat0.00000000");
-    // Serial2.println(":Lat0.00000000");
+    Serial2.println(":Lat0.00000000");
     Serial.println(":Lon0.00000000");
-    // Serial2.println(":Lon0.00000000");
+    Serial2.println(":Lon0.00000000");
   }
   else
   {
@@ -220,9 +223,6 @@ static void print_condition(SpNavData *pNavData)
 
 // カメラ関数
 
-bool CameraStart;
-bool Launch;
-
 /**
  * Print error message
  */
@@ -271,7 +271,7 @@ void printError(enum CamErr err)
  * Callback from Camera library when video frame is captured.
  */
 
-void CamCB(CamImage img)
+void CamCB(CamImage &img)
 {
   
   if (img.isAvailable())
@@ -290,18 +290,16 @@ void CamCB(CamImage img)
     */
 
     Serial.print(":Cam");
+    Serial2.print(":Cam");
+    
     
     uint8_t red_result = red_detect(img);
     Serial.println(red_result);
-
-    if (1 <= red_result || red_result <= 3){
-        Serial2.print(":Cam");
-        Serial2.println(red_result);
-    }
+    Serial2.println(red_result);
 
 
     // 画像の転送(USB)
-
+    /*
     if (Serial){
       digitalWrite(LED0, HIGH);
       Serial.flush();
@@ -309,8 +307,9 @@ void CamCB(CamImage img)
       Serial.flush();
       digitalWrite(LED0, LOW);
     }
+    */
 
-    }
+  }
 
   else {
     Serial.println("Failed to get video stream image");
@@ -324,7 +323,14 @@ void initCamera(){
   /* begin() without parameters means that
    * number of buffers = 1, 30FPS, QVGA, RGB565 format */
   Serial.println("Prepare camera");
-  err = theCamera.begin();
+  err = theCamera.begin(
+    1,
+    CAM_VIDEO_FPS_5,
+    CAM_IMGSIZE_QVGA_H,
+    CAM_IMGSIZE_QVGA_V,
+    CAM_IMAGE_PIX_FMT_RGB565,
+    7
+  );
   if (err != CAM_ERR_SUCCESS)
   {
       printError(err);
@@ -332,12 +338,13 @@ void initCamera(){
 
   
   // カメラストリームを受信したら CamCBを実行する
-  Serial.println("Start streaming");
-  err = theCamera.startStreaming(true, CamCB);
-  if (err != CAM_ERR_SUCCESS)
-  {
-      printError(err);
-  }
+  // Serial.println("Start streaming");
+  // err = theCamera.startStreaming(true, CamCB);
+  // if (err != CAM_ERR_SUCCESS)
+  // {
+  //     printError(err);
+  // }
+
 
   // ホワイトバランスの設定
   Serial.println("Set Auto white balance parameter");
@@ -376,7 +383,7 @@ void initCamera(){
 
 }
 
-void sendByteImage (CamImage &img) {
+void sendByteImage (CamImage img) {
     size_t img_size = img.getImgSize();
     uint8_t byte;
     Serial.println("#Image");
@@ -387,18 +394,17 @@ void sendByteImage (CamImage &img) {
       byte = img.getImgBuff()[i];
       Serial.write(byte);
     }
-    // Serial.println("#End");
+    Serial.println();
     delay(1000);
     // free(p);
 }
 
 
-uint16_t CountRedPixel(CamImage &img, uint16_t zone_begin, uint16_t zone_end){
+uint16_t CountRedPixel(CamImage img, uint16_t zone_begin, uint16_t zone_end){
   // Serial.println("Start red count...");
   uint16_t start_time = millis();
 
   size_t img_size = img.getImgSize();
-  size_t img_bufsize = img.getImgBuffSize();
 
   uint16_t img_height = img.getHeight();
   uint16_t img_width = img.getWidth();
@@ -410,7 +416,7 @@ uint16_t CountRedPixel(CamImage &img, uint16_t zone_begin, uint16_t zone_end){
   while (y_coordinate <= img_height){
     // RGB565取得
     uint16_t rgb565_1 = *(img.getImgBuff() + (( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 )));
-    uint16_t rgb565_2 = *(img.getImgBuff() + ((( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ) ) + 1));
+    uint16_t rgb565_2 = *(img.getImgBuff() + ((( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 )) + 1));
     uint16_t rgb565 = ( rgb565_1 << 8 ) | rgb565_2;
 
     // RGB565からRGB888
@@ -465,12 +471,13 @@ uint16_t CountRedPixel(CamImage &img, uint16_t zone_begin, uint16_t zone_end){
     if (((hue <= hue_max) && (sat >= sat_min) && (val >= val_min)) || ((hue >= hue_min) && (sat >= sat_min) && (val >= val_min))){
       red_count++;
       
-      uint8_t *green_ptr_1;
-      uint8_t *green_ptr_2;
-      green_ptr_1 = img.getImgBuff() + (( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ));
-      green_ptr_2 = img.getImgBuff() + ((( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ) ) + 1);
-      *green_ptr_1 = ((*green_ptr_1 >> 5) | 0x07);
-      *green_ptr_2 = ((*green_ptr_2 << 5) | 0xE0);
+      // 赤部分を緑に置換
+      // uint8_t *green_ptr_1;
+      // uint8_t *green_ptr_2;
+      // green_ptr_1 = img.getImgBuff() + (( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ));
+      // green_ptr_2 = img.getImgBuff() + ((( 2 * img_width * ( y_coordinate - 1 ) ) + 2 * ( x_coordinate - 1 ) ) + 1);
+      // *green_ptr_1 = ((*green_ptr_1 >> 5) | 0x07);
+      // *green_ptr_2 = ((*green_ptr_2 << 5) | 0xE0);
         
       // Serial.println("green_ptr?: ");
       // Serial.println(*green_ptr_1);
@@ -585,7 +592,7 @@ uint16_t CountRedPixel(CamImage &img, uint16_t zone_begin, uint16_t zone_end){
 }
 
 
-uint8_t red_detect(CamImage &img) {
+uint8_t red_detect(CamImage img) {
   // HSVに変換 -> 数える
 
   // 領域分け
@@ -621,14 +628,17 @@ uint8_t red_detect(CamImage &img) {
   }
   else if (left_red == max(max(left_red, center_red), right_red)){
     Serial.println("Left");
+    Watchdog.kick();
     result = 1;
   }
   else if (center_red == max(max(left_red, center_red), right_red)){
     Serial.println("Center");
+    Watchdog.kick();
     result = 2;
   }
   else if (right_red == max(max(left_red, center_red), right_red)){
     Serial.println("Right");
+    Watchdog.kick();
     result = 3;
   }
   else{
@@ -780,129 +790,181 @@ void setup(){
   }
 
 
-  // カメラセットアップ
+  // カメラ起動状態
+  Launch = false;
+  phase = 1;
 
-  initCamera();
-  delay(10);
+  Watchdog.begin();
 
-  bool CameraStart = true;
-  bool Launch = false;
 }
 
 void loop(){
 
   // UART受信
-  Serial.print("UART: ");
   if (Serial2.available() > 0){
-    String pico_message = Serial2.readStringUntil('\n'); 
+    pico_message = Serial2.readStringUntil('\n'); 
+    
+    Serial.print("UART: ");
     Serial.println(pico_message);
   }
-
-
-  // GPSループ
   
-  static int LoopCount = 0;
-  static int LastPrintMin = 0;
-
-  /* Blink LED. */
-  Led_isActive();
-
-  /* Check update. */
-  if (Gnss.waitUpdate(-1))
-  {
-    /* Get NaviData. */
-    SpNavData NavData;
-    Gnss.getNavData(&NavData);
-
-    /* Set posfix LED. */
-    bool LedSet = (NavData.posDataExist && (NavData.posFixMode != FixInvalid));
-    Led_isPosfix(LedSet);
-
-    /* Print satellite information every minute. */
-    if (NavData.time.minute != LastPrintMin)
-    {
-      print_condition(&NavData);
-      LastPrintMin = NavData.time.minute;
-    }
-
-    /* Print position information. */
-    print_pos(&NavData);
-  }
-  else
-  {
-    /* Not update. */
-    Serial.println("data not update");
+  if (pico_message == "CameraStart"){
+    phase = 1;
   }
 
-  /* Check loop count. */
-  LoopCount++;
-  if (LoopCount >= RESTART_CYCLE)
-  {
-    int error_flag = 0;
+  switch(phase){
+    case 0:
+      // GPSループ
+      static int LoopCount = 0;
+      static int LastPrintMin = 0;
 
-    /* Turn off LED0 */
-    ledOff(PIN_LED0);
+      /* Blink LED. */
+      Led_isActive();
 
-    /* Set posfix LED. */
-    Led_isPosfix(false);
+      /* Check update. */
+      if (Gnss.waitUpdate(-1))
+      {
+        /* Get NaviData. */
+        SpNavData NavData;
+        Gnss.getNavData(&NavData);
 
-    /* Restart GNSS. */
-    if (Gnss.stop() != 0)
-    {
-      Serial.println("Gnss stop error!!");
-      error_flag = 1;
-    }
-    else if (Gnss.end() != 0)
-    {
-      Serial.println("Gnss end error!!");
-      error_flag = 1;
-    }
-    else
-    {
-      Serial.println("Gnss stop OK.");
-    }
+        /* Set posfix LED. */
+        bool LedSet = (NavData.posDataExist && (NavData.posFixMode != FixInvalid));
+        Led_isPosfix(LedSet);
 
-    if (Gnss.begin() != 0)
-    {
-      Serial.println("Gnss begin error!!");
-      error_flag = 1;
-    }
-    else if (Gnss.start(HOT_START) != 0)
-    {
-      Serial.println("Gnss start error!!");
-      error_flag = 1;
-    }
-    else
-    {
-      Serial.println("Gnss restart OK.");
-    }
+        /* Print satellite information every minute. */
+        if (NavData.time.minute != LastPrintMin)
+        {
+          print_condition(&NavData);
+          LastPrintMin = NavData.time.minute;
+        }
 
-    LoopCount = 0;
+        /* Print position information. */
+        print_pos(&NavData);
+      }
+      else
+      {
+        /* Not update. */
+        Serial.println("data not update");
+      }              
 
-    /* Set error LED. */
-    if (error_flag == 1)
-    {
-      Led_isError(true);
-      exit(0);
-    }
+      /* Check loop count. */
+      LoopCount++;
+      if (LoopCount >= RESTART_CYCLE)
+      {
+        int error_flag = 0;
+
+        /* Turn off LED0 */
+        ledOff(PIN_LED0);
+
+        /* Set posfix LED. */
+        Led_isPosfix(false);
+
+        /* Restart GNSS. */
+        if (Gnss.stop() != 0)
+        {
+          Serial.println("Gnss stop error!!");
+          error_flag = 1;
+        }
+        else if (Gnss.end() != 0)
+        {
+          Serial.println("Gnss end error!!");
+          error_flag = 1;
+        }
+        else
+        {
+          Serial.println("Gnss stop OK.");
+        }
+
+        if (Gnss.begin() != 0)
+        {
+          Serial.println("Gnss begin error!!");
+          error_flag = 1;
+        }
+        else if (Gnss.start(HOT_START) != 0)
+        {
+          Serial.println("Gnss start error!!");
+          error_flag = 1;
+        }
+        else
+        {
+          Serial.println("Gnss restart OK.");
+        }
+
+        LoopCount = 0;
+
+        /* Set error LED. */
+        if (error_flag == 1)
+        {
+          Led_isError(true);
+          exit(0);
+        }
+      }
+      break;
+
+    case 1:
+      // カメラループ
+      if (Launch == 0){
+        initCamera();
+        delay(10);
+        Serial.println("CameraStart");
+        Watchdog.start(5000);
+
+        theCamera.startStreaming(true, CamCB);
+
+        Launch = true;
+      }
+      
+      /*
+      if (Launch > 0){
+        Serial.end();
+        Serial2.end();
+        delay(500);
+        Serial.begin(BAUDRATE);
+        Serial2.begin(BAUDRATE2);
+        Serial.println("Reset UART");
+        if (CameraReset > 15){
+          theCamera.end();
+          initCamera();
+          Serial.println("CameraReset");
+          theCamera.startStreaming(true, CamCB);
+          CameraReset = 0;
+        }
+        */
+
+        // theCamera.startStreaming(true, CamCB);
+        /*
+          if (img.isAvailable())
+          {
+            
+            // int iso = theCamera.getISOSensitivity();
+            // int exposure = theCamera.getAbsoluteExposure();
+            // int hdr = theCamera.getHDR();
+            // Serial.print("ISO ");
+            // Serial.print(iso);
+            // Serial.print(",Exposure ");
+            // Serial.print(exposure);
+            // Serial.print(",HDR ");
+            // Serial.print(hdr);
+            // Serial.println();
+            
+
+            uint8_t red_result = red_detect(img);
+            // Serial.println(red_result);
+
+
+            // 画像の転送(USB)
+            digitalWrite(LED0, HIGH);
+            Serial.flush();
+            sendByteImage(img);
+            Serial.flush();
+            digitalWrite(LED0, LOW);
+              
+            }
+            */
+    break;
   }
-
-
-  // カメラループ
-
-  /*
-  if (Serial1.available() > 0){
-    char pico_order = Serial1.read();
-  }
-  */
-
-  if ((CameraStart == true) && (Launch == false)){
-    theCamera.startStreaming(true, CamCB);
-    Launch = true;
-  }
-
-
   Serial2.flush();
-  delay(500);
+  delay(1000);
 
 }

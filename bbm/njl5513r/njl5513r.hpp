@@ -17,11 +17,17 @@ public:
     NJL5513R(const ADC& lux_adc, const LED& red_led, const LED& green_led) try :
         _lux_adc(lux_adc), _red_led(red_led), _green_led(green_led) 
     {
+        try
+        {
+        }
+        catch(const std::exception& e)
+        {
+            print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n%s\n\n********************\n", __FILE__, __LINE__, e.what());
+        }
     }
-    catch(const std::exception& e)
+    catch (const std::exception& e)
     {
-        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
-        print(e.what());
+        print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
     }
 
     const LED& green_led()
@@ -38,7 +44,8 @@ public:
                 adc_value[i] = _lux_adc.read();
             }
             uint16_t adc_m = median(adc_value[0], adc_value[1], adc_value[2]);
-            return Illuminance<Unit::lx>(adc_m * 9);  // 9倍して単位がlxになるのはは実験値
+            print("njl_read_data:%f\n", adc_m * 9);  // 9倍して単位がlxになるのは実験値
+            return Illuminance<Unit::lx>(adc_m * 9);  // 9倍して単位がlxになるのは実験値
         }
 
 };

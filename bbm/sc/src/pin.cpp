@@ -20,15 +20,21 @@ namespace sc
 Pin::Pin(int pin_gpio) try :
     _pin_gpio(pin_gpio)
 {
-    if (pin_gpio < Pin::MinGpio || Pin::MaxGpio < pin_gpio)
+    try
     {
-        throw std::invalid_argument(f_err(__FILE__, __LINE__, "GPIO number %d is not available", pin_gpio));  // このGPIO番号は利用できません
-    }   
+        if (pin_gpio < Pin::MinGpio || Pin::MaxGpio < pin_gpio)
+        {
+            throw std::invalid_argument(f_err(__FILE__, __LINE__, "GPIO number %d is not available", pin_gpio));  // このGPIO番号は利用できません
+        }   
+    }
+    catch(const std::exception& e)
+    {
+        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n%s\n\n********************\n", __FILE__, __LINE__, e.what());
+    }
 }
 catch (const std::exception& e)
 {
-    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
-    print(e.what());
+    print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
 }
 
 uint8_t Pin::gpio() const

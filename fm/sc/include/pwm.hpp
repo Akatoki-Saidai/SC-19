@@ -69,6 +69,8 @@ public:
     //! @param high_time high(1)になる時間
     void write(Time<Unit::s> high_time) const;
 
+    bool save = true;
+
 private:
     //! @brief 周波数から，設定できる最大の分解能(カウンタの最大値)を計算  (詳しくは下記の資料へ)
     //! @param freq 設定したい周波数

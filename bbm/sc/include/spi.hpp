@@ -53,13 +53,39 @@ public:
     //! @brief CSピンを指定
     //! @param cs_gpios CSピンのGPIO番号を(3, 4, 5)のように並べて入力
     template<typename... T>
-    CS(T... cs_gpios):
-        _cs_pins(Pin(cs_gpios)...) {}
+    CS(T... cs_gpios) try:
+        _cs_pins(Pin(cs_gpios)...)
+    {
+        try
+        {
+        }
+        catch(const std::exception& e)
+        {
+            print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n%s\n\n********************\n", __FILE__, __LINE__, e.what());
+        }
+    }
+    catch (const std::exception& e)
+    {
+        print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
+    }
 
     //! @brief CSピンを指定
     //! @param cs_gpios CSピンのGPIO番号を{3, 4, 5}のように並べて入力
-    CS(std::initializer_list<Pin> cs_gpios):
-        _cs_pins(cs_gpios) {}
+    CS(std::initializer_list<Pin> cs_gpios) try:
+        _cs_pins(cs_gpios)
+    {
+        try
+        {
+        }
+        catch(const std::exception& e)
+        {
+            print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n%s\n\n********************\n", __FILE__, __LINE__, e.what());
+        }
+    }
+    catch (const std::exception& e)
+    {
+        print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
+    }
 
     //! @brief CSピンを取得
     operator std::vector<Pin>() const
@@ -177,6 +203,8 @@ public:
 
     using TX = MOSI;
     using RX = MISO;
+
+    bool save = true;
 private:
     static inline bool IsUse[2] = {false, false};  // 既にSPI0とSPI1を使用しているか
 };

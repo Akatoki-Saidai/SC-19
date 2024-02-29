@@ -30,11 +30,17 @@ public:
         #ifndef NODEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
+        try
+        {
+        }
+        catch(const std::exception& e)
+        {
+            print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n%s\n\n********************\n", __FILE__, __LINE__, e.what());
+        }
     }
-    catch(const std::exception& e)
+    catch (const std::exception& e)
     {
-        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
-        print(e.what());
+        print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
     }
 
     // モーターを動かす
@@ -66,11 +72,17 @@ public:
         #ifndef NODEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
+        try
+        {
+        }
+        catch(const std::exception& e)
+        {
+            print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n%s\n\n********************\n", __FILE__, __LINE__, e.what());
+        }
     }
     catch (const std::exception& e)
     {
-        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
-        print(e.what());
+        print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
     }
 
     // 左右のモーターを同時に動かす

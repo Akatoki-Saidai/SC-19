@@ -20,15 +20,21 @@ namespace sc
 SDA::SDA(int sda_gpio) try :
     Pin(sda_gpio)
 {
-    if (gpio() != all_of(EnableI2C0_SDA) && gpio() != all_of(EnableI2C1_SDA))
+    try
     {
-throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect SDA pin number was entered"));  // 正しくないSDAピンの番号が入力されました
+        if (gpio() != all_of(EnableI2C0_SDA) && gpio() != all_of(EnableI2C1_SDA))
+        {
+    throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect SDA pin number was entered"));  // 正しくないSDAピンの番号が入力されました
+        }
+    }
+    catch(const std::exception& e)
+    {
+        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n%s\n\n********************\n", __FILE__, __LINE__, e.what());
     }
 }
 catch (const std::exception& e)
 {
-    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
-    print(e.what());
+    print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
 }
 
 I2C_ID SDA::get_i2c_id() const
@@ -48,15 +54,21 @@ throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect SDA pin numb
 SCL::SCL(int sda_gpio) try :
     Pin(sda_gpio)
 {
-    if (gpio() != all_of(EnableI2C0_SCL) && gpio() != all_of(EnableI2C1_SCL))
+    try 
     {
-throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect SCL pin number was entered"));  // 正しくないSCLピンの番号が入力されました
+        if (gpio() != all_of(EnableI2C0_SCL) && gpio() != all_of(EnableI2C1_SCL))
+        {
+    throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect SCL pin number was entered"));  // 正しくないSCLピンの番号が入力されました
+        }
+    }
+    catch(const std::exception& e)
+    {
+        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n%s\n\n********************\n", __FILE__, __LINE__, e.what());
     }
 }
 catch (const std::exception& e)
 {
-    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
-    print(e.what());
+    print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
 }
 
 I2C_ID SCL::get_i2c_id() const
@@ -124,31 +136,38 @@ I2C::I2C(SDA sda, SCL scl, Frequency<Unit::Hz> freq) try :
     #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
-    if (sda.get_i2c_id() != scl.get_i2c_id())
+    try 
     {
+        if (sda.get_i2c_id() != scl.get_i2c_id())
+        {
 throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect I2C pin number was entered"));  // 正しくないI2Cのピン番号が入力されました
-    } else if (!(Pin::Status.at(_sda.gpio()) == PinStatus::NoUse && Pin::Status.at(_scl.gpio()) == PinStatus::NoUse)) {
+        } else if (!(Pin::Status.at(_sda.gpio()) == PinStatus::NoUse && Pin::Status.at(_scl.gpio()) == PinStatus::NoUse)) {
 throw std::logic_error(f_err(__FILE__, __LINE__, "This pin is already in use"));  // このピンは既に使用されています
-    } else if (I2C::IsUse[_i2c_id]) {
+        } else if (I2C::IsUse[_i2c_id]) {
 throw std::logic_error(f_err(__FILE__, __LINE__, "I2C cannot be reinitialized"));  // I2Cを再度初期化することはできません
+        }
+
+        Pin::Status.at(_sda.gpio()) = PinStatus::I2cSda;
+        Pin::Status.at(_scl.gpio()) = PinStatus::I2cScl;
+
+        I2C::IsUse[_i2c_id] = true;
+
+        ::i2c_init((_i2c_id ? i2c1 : i2c0), static_cast<double>(_freq));  // pico-SDKの関数  I2Cを初期化する
+
+        ::gpio_set_function(_sda.gpio(), GPIO_FUNC_I2C);  // pico-SDKの関数  ピンの機能をI2Cモードにする
+        ::gpio_pull_up(_sda.gpio());  // pico-SDKの関数  プルアップ抵抗を有効にする
+        ::gpio_set_function(_scl.gpio(), GPIO_FUNC_I2C);  // pico-SDKの関数  ピンの機能をI2Cモードにする
+        ::gpio_pull_up(_scl.gpio());  // pico-SDKの関数  プルアップ抵抗を有効にする
     }
-
-    Pin::Status.at(_sda.gpio()) = PinStatus::I2cSda;
-    Pin::Status.at(_scl.gpio()) = PinStatus::I2cScl;
-
-    I2C::IsUse[_i2c_id] = true;
-
-    ::i2c_init((_i2c_id ? i2c1 : i2c0), static_cast<double>(_freq));  // pico-SDKの関数  I2Cを初期化する
-
-    ::gpio_set_function(_sda.gpio(), GPIO_FUNC_I2C);  // pico-SDKの関数  ピンの機能をI2Cモードにする
-    ::gpio_pull_up(_sda.gpio());  // pico-SDKの関数  プルアップ抵抗を有効にする
-    ::gpio_set_function(_scl.gpio(), GPIO_FUNC_I2C);  // pico-SDKの関数  ピンの機能をI2Cモードにする
-    ::gpio_pull_up(_scl.gpio());  // pico-SDKの関数  プルアップ抵抗を有効にする
+    catch(const std::exception& e)
+    {
+        save = false;
+        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n%s\n\n********************\n", __FILE__, __LINE__, e.what());
+    }
 }
-catch(const std::exception& e)
+catch (const std::exception& e)
 {
-    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
-    print(e.what());
+    print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
 }
 
 void I2C::write(Binary output_data, SlaveAddr slave_addr) const
@@ -156,6 +175,8 @@ void I2C::write(Binary output_data, SlaveAddr slave_addr) const
     #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
+    if (save == false)
+        throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot execute because initialization failed"));
     int output_size = 0;  // 実際には何バイト送信したか
     ::i2c_write_blocking_until((_i2c_id ? i2c1 : i2c0), slave_addr, output_data, output_data.size(), false, make_timeout_time_us(100*1000));  // pico-SDKの関数  I2Cで送信
     if (output_size < 0)
@@ -169,6 +190,8 @@ Binary I2C::read(std::size_t size, SlaveAddr slave_addr) const
     #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
+    if (save == false)
+        throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot execute because initialization failed"));
     std::vector<uint8_t> input_data(size);
 
     int input_size = 0;  // 実際には何バイト受信したか
@@ -187,6 +210,8 @@ void I2C::write_memory(Binary output_data, SlaveAddr slave_addr, MemoryAddr memo
     #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
+    if (save == false)
+        throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot execute because initialization failed"));
     Binary corrected_data = memory_addr + output_data;
     int output_size = 0;  // 実際には何バイト送信したか
     output_size = ::i2c_write_blocking_until((_i2c_id ? i2c1 : i2c0), slave_addr, corrected_data, corrected_data.size(), false, make_timeout_time_us(100*1000));  // pico-SDKの関数  I2Cで送信
@@ -201,6 +226,8 @@ Binary I2C::read_memory(std::size_t size, SlaveAddr slave_addr, MemoryAddr memor
     #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
+    if (save == false)
+        throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot execute because initialization failed"));
     std::vector<uint8_t> input_data(size);
     int output_size = 0;  // 実際には何バイト送信したか
     int input_size = 0;  // 実際には何バイト受信したか

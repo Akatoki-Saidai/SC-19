@@ -42,6 +42,7 @@ public:
 
     static inline bool IsUse[5] = {false, false, false, false, false};  // 既にADCを使用しているか
 
+    bool save = true;
 };
 
 
@@ -52,6 +53,8 @@ public:
     PicoTemp();
 
     dimension::degC read();
+
+    bool save = true;
 };
 
 //! @brief picoのVSYSピンの電圧
@@ -61,6 +64,8 @@ public:
     VsysVoltage();
 
     dimension::V read();
+
+    bool save = true;
 };
 
 }

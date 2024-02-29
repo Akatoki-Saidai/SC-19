@@ -129,6 +129,8 @@ public:
     //! @param memory_addr 通信先のデバイスのメモリの何番地からデータを読み込むか
     //! @return Binary型のバイト列
     Binary read_memory(std::size_t size, SlaveAddr slave_addr, MemoryAddr memory_addr) const;
+
+    bool save = true;
 private:
     static inline bool IsUse[2] = {false, false};  // 既にI2C0とI2C1を使用しているか
 };

@@ -93,6 +93,7 @@ std::tuple<Latitude<Unit::deg>, Longitude<Unit::deg> > Spresense::gps()
     {
 throw std::runtime_error(f_err(__FILE__, __LINE__, "Latest GPS data not available"));  // 最新のGPSのデータがありません
     }
+    print("gps_read_data:%f,%f\n", _lat, _lon);
     return std::tuple(Latitude<Unit::deg>(_lat), Longitude<Unit::deg>(_lon));
 }
 
@@ -111,6 +112,7 @@ Cam Spresense::camera()
     {
 throw std::runtime_error(f_err(__FILE__, __LINE__, "Latest camera data not available"));  // 最新のカメラのデータがありません
     }
+    print("camera_read_data:%d\n", int(_cam));
     return _cam;
 }
 
@@ -128,6 +130,11 @@ throw std::runtime_error(f_err(__FILE__, __LINE__, "Latest time data not availab
     }
     time_t new_time = mktime(&_time) + absolute_time_diff_us(_time_update, get_absolute_time())/(1000*1000);
     _new_time = *gmtime(&new_time);
+
+    std::string time_str(20, '\0');
+    strftime(time_str.data(), 20, "%FT%TZ\n", &_new_time);
+    print("time_stamp:%s", time_str.c_str());
+
     return _new_time;
 }
 

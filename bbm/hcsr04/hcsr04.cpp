@@ -19,19 +19,25 @@ HCSR04::HCSR04(Pin trig_pin, Pin echo_pin) try :
     #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
-    // gpio_init(28);
-    // gpio_set_dir(28, GPIO_OUT);
-    // gpio_pull_down(28);
+    try
+    {
+        // gpio_init(28);
+        // gpio_set_dir(28, GPIO_OUT);
+        // gpio_pull_down(28);
 
-    // gpio_init(19);
-    // gpio_set_dir(19, GPIO_IN);
-    gpio_set_irq_enabled_with_callback(_in_pin.gpio(), GPIO_IRQ_EDGE_RISE + GPIO_IRQ_EDGE_FALL, true, &hcsr_callback);
-    echo_pin_gpio_num = _in_pin.gpio();
+        // gpio_init(19);
+        // gpio_set_dir(19, GPIO_IN);
+        gpio_set_irq_enabled_with_callback(_in_pin.gpio(), GPIO_IRQ_EDGE_RISE + GPIO_IRQ_EDGE_FALL, true, &hcsr_callback);
+        echo_pin_gpio_num = _in_pin.gpio();
+    }
+    catch(const std::exception& e)
+    {
+        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n%s\n\n********************\n", __FILE__, __LINE__, e.what());
+    }
 }
-catch(const std::exception& e)
+catch (const std::exception& e)
 {
-    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
-    print(e.what());
+    print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
 }
 
 Length<Unit::m> HCSR04::read()
@@ -65,6 +71,8 @@ Length<Unit::m> HCSR04::read()
         throw std::runtime_error(f_err(__FILE__, __LINE__, "Distance measurement failed"));  // 距離の測定に失敗しました
     }
     old_distance = distance;
+
+    print("hcsr_read_data:%f\n", distance);
     
     return Length<Unit::m>(distance);
 }

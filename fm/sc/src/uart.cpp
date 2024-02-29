@@ -18,15 +18,21 @@ namespace sc
 TX::TX(int tx_gpio) try :
     Pin(tx_gpio)
 {
-    if (gpio() != all_of(EnableUART0_TX) && gpio() != all_of(EnableUART1_TX))
+    try 
     {
+        if (gpio() != all_of(EnableUART0_TX) && gpio() != all_of(EnableUART1_TX))
+        {
 throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect TX pin number was entered"));  // 正しくないTXピンの番号が入力されました
+        }
+    }
+    catch(const std::exception& e)
+    {
+        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n%s\n\n********************\n", __FILE__, __LINE__, e.what());
     }
 }
 catch (const std::exception& e)
 {
-    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
-    print(e.what());
+    print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
 }
 
 UART_ID TX::get_uart_id() const
@@ -46,15 +52,21 @@ throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect TX pin numbe
 RX::RX(int tx_gpio) try :
     Pin(tx_gpio)
 {
-    if (gpio() != all_of(EnableUART0_RX) && gpio() != all_of(EnableUART1_RX))
+    try 
     {
+        if (gpio() != all_of(EnableUART0_RX) && gpio() != all_of(EnableUART1_RX))
+        {
 throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect RX pin number was entered"));  // 正しくないRXピンの番号が入力されました
+        }
+    }
+    catch(const std::exception& e)
+    {
+        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n%s\n\n********************\n", __FILE__, __LINE__, e.what());
     }
 }
 catch (const std::exception& e)
 {
-    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
-    print(e.what());
+    print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
 }
 
 UART_ID RX::get_uart_id() const
@@ -80,47 +92,54 @@ UART::UART(TX tx, RX rx, Frequency<Unit::Hz>  freq) try :
     #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
-    if (tx.get_uart_id() != rx.get_uart_id())
+    try 
     {
+        if (tx.get_uart_id() != rx.get_uart_id())
+        {
 throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect UART pin number was entered"));  // 正しくないUARTのピン番号が入力されました
-    } else if (!(Pin::Status.at(_tx.gpio()) == PinStatus::NoUse && Pin::Status.at(_rx.gpio()) == PinStatus::NoUse)) {
+        } else if (!(Pin::Status.at(_tx.gpio()) == PinStatus::NoUse && Pin::Status.at(_rx.gpio()) == PinStatus::NoUse)) {
 throw std::logic_error(f_err(__FILE__, __LINE__, "This pin is already in use"));  // このピンは既に使用されています
-    } else if (UART::IsUse[_uart_id]) {
+        } else if (UART::IsUse[_uart_id]) {
 throw std::logic_error(f_err(__FILE__, __LINE__, "UART cannot be reinitialized"));  // UARTを再度初期化することはできません
+        }
+
+        Pin::Status.at(_tx.gpio()) = PinStatus::UartTx;
+        Pin::Status.at(_rx.gpio()) = PinStatus::UartRx;
+
+        UART::IsUse[_uart_id] = true;
+
+        ::uart_init((_uart_id ? uart1 : uart0), static_cast<double>(_freq));  // pico-SDKの関数  UARTを初期化する
+
+        ::gpio_set_function(_tx.gpio(), GPIO_FUNC_UART);  // pico-SDKの関数  ピンの機能をUARTモードにする
+        ::gpio_set_function(_rx.gpio(), GPIO_FUNC_UART);  // pico-SDKの関数  ピンの機能をUARTモードにする
+
+        // 割り込み処理の設定を行う
+        if (_uart_id)
+        {
+            uart_set_hw_flow(uart1, false, false);  // フロー制御(受信準備が終わるまで送信しないで待つ機能)を無効にする
+            uart_set_format(uart1, 8, 1, UART_PARITY_NONE);  // UART通信の設定をする
+            uart_set_fifo_enabled(uart1, false);  // FIFO(受信したデータを一時的に保管する機能)をオフにし，1文字ずつ受信する
+            irq_set_exclusive_handler(UART1_IRQ, uart1_handler);  // 割り込み処理で実行する関数をセット
+            irq_set_enabled(UART1_IRQ, true);  // 割り込み処理を有効にする
+            uart_set_irq_enables(uart1, true, false);  // UARTの受信のみを割り込み処理で行う
+        } else {
+            uart_set_hw_flow(uart0, false, false);  // フロー制御(受信準備が終わるまで送信しないで待つ機能)を無効にする
+            uart_set_format(uart0, 8, 1, UART_PARITY_NONE);  // UART通信の設定をする
+            uart_set_fifo_enabled(uart0, false);  // FIFO(受信したデータを一時的に保管する機能)をオフにし，1文字ずつ受信する
+            irq_set_exclusive_handler(UART0_IRQ, uart0_handler);  // 割り込み処理で実行する関数をセット
+            irq_set_enabled(UART0_IRQ, true);  // 割り込み処理を有効にする
+            uart_set_irq_enables(uart0, true, false);  // UARTの受信のみを割り込み処理で行う
+        }
     }
-
-    Pin::Status.at(_tx.gpio()) = PinStatus::UartTx;
-    Pin::Status.at(_rx.gpio()) = PinStatus::UartRx;
-
-    UART::IsUse[_uart_id] = true;
-
-    ::uart_init((_uart_id ? uart1 : uart0), static_cast<double>(_freq));  // pico-SDKの関数  UARTを初期化する
-
-    ::gpio_set_function(_tx.gpio(), GPIO_FUNC_UART);  // pico-SDKの関数  ピンの機能をUARTモードにする
-    ::gpio_set_function(_rx.gpio(), GPIO_FUNC_UART);  // pico-SDKの関数  ピンの機能をUARTモードにする
-
-    // 割り込み処理の設定を行う
-    if (_uart_id)
+    catch(const std::exception& e)
     {
-        uart_set_hw_flow(uart1, false, false);  // フロー制御(受信準備が終わるまで送信しないで待つ機能)を無効にする
-        uart_set_format(uart1, 8, 1, UART_PARITY_NONE);  // UART通信の設定をする
-        uart_set_fifo_enabled(uart1, false);  // FIFO(受信したデータを一時的に保管する機能)をオフにし，1文字ずつ受信する
-        irq_set_exclusive_handler(UART1_IRQ, uart1_handler);  // 割り込み処理で実行する関数をセット
-        irq_set_enabled(UART1_IRQ, true);  // 割り込み処理を有効にする
-        uart_set_irq_enables(uart1, true, false);  // UARTの受信のみを割り込み処理で行う
-    } else {
-        uart_set_hw_flow(uart0, false, false);  // フロー制御(受信準備が終わるまで送信しないで待つ機能)を無効にする
-        uart_set_format(uart0, 8, 1, UART_PARITY_NONE);  // UART通信の設定をする
-        uart_set_fifo_enabled(uart0, false);  // FIFO(受信したデータを一時的に保管する機能)をオフにし，1文字ずつ受信する
-        irq_set_exclusive_handler(UART0_IRQ, uart0_handler);  // 割り込み処理で実行する関数をセット
-        irq_set_enabled(UART0_IRQ, true);  // 割り込み処理を有効にする
-        uart_set_irq_enables(uart0, true, false);  // UARTの受信のみを割り込み処理で行う
+        save = false;
+        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n%s\n\n********************\n", __FILE__, __LINE__, e.what());
     }
 }
-catch(const std::exception& e)
+catch (const std::exception& e)
 {
-    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
-    print(e.what());
+    print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
 }
 
 void UART::write(Binary output_data) const
@@ -128,6 +147,8 @@ void UART::write(Binary output_data) const
     #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
+    if (save == false)
+        throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot execute because initialization failed"));
     ::uart_write_blocking((_uart_id ? uart1 : uart0), output_data, output_data.size());  // pico-SDKの関数  UARTで送信
 }
 
@@ -136,6 +157,8 @@ Binary UART::read() const
     #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
+    if (save == false)
+        throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot execute because initialization failed"));
     std::deque<uint8_t> other_data(0);
     std::swap((_uart_id ? uart1_queue : uart0_queue), other_data);
     return sc::Binary(other_data);  // 割り込み処理で一時保存しておいたデータを返す

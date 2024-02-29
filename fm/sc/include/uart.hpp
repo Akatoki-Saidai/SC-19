@@ -85,6 +85,8 @@ public:
     //! @return Binary型のバイト列
     Binary read() const;
 
+    bool save = true;
+
 private:
     static inline bool IsUse[2] = {false, false};  // 既にUART0とUART1を使用しているか
     static constexpr std::size_t MaxInputLen = 255;  // 受信したデータを最大で何バイトまで保管しておくか

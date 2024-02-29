@@ -8,22 +8,27 @@ SD::SD() try
     #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
-    pSD = sd_get_by_num(0);
-
-    fr = f_mount(&pSD->fatfs, pSD->pcName, 1);
-
-    if (FR_OK != fr)
+    try 
     {
-        SD::save = false;
-        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
-        print(f_err(__FILE__, __LINE__, "f_mount error: %s (%d)\n", FRESULT_str(fr), fr));
+        pSD = sd_get_by_num(0);
+
+        fr = f_mount(&pSD->fatfs, pSD->pcName, 1);
+
+        if (FR_OK != fr)
+        {
+            SD::save = false;
+            print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
+            print(f_err(__FILE__, __LINE__, "f_mount error: %s (%d)\n", FRESULT_str(fr), fr));
+        }
+    }
+    catch(const std::exception& e)
+    {
+        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n%s\n\n********************\n", __FILE__, __LINE__, e.what());
     }
 }
-catch(const std::exception& e)
+catch (const std::exception& e)
 {
-    SD::save = false;
-    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
-    print(e.what());
+    print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
 }
 
 SD::~SD()

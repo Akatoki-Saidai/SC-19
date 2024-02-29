@@ -45,11 +45,17 @@ public:
         #ifndef NODEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
+        try
+        {
+        }
+        catch(const std::exception& e)
+        {
+            print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n%s\n\n********************\n", __FILE__, __LINE__, e.what());
+        }
     }
-    catch(const std::exception& e)
+    catch (const std::exception& e)
     {
-        sc::print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
-        sc::print(e.what());
+        print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
     }
 
     //! @brief { }からバイト列を作成
@@ -60,11 +66,17 @@ public:
         #ifndef NODEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
+        try
+        {
+        }
+        catch(const std::exception& e)
+        {
+            print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n%s\n\n********************\n", __FILE__, __LINE__, e.what());
+        }
     }
-    catch(const std::exception& e)
+    catch (const std::exception& e)
     {
-        sc::print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
-        sc::print(e.what());
+        print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
     }
 
     //! @brief 配列からバイト列を作成
@@ -77,11 +89,17 @@ public:
         #ifndef NODEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
+        try
+        {
+        }
+        catch(const std::exception& e)
+        {
+            print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n%s\n\n********************\n", __FILE__, __LINE__, e.what());
+        }
     }
-    catch(const std::exception& e)
+    catch (const std::exception& e)
     {
-        sc::print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
-        sc::print(e.what());
+        print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
     }
 
     //! @brief 1バイトの値からバイト列を作成
@@ -91,11 +109,17 @@ public:
         #ifndef NODEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
+        try
+        {
+        }
+        catch(const std::exception& e)
+        {
+            print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n%s\n\n********************\n", __FILE__, __LINE__, e.what());
+        }
     }
-    catch(const std::exception& e)
+    catch (const std::exception& e)
     {
-        sc::print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
-        sc::print(e.what());
+        print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
     }
 
     //! @brief バイト列のサイズを返す

@@ -55,6 +55,8 @@ public:
     //! @return GPIO番号
     uint8_t gpio() const
         {return _pin.gpio();}
+
+    bool save = true;
 };
 
 using LED = GPIO<Out>;  // LEDによる出力
@@ -82,6 +84,8 @@ public:
     //! @return GPIO番号
     uint8_t gpio() const
         {return _pin.gpio();}
+
+    bool save = true;
 };
 
 }

@@ -126,41 +126,53 @@ SPI::SPI(MISO miso, CS cs, SCK sck, MOSI mosi):
     #endif
 }
 
-SPI::SPI(MISO miso, CS cs, SCK sck, MOSI mosi, Frequency<Unit::Hz>  freq):
+SPI::SPI(MISO miso, CS cs, SCK sck, MOSI mosi, Frequency<Unit::Hz>  freq) try:
     _miso(miso), _sck(sck), _mosi(mosi), _freq(freq), _spi_id(miso.get_spi_id())
 {
     #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
-    if (!(miso.get_spi_id() == sck.get_spi_id() && sck.get_spi_id() == mosi.get_spi_id()))
+    try 
     {
+        if (!(miso.get_spi_id() == sck.get_spi_id() && sck.get_spi_id() == mosi.get_spi_id()))
+        {
 throw std::invalid_argument(f_err(__FILE__, __LINE__, "An incorrect SPI pin number was entered"));  // 正しくないSPIのピン番号が入力されました
-    } else if (Pin::Status.at(_miso.gpio()) != PinStatus::NoUse || Pin::Status.at(_sck.gpio()) != PinStatus::NoUse || Pin::Status.at(_mosi.gpio()) != PinStatus::NoUse || !cs.no_use()) {
+        } else if (Pin::Status.at(_miso.gpio()) != PinStatus::NoUse || Pin::Status.at(_sck.gpio()) != PinStatus::NoUse || Pin::Status.at(_mosi.gpio()) != PinStatus::NoUse || !cs.no_use()) {
 throw std::logic_error(f_err(__FILE__, __LINE__, "This pin is already in use"));  // このピンは既に使用されています
-    } else if (SPI::IsUse[_spi_id]) {
+        } else if (SPI::IsUse[_spi_id]) {
 throw std::logic_error(f_err(__FILE__, __LINE__, "SPI cannot be reinitialized"));  // SPIを再度初期化することはできません
-    }
+        }
 
-    Pin::Status.at(_miso.gpio()) = PinStatus::SpiMiso;
-    Pin::Status.at(_sck.gpio()) = PinStatus::SpiSck;
-    Pin::Status.at(_mosi.gpio()) = PinStatus::SpiMosi;
-    for (Pin cs_pin : cs.get())
+        Pin::Status.at(_miso.gpio()) = PinStatus::SpiMiso;
+        Pin::Status.at(_sck.gpio()) = PinStatus::SpiSck;
+        Pin::Status.at(_mosi.gpio()) = PinStatus::SpiMosi;
+        for (Pin cs_pin : cs.get())
+        {
+            Pin::Status.at(cs_pin.gpio()) = PinStatus::SpiCs;
+        }
+
+        SPI::IsUse[_spi_id] = true;
+
+        ::spi_init((_spi_id ? spi1 : spi0), static_cast<double>(_freq));  // pico-SDKの関数  SPIを初期化する
+
+        ::gpio_set_function(_miso.gpio(), GPIO_FUNC_SPI);  // pico-SDKの関数  ピンの機能をSPIモードにする
+        ::gpio_set_function(_sck.gpio(), GPIO_FUNC_SPI);  // pico-SDKの関数  ピンの機能をSPIモードにする
+        ::gpio_set_function(_mosi.gpio(), GPIO_FUNC_SPI);  // pico-SDKの関数  ピンの機能をSPIモードにする
+        for (Pin cs_pin : cs.get())
+        {
+            _cs_pins.push_back(GPIO<Out>(cs_pin));  // CSピンをGPIO出力用のピンとしてセットアップ
+            _cs_pins.back().write(1);  // CSピンをオンに設定
+        }
+    }
+    catch(const std::exception& e)
     {
-        Pin::Status.at(cs_pin.gpio()) = PinStatus::SpiCs;
+        save = false;
+        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n%s\n\n********************\n", __FILE__, __LINE__, e.what());
     }
-
-    SPI::IsUse[_spi_id] = true;
-
-    ::spi_init((_spi_id ? spi1 : spi0), static_cast<double>(_freq));  // pico-SDKの関数  SPIを初期化する
-
-    ::gpio_set_function(_miso.gpio(), GPIO_FUNC_SPI);  // pico-SDKの関数  ピンの機能をSPIモードにする
-    ::gpio_set_function(_sck.gpio(), GPIO_FUNC_SPI);  // pico-SDKの関数  ピンの機能をSPIモードにする
-    ::gpio_set_function(_mosi.gpio(), GPIO_FUNC_SPI);  // pico-SDKの関数  ピンの機能をSPIモードにする
-    for (Pin cs_pin : cs.get())
-    {
-        _cs_pins.push_back(GPIO<Out>(cs_pin));  // CSピンをGPIO出力用のピンとしてセットアップ
-        _cs_pins.back().write(1);  // CSピンをオンに設定
-    }
+}
+catch (const std::exception& e)
+{
+    print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
 }
 
 void SPI::write(Binary output_data, CS cs_pin) const
@@ -168,6 +180,8 @@ void SPI::write(Binary output_data, CS cs_pin) const
     #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
+    if (save == false)
+        throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot execute because initialization failed"));
     if (cs_pin.size() > 1)
     {
 throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot communicate with multiple devices at the same time"));  // 複数のデバイスと同時に通信することはできません
@@ -187,6 +201,8 @@ Binary SPI::read(std::size_t size, CS cs_pin) const
     #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
+    if (save == false)
+        throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot execute because initialization failed"));
     if (cs_pin.size() > 1)
     {
 throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot communicate with multiple devices at the same time"));  // 複数のデバイスと同時に通信することはできません
@@ -210,6 +226,8 @@ void SPI::write_memory(Binary output_data, CS cs_pin, MemoryAddr memory_addr) co
     #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
+    if (save == false)
+        throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot execute because initialization failed"));
     if (cs_pin.size() > 1)
     {
 throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot communicate with multiple devices at the same time"));  // 複数のデバイスと同時に通信することはできません
@@ -230,6 +248,8 @@ Binary SPI::read_memory(std::size_t size, CS cs_pin, MemoryAddr memory_addr) con
     #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
+    if (save == false)
+        throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot execute because initialization failed"));
     if (cs_pin.size() > 1)
     {
 throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot communicate with multiple devices at the same time"));  // 複数のデバイスと同時に通信することはできません

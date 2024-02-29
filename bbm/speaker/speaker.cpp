@@ -15,26 +15,32 @@ Speaker::Speaker(const Pin& pin) try :
     #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
-    //pwmの設定
-    gpio_set_function(_pin.gpio(),GPIO_FUNC_PWM);
+    try 
+    {
+        //pwmの設定
+        gpio_set_function(_pin.gpio(),GPIO_FUNC_PWM);
 
-    // uint8_t _speaker_pwm_slice_num = pwm_gpio_to_slice_num(_pin.gpio());
-    _speaker_pwm_slice_config = pwm_get_default_config();
-    // 位相補正：なし
-    // 分周：1分周
-    // カウントモード：フリーランニング
-    // 極性：通常   
-    // 1周期525.0us
+        // uint8_t _speaker_pwm_slice_num = pwm_gpio_to_slice_num(_pin.gpio());
+        _speaker_pwm_slice_config = pwm_get_default_config();
+        // 位相補正：なし
+        // 分周：1分周
+        // カウントモード：フリーランニング
+        // 極性：通常   
+        // 1周期525.0us
 
-    // double _speaker_pwm_clkdiv = 1.8;
-    pwm_config_set_clkdiv( &_speaker_pwm_slice_config, _speaker_pwm_clkdiv );
+        // double _speaker_pwm_clkdiv = 1.8;
+        pwm_config_set_clkdiv( &_speaker_pwm_slice_config, _speaker_pwm_clkdiv );
 
-    pwm_set_enabled(_speaker_pwm_slice_num, true);
+        pwm_set_enabled(_speaker_pwm_slice_num, true);
+    }
+    catch(const std::exception& e)
+    {
+        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n%s\n\n********************\n", __FILE__, __LINE__, e.what());
+    }
 }
-catch(const std::exception& e)
+catch (const std::exception& e)
 {
-    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
-    print(e.what());
+    print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
 }
 
 void Speaker::play_starwars(){

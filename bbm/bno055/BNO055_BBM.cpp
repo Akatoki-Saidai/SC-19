@@ -54,22 +54,28 @@ BNO055::BNO055(const I2C& i2c) try :
     #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
+    try
+    {
 
-    // // Configure the I2C Communication
-    // // i2c_init(I2C_PORT, 400 * 1000);
-    // gpio_set_function(6, GPIO_FUNC_I2C);
-    // gpio_set_function(7, GPIO_FUNC_I2C);
-    // gpio_pull_up(6);
-    // gpio_pull_up(7);
+        // // Configure the I2C Communication
+        // // i2c_init(I2C_PORT, 400 * 1000);
+        // gpio_set_function(6, GPIO_FUNC_I2C);
+        // gpio_set_function(7, GPIO_FUNC_I2C);
+        // gpio_pull_up(6);
+        // gpio_pull_up(7);
 
-    // Call accelerometer initialisation function
-    accel_init();
+        // Call accelerometer initialisation function
+        accel_init();
 
+    }
+    catch(const std::exception& e)
+    {
+        print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n%s\n\n********************\n", __FILE__, __LINE__, e.what());
+    }
 }
-catch(const std::exception& e)
+catch (const std::exception& e)
 {
-    print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n\n********************\n", __FILE__, __LINE__);
-    print(e.what());
+    print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
 }
 
 std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity<Unit::T>,AngularVelocity<Unit::rad_s>> BNO055::read(){
@@ -191,6 +197,8 @@ throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is 
         sleep(100_ms);
         throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is abnormal"));  // BNO055の測定値が異常です
     }
+
+    print("bno_read_data:%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", d_accelX, d_accelY, d_accelZ, d_grvX, d_grvY, d_grvZ, d_magX, d_magY, d_magZ, d_gyroX, d_gyroY, d_gyroZ);
 
     return {accel_vector,grav_vector,Mag_vector,gyro_vector};
 }

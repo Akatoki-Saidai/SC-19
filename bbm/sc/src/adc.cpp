@@ -108,7 +108,9 @@ dimension::degC PicoTemp::read()
     if (save == false)
         throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot execute because initialization failed"));
     ::adc_select_input(4);
-    return dimension::degC(27 - ((::adc_read() * 3.3 / (1<<12)) - 0.706)/0.001721);
+    double read_temp = 27 - ((::adc_read() * 3.3 / (1<<12)) - 0.706)/0.001721;
+    print("pico_temp_data:%f\n", read_temp);
+    return dimension::degC(read_temp);
 }
 
 
@@ -149,7 +151,9 @@ dimension::V VsysVoltage::read()
     if (save == false)
         throw std::logic_error(f_err(__FILE__, __LINE__, "Cannot execute because initialization failed"));
     ::adc_select_input(3);
-    return dimension::V(3 * ::adc_read() * 3.3 / (1 << 12));
+    double voltage = 3 * ::adc_read() * 3.3 / (1 << 12);
+    print("vsys_voltage_data:%f\n", voltage);
+    return dimension::V(voltage);
 }
 
 

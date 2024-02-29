@@ -101,7 +101,7 @@ int main()
                         try
                         {
                             auto njl_data = njl5513r.read();
-                            if(njl_data>100_lx)//照度によりキャリア展開検知　→落下フェーズへ
+                            if(njl_data>2500_lx)//照度によりキャリア展開検知　→落下フェーズへ
                             {
                                 fase=Fase::Fall;
                                 break;
@@ -127,7 +127,7 @@ int main()
                             Pressure<Unit::Pa> pressure = std::get<0>(bme_data);  // 気圧
                             Temperature<Unit::degC> temperature = std::get<2>(bme_data);  // 気温
                             Altitude<Unit::m> altitude(pressure, temperature);
-                            if(altitude<10.0_m)//地面からの標高が10m以内
+                            if(altitude<5_m)//地面からの標高が5m以内
                             {
                                 sleep(10_s);//念のため待機しておく
                                 separate=para_separate.read();
@@ -141,7 +141,7 @@ int main()
                                 auto bno_data = bno055.read();  // BNO055(9軸)から受信
                                 Acceleration<Unit::m_s2> gravity_acceleration = std::get<1>(bno_data);//重力加速度取得
                                 //Z軸の重力加速度が正かどうかで機体の体制修正
-                                if(gravity_acceleration.z()>0_m_s2)//z軸が正なら正常
+                                if(gravity_acceleration.z()<3_m_s2)//z軸が負なら正常
                                 {
                                     fase=Fase::Ldistance;
                                     break;

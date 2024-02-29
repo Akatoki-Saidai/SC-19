@@ -111,7 +111,7 @@ static void print_pos(SpNavData *pNavData)
   snprintf(StringBuffer, STRING_BUFFER_SIZE, ":Tim%04d%02d%02d", pNavData->time.year, pNavData->time.month, pNavData->time.day);
   Serial2.print(StringBuffer);
 
-  snprintf(StringBuffer, STRING_BUFFER_SIZE, "%02d%02d%02", pNavData->time.hour, pNavData->time.minute, pNavData->time.sec);
+  snprintf(StringBuffer, STRING_BUFFER_SIZE, "%02d%02d%02d", pNavData->time.hour, pNavData->time.minute, pNavData->time.sec);
   Serial.println(StringBuffer);
   snprintf(StringBuffer, STRING_BUFFER_SIZE, "%02d%02d%02d", pNavData->time.hour, pNavData->time.minute, pNavData->time.sec);
   Serial2.println(StringBuffer);
@@ -792,7 +792,7 @@ void setup(){
 
   // カメラ起動状態
   Launch = false;
-  phase = 1;
+  phase = 0;
 
   Watchdog.begin();
 

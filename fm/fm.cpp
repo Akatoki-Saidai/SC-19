@@ -82,6 +82,9 @@ int main()
 
         fase = Fase::Wait;
 
+        absolute_time_t recent_successful = get_absolute_time();  // エラーが出続けている時間を測るために使う．
+        bool is_success = true;  // エラーが出ずに成功したか
+
     // ************************************************** //
     //                        loop                        //
     // ************************************************** //
@@ -91,6 +94,19 @@ int main()
         {
             try
             {
+                try
+                {
+                    print("\nfase : %d\n", int(fase));  // フェーズを表示
+                    spresense.time();  // タイムスタンプを表示
+                    vsys.read();  // 電源電圧を表示
+                    if (is_success)  // もし，前回のループがうまくいったなら
+                    {
+                        recent_successful = get_absolute_time();
+                    }
+                    is_success = true;
+                }
+                catch(const std::exception& e){print(e.what());}
+                
                 switch (fase)
                 {
                     // ************************************************** //
@@ -111,8 +127,16 @@ int main()
                                 break;
                             }
                         }
-                        catch(const std::exception& e){print(e.what());}
-                        
+                        catch(const std::exception& e)
+                        {
+                            print(e.what());
+                            is_success = false;
+                            // もしエラーが出続けているなら
+                            if (absolute_time_diff_us(recent_successful, get_absolute_time()) > 60*1000*1000)
+                            {
+                            }
+                        }
+                        break;  // 保険のbreak
                     }
 
                     // ************************************************** //
@@ -161,7 +185,16 @@ int main()
                                 break;
                             }
                         }
-                        catch(const std::exception& e){print(e.what());}
+                        catch(const std::exception& e)
+                        {
+                            print(e.what());
+                            is_success = false;
+                            // もしエラーが出続けているなら
+                            if (absolute_time_diff_us(recent_successful, get_absolute_time()) > 60*1000*1000)
+                            {
+                            }
+                        }
+                        break;  // 保険のbreak
                     }
 
                     // ************************************************** //
@@ -320,7 +353,16 @@ int main()
                                 break;
                             }
                         }
-                        catch(const std::exception& e){print(e.what());}
+                        catch(const std::exception& e)
+                        {
+                            print(e.what());
+                            is_success = false;
+                            // もしエラーが出続けているなら
+                            if (absolute_time_diff_us(recent_successful, get_absolute_time()) > 60*1000*1000)
+                            {
+                            }
+                        }
+                        break;  // 保険のbreak
                     }
 
                     // ************************************************** //
@@ -374,7 +416,17 @@ int main()
                                 break;
                             }
                         }
-                        catch(const std::exception& e){print(e.what());}
+                        catch(const std::exception& e)
+                        {
+                            print(e.what());
+                            print(e.what());
+                            is_success = false;
+                            // もしエラーが出続けているなら
+                            if (absolute_time_diff_us(recent_successful, get_absolute_time()) > 60*1000*1000)
+                            {
+                            }
+                        }
+                        break;  // 保険のbreak
                     }
 
                     // ************************************************** //
@@ -390,8 +442,6 @@ int main()
         // エラー時の出力
         print(e.what());
         print("\nOut of the loop\n");
-        sleep(100_ms);
-        exit(EXIT_FAILURE);
     }
 }
 

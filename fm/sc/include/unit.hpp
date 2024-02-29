@@ -322,6 +322,10 @@ public:
 
     Element constexpr operator[] (std::size_t index) const
         {return _data[index];}
+
+    //! @brief ベクトル量の大きさ
+    Element magnitude() const
+        {return Element(std::sqrt(_data[0]*_data[0] + _data[1]*_data[1] + _data[2]*_data[2]));}
 };
 
 //! @brief ベクトルの単項+

@@ -67,6 +67,20 @@ int main()
             try {sd.write(message);} catch(const std::exception& e){printf(e.what());}
             try {twelite.write(0x00, message);} catch(const std::exception& e){printf(e.what());}
         };
+        
+        // 標高の基準となる気圧を設定
+        try
+        {
+            auto b0 = bme280.read();
+            sleep(1_ms);
+            auto b1 = bme280.read();
+            sleep(1_ms);
+            auto b2 = bme280.read();
+            Altitude<Unit::m>::set_origin(average(std::get<0>(b0), std::get<0>(b1), std::get<0>(b2)), average(std::get<2>(b0), std::get<2>(b1), std::get<2>(b2)));
+        }
+        catch(const std::exception& e){printf(e.what());}
+
+        fase = Fase::Wait;
 
     // ************************************************** //
     //                        loop                        //

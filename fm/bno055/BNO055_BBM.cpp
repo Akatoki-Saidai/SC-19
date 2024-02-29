@@ -102,7 +102,7 @@ std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity
 
     if (std::abs(d_accelX) > 30 || std::abs(d_accelY) > 30 || std::abs(d_accelZ) > 30)
     {
-throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is abnormal"));  // BNO055の測定値が異常です
+throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is abnormal. accel:%f, %f, %f", d_accelX, d_accelY, d_accelZ));  // BNO055の測定値が異常です
     }
 
     Acceleration<Unit::m_s2>accel_vector{dimension::m_s2(d_accelX),dimension::m_s2(d_accelY),dimension::m_s2(d_accelZ)};
@@ -127,7 +127,7 @@ throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is 
 
     if (std::abs(9.8 - std::sqrt(d_grvX*d_grvX + d_grvY*d_grvY + d_grvZ*d_grvZ)) > 0.1)
     {
-throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is abnormal"));  // BNO055の測定値が異常です
+throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is abnormal. grv:%f, %f, %f", d_grvX, d_grvY, d_grvZ));  // BNO055の測定値が異常です
     }
 
     Acceleration<Unit::m_s2>grav_vector{dimension::m_s2(d_grvX),dimension::m_s2(d_grvY),dimension::m_s2(d_grvZ)};
@@ -150,10 +150,10 @@ throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is 
     double d_magY = milli * median(magY[0], magY[1], magY[2]) / 16.00;
     double d_magZ = milli * median(magZ[0], magZ[1], magZ[2]) / 16.00;
 
-    double all_mag =std::sqrt(d_grvX*d_grvX + d_grvY*d_grvY + d_grvZ*d_grvZ);    
-    if (all_mag < 35*milli || 55*milli < all_mag)  // 日本は47mT～50mTくらい
+    double all_mag =std::sqrt(d_magX*d_magX + d_magY*d_magY + d_magZ*d_magZ);    
+    if (all_mag < 35*milli || 70*milli < all_mag)  // 日本は47mT～50mTくらい
     {
-throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is abnormal"));  // BNO055の測定値が異常です
+throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is abnormal. mag:%f, %f, %f", d_magX, d_magY, d_magZ));  // BNO055の測定値が異常です
     }
     
     MagneticFluxDensity<Unit::T>Mag_vector{dimension::T(d_magX),dimension::T(d_magY),dimension::T(d_magZ)};
@@ -178,7 +178,7 @@ throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is 
 
     if (d_gyroX > 20 || d_gyroY > 20 || d_gyroZ > 20)
     {
-throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is abnormal"));  // BNO055の測定値が異常です
+throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is abnormal. gyro:%f, %f, %f", d_gyroX, d_gyroY, d_gyroZ));  // BNO055の測定値が異常です
     }
 
     AngularVelocity<Unit::rad_s>gyro_vector{dimension::rad_s(d_gyroX),dimension::rad_s(d_gyroY),dimension::rad_s(d_gyroZ)};

@@ -76,6 +76,19 @@ int main()
             try {twelite.write(0x00, message);} catch(const std::exception& e){printf(e.what());}
         };
 
+        // 標高の基準となる気圧を設定
+        try
+        {
+            auto b0 = bme280.read();
+            sleep(1_ms);
+            auto b1 = bme280.read();
+            sleep(1_ms);
+            auto b2 = bme280.read();
+            Altitude<Unit::m>::set_origin(average(std::get<0>(b0), std::get<0>(b1), std::get<0>(b2)), average(std::get<2>(b0), std::get<2>(b1), std::get<2>(b2)));
+        }
+        catch(const std::exception& e){printf(e.what());}
+        
+
     /***** loop *****/
         while (true) { 
         try {
@@ -90,7 +103,8 @@ int main()
                     Pressure<Unit::Pa> pressure = std::get<0>(bme_data);  // 気圧
                     Humidity<Unit::percent> humidity = std::get<1>(bme_data);  // 湿度
                     Temperature<Unit::degC> temperature = std::get<2>(bme_data);  // 気温
-                    print("pressure:%f hPa, humidity:%f %, temperature:%f degC\n", pressure*hecto, humidity, temperature);
+                    Altitude<Unit::m> altitude(pressure, temperature);  // 標高
+                    print("pressure:%f hPa, humidity:%f %, temperature:%f degC, altitude:%f\n", double(pressure/hecto), double(humidity), double(temperature), double(altitude));
                 }
                 catch(const std::exception& e){printf(e.what());}
                 

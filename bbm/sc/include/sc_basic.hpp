@@ -185,6 +185,17 @@ constexpr inline double not_minus0(const double& value) {return (value ? value :
 constexpr inline long double not_minus0(const long double& value) {return (value ? value : 0.0L);}
 
 
+//! @brief 中央値を求める
+template<class T>
+constexpr inline const T& median(const T& num0, const T& num1, const T& num2)
+    {return (num0<num1 ? (num1<num2 ? num1 : (num0<num2 ? num2 : num0)) : (num0<num2 ? num0 : (num1<num2 ? num2 : num1)));}
+
+//! @brief 平均値を求める
+template<class T>
+constexpr inline T average(const T& num0, const T& num1, const T& num2)
+    {return T((num0 + num1 + num2)*(1.0/3.0));}
+
+
 //! @brief コピーを禁止するための親クラス
 class Noncopyable
 {

@@ -31,7 +31,15 @@ public:
         {return _red_led;}
 
     Illuminance<Unit::lx> read() 
-        {return Illuminance<Unit::lx>(_lux_adc.read() * 9);}
+        {
+            uint16_t adc_value[3];
+            for (int i=0; i<3; ++i)
+            {
+                adc_value[i] = _lux_adc.read();
+            }
+            uint16_t adc_m = median(adc_value[0], adc_value[1], adc_value[2]);
+            return Illuminance<Unit::lx>(adc_m * 9);  // 9倍して単位がlxになるのはは実験値
+        }
 
 };
 

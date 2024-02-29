@@ -100,7 +100,6 @@ std::tuple<Pressure<Unit::Pa>,Humidity<Unit::percent>,Temperature<Unit::degC>> B
     #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
-    int32_t pressure, humidity, temperature;
     if (measurement_reg.mode == BME280::MODE::MODE_FORCED) {
         write_register(0xf4, measurement_reg.get());
         int count = 0;
@@ -111,18 +110,33 @@ std::tuple<Pressure<Unit::Pa>,Humidity<Unit::percent>,Temperature<Unit::degC>> B
             if (++count > 100) break;
         } while (buffer & 0x08); // loop until measurement completed
     }
-    // read raw sensor data from BME280
-    bme280_read_raw(&humidity,
-                    &pressure,
-                    &temperature);
+    
+    int32_t pressure[3], humidity[3], temperature[3];
 
-    // compensate raw sensor values
-    pressure = compensate_pressure(pressure);
-    humidity = compensate_humidity(humidity);
-    temperature = compensate_temp(temperature);
-    Pressure<Unit::Pa>pressure_Pa(double(pressure/100.0) / hecto);
-    Humidity<Unit::percent>humidity_percent(double(humidity/1024.0));
-    Temperature<Unit::degC>temperature_degC(double(temperature/100.0));
+    // 3回測定
+    for (int i=0; i<3; ++i)
+    {
+        bme280_read_raw(&(humidity[i]), &(pressure[i]), &(temperature[i]));
+        sleep_ms(1);
+    }
+
+    // 中央値を求める
+    int32_t pressure_m = median(pressure[0], pressure[1], pressure[2]);
+    int32_t humidity_m = median(humidity[0], humidity[1], humidity[2]);
+    int32_t temperature_m = median(temperature[0], temperature[1], temperature[2]);
+
+    pressure_m = compensate_pressure(pressure_m);
+    humidity_m = compensate_humidity(humidity_m);
+    temperature_m = compensate_temp(temperature_m);
+
+    if (pressure_m < 900*100 || 1100*100 < pressure_m || humidity_m/1024 <= 0 || 100 <= humidity_m/1024 || temperature_m/100.0 < -20 || 50 < temperature_m/100.0)
+    {
+throw std::runtime_error(f_err(__FILE__, __LINE__, "BME280 measurement value is abnormal"));  // BME280の測定値が異常です
+    }
+
+    Pressure<Unit::Pa>pressure_Pa(pressure_m);
+    Humidity<Unit::percent>humidity_percent(humidity_m/1024.0);
+    Temperature<Unit::degC>temperature_degC(temperature_m/100.0);
     // measurement.pressure = Pressure / 100.0;
     // measurement.humidity = Humidity / 1024.0;
     // measurement.temperature = Temperature / 100.0;

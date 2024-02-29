@@ -8,6 +8,7 @@ camera.ino - Simple camera example sketch
 #include <Camera.h>
 #include <GNSS.h>
 #include <Watchdog.h>
+#include <Wire.h>
 
 #define BAUDRATE (1000000)
 #define BAUDRATE2 (31250)
@@ -108,13 +109,15 @@ static void print_pos(SpNavData *pNavData)
   /* print time */
   snprintf(StringBuffer, STRING_BUFFER_SIZE, ":Tim%04d%02d%02d", pNavData->time.year, pNavData->time.month, pNavData->time.day);
   Serial.print(StringBuffer);
-  snprintf(StringBuffer, STRING_BUFFER_SIZE, ":Tim%04d%02d%02d", pNavData->time.year, pNavData->time.month, pNavData->time.day);
   Serial2.print(StringBuffer);
+  I2Cprint(StringBuffer);
+
 
   snprintf(StringBuffer, STRING_BUFFER_SIZE, "%02d%02d%02d", pNavData->time.hour, pNavData->time.minute, pNavData->time.sec);
   Serial.println(StringBuffer);
-  snprintf(StringBuffer, STRING_BUFFER_SIZE, "%02d%02d%02d", pNavData->time.hour, pNavData->time.minute, pNavData->time.sec);
   Serial2.println(StringBuffer);
+  I2Cprint(StringBuffer);
+  I2Cprint("\n");
 
   /* print satellites count */
   // snprintf(StringBuffer, STRING_BUFFER_SIZE, "numSat:%2d, ", pNavData->numSatellites);
@@ -126,27 +129,39 @@ static void print_pos(SpNavData *pNavData)
   if (pNavData->posFixMode == FixInvalid)
   {
     Serial.println("No-Fix");
+    I2Cprint("No-Fix\n");
   }
   else
   {
     Serial.println("Fix");
+    I2Cprint("Fix\n");
   }
   if (pNavData->posDataExist == 0)
   {
     Serial.println("No Position");
+    I2Cprint("No Position");
+
     Serial.println(":Lat0.00000000");
     Serial2.println(":Lat0.00000000");
+    I2Cprint(":Lat0.00000000");
+
     Serial.println(":Lon0.00000000");
     Serial2.println(":Lon0.00000000");
+    I2Cprint(":Lon0.00000000");
+    
   }
   else
   {
     snprintf(StringBuffer, STRING_BUFFER_SIZE, ":Lat%08f", pNavData->latitude);
     Serial.println(StringBuffer);
     Serial2.println(StringBuffer);
+    I2Cprint(StringBuffer);
+
     snprintf(StringBuffer, STRING_BUFFER_SIZE, ":Lon%08f", pNavData->longitude);
     Serial.println(StringBuffer);
     Serial2.println(StringBuffer);
+    I2Cprint(StringBuffer);
+
   }
 }
 
@@ -213,6 +228,7 @@ static void print_condition(SpNavData *pNavData)
     /* Print satellite condition. */
     snprintf(StringBuffer, STRING_BUFFER_SIZE, "[%2ld] Type:%s, Id:%2ld, Elv:%2ld, Azm:%3ld, CN0:", cnt, pType, Id, Elv, Azm );
     Serial.print(StringBuffer);
+
     Serial.println(sigLevel, 6);
   }
 }
@@ -230,37 +246,49 @@ static void print_condition(SpNavData *pNavData)
 void printError(enum CamErr err)
 {
   Serial.print("Error: ");
+  I2Cprint("Error: ");
+
   switch (err)
   {
       case CAM_ERR_NO_DEVICE:
     Serial.println("No Device");
+    I2Cprint("No Device\n");
     break;
       case CAM_ERR_ILLEGAL_DEVERR:
     Serial.println("Illegal device error");
+    I2Cprint("Illegal device error\n");
     break;
       case CAM_ERR_ALREADY_INITIALIZED:
     Serial.println("Already initialized");
+    I2Cprint("Already initialized\n");
     break;
       case CAM_ERR_NOT_INITIALIZED:
     Serial.println("Not initialized");
+    I2Cprint("Not initialized\n");
     break;
       case CAM_ERR_NOT_STILL_INITIALIZED:
     Serial.println("Still picture not initialized");
+    I2Cprint("Still picture not initialized\n");
     break;
       case CAM_ERR_CANT_CREATE_THREAD:
     Serial.println("Failed to create thread");
+    I2Cprint("Failed to create thread\n");
     break;
       case CAM_ERR_INVALID_PARAM:
     Serial.println("Invalid parameter");
+    I2Cprint("Invalid parameter\n");
     break;
       case CAM_ERR_NO_MEMORY:
     Serial.println("No memory");
+    I2Cprint("No memory\n");
     break;
       case CAM_ERR_USR_INUSED:
     Serial.println("Buffer already in use");
+    I2Cprint("Buffer already in use\n");
     break;
       case CAM_ERR_NOT_PERMITTED:
     Serial.println("Operation not permitted");
+    I2Cprint("Operation not permitted\n");
     break;
       default:
     break;
@@ -291,11 +319,13 @@ void CamCB(CamImage &img)
 
     Serial.print(":Cam");
     Serial2.print(":Cam");
-    
+    I2Cprint(":Cam");
     
     uint8_t red_result = red_detect(img);
     Serial.println(red_result);
     Serial2.println(red_result);
+    I2Cprint(red_result);
+    I2Cprint("\n");
 
 
     // 画像の転送(USB)
@@ -313,6 +343,7 @@ void CamCB(CamImage &img)
 
   else {
     Serial.println("Failed to get video stream image");
+    I2Cprint("Failed to get video stream image\n");
   }
 
 }
@@ -609,40 +640,59 @@ uint8_t red_detect(CamImage img) {
   left_red = CountRedPixel(img, 1, center_begin - 1 );
   Serial.print("Left: ");
   Serial.println(left_red);
+  I2Cprint("Left: ");
+  I2Cprint(left_red);
+  I2Cprint("\n");
+  
   center_red = CountRedPixel(img, center_begin, right_begin - 1 );
   Serial.print("Center: ");
   Serial.println(center_red);
+  I2Cprint("Center: ");
+  I2Cprint(center_red);
+  I2Cprint("\n");
+
   right_red = CountRedPixel(img, right_begin, img_width);
   Serial.print("Right: ");
   Serial.println(right_red);
+  I2Cprint("Right: ");
+  I2Cprint(right_red);
+  I2Cprint("\n");
 
 
   Serial.print("Red object: ");
+  I2Cprint("Red object: ");
+
   if (right_red == left_red || right_red == center_red || left_red == center_red){
     Serial.println("Failed judgement");
+    I2Cprint("Failed judgement\n");
     result = 4;
   }
   else if ((left_red + center_red + right_red) <= 10){
     Serial.println("Not found");
+    I2Cprint("Not found\n");
     result = 4;
   }
   else if (left_red == max(max(left_red, center_red), right_red)){
     Serial.println("Left");
+    I2Cprint("Left\n");
     Watchdog.kick();
     result = 1;
   }
   else if (center_red == max(max(left_red, center_red), right_red)){
     Serial.println("Center");
+    I2Cprint("Center\n");
     Watchdog.kick();
     result = 2;
   }
   else if (right_red == max(max(left_red, center_red), right_red)){
     Serial.println("Right");
+    I2Cprint("Right\n");
     Watchdog.kick();
     result = 3;
   }
   else{
     Serial.println("CountRedPixel didn't success");
+    I2Cprint("CountRedPixel didn't success\n");
   }
   Serial.println();
 
@@ -653,13 +703,22 @@ uint8_t red_detect(CamImage img) {
 
 }
 
+void I2Cprint(const char* message){
+  // Twe-liteのI2Cアドレス要確認
+  Wire.beginTransmission(0x70);
+  Wire.write(message);
+  Wire.endTransmission();
+
+}
+
 
 void setup(){
   Serial.begin(BAUDRATE);
   Serial2.begin(BAUDRATE2);
   delay(500);
   // while (!Serial);
-
+  
+  Wire.begin();
 
   // GPSセットアップ
   
@@ -688,6 +747,7 @@ void setup(){
   if (result != 0)
   {
     Serial.println("Gnss begin error!!");
+    I2Cprint("Gnss begin error!!\n");
     error_flag = 1;
   }
   else
@@ -765,11 +825,13 @@ void setup(){
     if (result != 0)
     {
       Serial.println("Gnss start error!!");
+      I2Cprint("Gnss start error!!\n");
       error_flag = 1;
     }
     else
     {
       Serial.println("Gnss setup OK");
+      I2Cprint("Gnss setup OK\n");
     }
   }
 
@@ -806,6 +868,9 @@ void loop(){
     
     Serial.print("UART: ");
     Serial.println(pico_message);
+    // I2Cprint("UART: ");
+    // I2Cprint(pico_message\n);
+
   }
   
   if (pico_message == "CameraStart"){
@@ -846,6 +911,7 @@ void loop(){
       {
         /* Not update. */
         Serial.println("data not update");
+        I2Cprint("data not update\n");
       }              
 
       /* Check loop count. */
@@ -864,31 +930,37 @@ void loop(){
         if (Gnss.stop() != 0)
         {
           Serial.println("Gnss stop error!!");
+          I2Cprint("Gnss stop error!!\n");
           error_flag = 1;
         }
         else if (Gnss.end() != 0)
         {
           Serial.println("Gnss end error!!");
+          I2Cprint("Gnss end error!!\n");
           error_flag = 1;
         }
         else
         {
           Serial.println("Gnss stop OK.");
+          I2Cprint("Gnss stop OK.\n");
         }
 
         if (Gnss.begin() != 0)
         {
           Serial.println("Gnss begin error!!");
+          I2Cprint("Gnss begin error!!\n");
           error_flag = 1;
         }
         else if (Gnss.start(HOT_START) != 0)
         {
           Serial.println("Gnss start error!!");
+          I2Cprint("Gnss start error!!\n");
           error_flag = 1;
         }
         else
         {
           Serial.println("Gnss restart OK.");
+          I2Cprint("Gnss restart OK.\n");
         }
 
         LoopCount = 0;
@@ -908,6 +980,7 @@ void loop(){
         initCamera();
         delay(10);
         Serial.println("CameraStart");
+        I2Cprint("CameraStart\n");
         Watchdog.start(5000);
 
         theCamera.startStreaming(true, CamCB);

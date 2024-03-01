@@ -193,7 +193,7 @@ int main()
                                 {
                                     fase=Fase::Ldistance;
                                     break;
-                                } else if(){
+                                } else {
                                     motor.forward(1.0);//じたばたして体制修正できるかな？
                                     sleep(1_s); 
                                     motor.forward(0);
@@ -204,7 +204,8 @@ int main()
                                     sleep(1_s);
                                     motor.left(0);
                                     break;
-                                }else if(absolute_time_diff_us(recent_successful, get_absolute_time()) > 120*1000*1000){   //エラーが2分以上続いたら遠距離フェーズへ
+                                }
+                                if(absolute_time_diff_us(recent_successful, get_absolute_time()) > 120*1000*1000){   //エラーが2分以上続いたら遠距離フェーズへ
                                     fase=Fase::Ldistance;
                                     break;
                                 }else if(absolute_time_diff_us(start_time, get_absolute_time())>300*1000*1000){             //電源オンから5分以上経過していたら遠距離フェーズへ

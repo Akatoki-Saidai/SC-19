@@ -183,6 +183,8 @@ int main()
                                     sleep(1_s);
                                     motor.forward(0);
                                     break;
+                                } else {
+                                    fase=Fase::Ldistance;
                                 }
                                 auto bno_data = bno055.read();  // BNO055(9軸)から受信
                                 Acceleration<Unit::m_s2> gravity_acceleration = std::get<1>(bno_data);//重力加速度取得
@@ -191,9 +193,9 @@ int main()
                                 {
                                     fase=Fase::Ldistance;
                                     break;
-                                } else {
+                                } else if(){
                                     motor.forward(1.0);//じたばたして体制修正できるかな？
-                                    sleep(1_s);
+                                    sleep(1_s); 
                                     motor.forward(0);
                                     motor.right(1.0); 
                                     sleep(1_s);
@@ -201,6 +203,12 @@ int main()
                                     motor.left(1.0); 
                                     sleep(1_s);
                                     motor.left(0);
+                                    break;
+                                }else if(absolute_time_diff_us(recent_successful, get_absolute_time()) > 120*1000*1000){   //エラーが2分以上続いたら遠距離フェーズへ
+                                    fase=Fase::Ldistance;
+                                    break;
+                                }else if(absolute_time_diff_us(start_time, get_absolute_time())>300*1000*1000){             //電源オンから5分以上経過していたら遠距離フェーズへ
+                                    fase=Fase::Ldistance;
                                     break;
                                 }
                             } else {
@@ -288,7 +296,7 @@ int main()
                             //ベクトルのprintわかんなかったからChatGPTさんに出力してもらったよ。間違ってたら直してほしい
                             std::cout << "(" << direction_vector_1.x() << ", " << direction_vector_1.y() << ", " << direction_vector_1.z() << ")" << std::endl;
                             
-                            Vector3<double> direction_vector_2 = Rotation_counter_xy(direction_vector_1,Latitude<sc::Unit::rad>(North_angle_rad));//東西南北の基底から機体のxyを基底とした座標に回転.
+                            Vector3<double> direction_vector_2 = Rotation_clockwise_xy(direction_vector_1,Latitude<sc::Unit::rad>(North_angle_rad));//東西南北の基底から機体のxyを基底とした座標に回転.
                             double direction_angle_rad;
                             
                             //ここも

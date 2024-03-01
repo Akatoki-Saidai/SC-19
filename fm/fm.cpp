@@ -85,6 +85,8 @@ int main()
         absolute_time_t recent_successful = get_absolute_time();  // エラーが出続けている時間を測るために使う．
         bool is_success = true;  // エラーが出ずに成功したか
 
+        absolute_time_t startTime = get_absolute_time();//開始時刻
+
     // ************************************************** //
     //                        loop                        //
     // ************************************************** //
@@ -116,14 +118,27 @@ int main()
                     {
                         try
                         {
+                            //照度によりキャリア展開検知&&自由落下　→落下フェーズへ
                             auto njl_data = njl5513r.read();
-                            if(njl_data>2500_lx)//照度によりキャリア展開検知　→落下フェーズへ
+                            if((njl_data>2500_lx)&&(is_free_fall(const Acceleration<Unit::m_s2>& line_acce, const Acceleration<Unit::m_s2>& gravity)))
                             {
                                 fase=Fase::Fall;
                                 break;
                             }
-                            else
+                            //開始から２分以上＆＆高度５ｍ以下　→落下フェーズへ
+                            auto bme_data = bme280.read();  // BME280(温湿圧)から受信
+                            Pressure<Unit::Pa> pressure = std::get<0>(bme_data);  // 気圧
+                            Temperature<Unit::degC> temperature = std::get<2>(bme_data);  // 気温
+                            Altitude<Unit::m> altitude(pressure, temperature);
+                            if((absolute_time_diff_us(startTime, get_absolute_time())>120*1000*1000)&&(altitude<5_m))
                             {
+                                fase=Fase::Fall;
+                                break;
+                            }
+                            //開始から４分以上　→落下フェーズへ
+                            if((absolute_time_diff_us(startTime, get_absolute_time())>240*1000*1000))
+                            {
+                                fase=Fase::Fall;
                                 break;
                             }
                         }
@@ -132,8 +147,10 @@ int main()
                             print(e.what());
                             is_success = false;
                             // もしエラーが出続けているなら
-                            if (absolute_time_diff_us(recent_successful, get_absolute_time()) > 60*1000*1000)
+                            //エラー２分以上　→落下フェーズへ
+                            if (absolute_time_diff_us(recent_successful, get_absolute_time()) > 120*1000*1000)
                             {
+                                fase=Fase::Fall;
                             }
                         }
                         break;  // 保険のbreak

@@ -80,7 +80,7 @@ int main()
         }
         catch(const std::exception& e){printf(e.what());}
 
-        fase = Fase::Wait;
+        fase = Fase::Ldistance;
 
         absolute_time_t recent_successful = get_absolute_time();  // エラーが出続けている時間を測るために使う．
         bool is_success = true;  // エラーが出ずに成功したか
@@ -235,11 +235,13 @@ int main()
                         try
                         {
                             //------ちゃんと動くか確認するためのコード-----
-                            Vector3<double> magnetic(0.0,0.0,0.0);
-                            double t_lon = 0.0000;//ゴールの経度(自分たちで決めて書き換えてね)
-                            double t_lat = 0.0000;//ゴールの緯度
-                            double m_lon = 0.0000;//自分の経度(ここはGPSで手に入れたものが入るように書き換えて)
-                            double m_lat = 0.0000;//自分の緯度
+                            auto bno_data = bno055.read();
+                            auto gps_data = spresense.gps();
+                            MagneticFluxDensity<sc::Unit::T> magnetic = std::get<2>(bno_data);
+                            double t_lon = 139.606537;//ゴールの経度(自分たちで決めて書き換えてね)
+                            double t_lat = 35.864639;//ゴールの緯度
+                            double m_lon = double(std::get<1>(gps_data));//自分の経度(ここはGPSで手に入れたものが入るように書き換えて)
+                            double m_lat = double(std::get<0>(gps_data));//自分の緯度
                             double t_lon_rad = deg_to_rad(t_lon);
                             double t_lat_rad = deg_to_rad(t_lat);
                             double m_lon_rad = deg_to_rad(m_lon);
@@ -250,13 +252,13 @@ int main()
                             // Vector3<double> front_vetor_basic = (-1.0, 0.0, 0.0);//機体正面の単位ベクトル
 
                             //北を見つける
-                            Vector3<double> North_vector(magnetic.x(),magnetic.y(),0);//磁気センサから求める北の向き
+                            Vector3<double> North_vector(double(magnetic.x()),double(magnetic.y()),0);//磁気センサから求める北の向き
                             // Vector3<double> North_vector_basic = Normalization(North_vector);//正規化
                             double North_angle_rad;//後で使う北の角度
 
                             // 北がBnoの座標軸において何度回転した位置にあるか求める
                             // 但しθは[0,2Pi)とした
-                            North_angle_rad = atan2(magnetic.y(),magnetic.x());
+                            North_angle_rad = atan2(double(magnetic.y()),double(magnetic.x()));
                             if(North_angle_rad < 0)
                             {
                                 North_angle_rad += 2 * PI;

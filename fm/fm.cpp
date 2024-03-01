@@ -288,7 +288,7 @@ int main()
                             //ベクトルのprintわかんなかったからChatGPTさんに出力してもらったよ。間違ってたら直してほしい
                             std::cout << "(" << direction_vector_1.x() << ", " << direction_vector_1.y() << ", " << direction_vector_1.z() << ")" << std::endl;
                             
-                            Vector3<double> direction_vector_2 = Rotation_counter_xy(direction_vector_1,Latitude<sc::Unit::rad>(North_angle_rad));//東西南北の基底から機体のxyを基底とした座標に回転.
+                            Vector3<double> direction_vector_2 = Rotation_clockwise_xy(direction_vector_1,Latitude<sc::Unit::rad>(North_angle_rad));//東西南北の基底から機体のxyを基底とした座標に回転.
                             double direction_angle_rad;
                             
                             //ここも

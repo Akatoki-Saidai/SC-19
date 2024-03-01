@@ -186,9 +186,9 @@ int main()
                                 {
                                     fase=Fase::Ldistance;
                                     break;
-                                } else {
+                                } else if(){
                                     motor.forward(1.0);//じたばたして体制修正できるかな？
-                                    sleep(1_s);
+                                    sleep(1_s); 
                                     motor.forward(0);
                                     motor.right(1.0); 
                                     sleep(1_s);
@@ -197,6 +197,8 @@ int main()
                                     sleep(1_s);
                                     motor.left(0);
                                     break;
+                                }else if(absolute_time_diff_us(recent_successful, get_absolute_time()) > 120*1000*1000){
+                                    
                                 }
                             } else {
                                 break;

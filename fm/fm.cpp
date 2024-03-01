@@ -85,7 +85,7 @@ int main()
         absolute_time_t recent_successful = get_absolute_time();  // エラーが出続けている時間を測るために使う．
         bool is_success = true;  // エラーが出ずに成功したか
 
-        absolute_time_t startTime = get_absolute_time();//開始時刻
+        const absolute_time_t start_time = get_absolute_time();//開始時刻
 
     // ************************************************** //
     //                        loop                        //
@@ -120,9 +120,11 @@ int main()
                         {
                             //照度によりキャリア展開検知&&自由落下　→落下フェーズへ
                             auto njl_data = njl5513r.read();
-                            if((njl_data>2500_lx)&&(is_free_fall(const Acceleration<Unit::m_s2>& line_acce, const Acceleration<Unit::m_s2>& gravity)))
+                            auto bno_data = bno055.read();
+                            if((njl_data>2500_lx)&&(is_free_fall(std::get<0>(bno_data), std::get<1>(bno_data))))
                             {
                                 fase=Fase::Fall;
+                                print("Shifts to the falling phase under condition 1\n");  // 条件1で落下フェーズに移行します
                                 break;
                             }
                             //開始から２分以上＆＆高度５ｍ以下　→落下フェーズへ
@@ -130,15 +132,17 @@ int main()
                             Pressure<Unit::Pa> pressure = std::get<0>(bme_data);  // 気圧
                             Temperature<Unit::degC> temperature = std::get<2>(bme_data);  // 気温
                             Altitude<Unit::m> altitude(pressure, temperature);
-                            if((absolute_time_diff_us(startTime, get_absolute_time())>120*1000*1000)&&(altitude<5_m))
+                            if((absolute_time_diff_us(start_time, get_absolute_time())>120*1000*1000)&&(altitude<5_m))
                             {
                                 fase=Fase::Fall;
+                                print("Shifts to the falling phase under condition 2\n");  // 条件2で落下フェーズに移行します
                                 break;
                             }
                             //開始から４分以上　→落下フェーズへ
-                            if((absolute_time_diff_us(startTime, get_absolute_time())>240*1000*1000))
+                            if((absolute_time_diff_us(start_time, get_absolute_time())>240*1000*1000))
                             {
                                 fase=Fase::Fall;
+                                print("Shifts to the falling phase under condition 3\n");  // 条件3で落下フェーズに移行します
                                 break;
                             }
                         }
@@ -151,6 +155,7 @@ int main()
                             if (absolute_time_diff_us(recent_successful, get_absolute_time()) > 120*1000*1000)
                             {
                                 fase=Fase::Fall;
+                                print("Shifts to the falling phase under condition 4\n");  // 条件4で落下フェーズに移行します
                             }
                         }
                         break;  // 保険のbreak

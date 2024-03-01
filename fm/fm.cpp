@@ -211,6 +211,9 @@ int main()
                                 }else if(absolute_time_diff_us(start_time, get_absolute_time())>300*1000*1000){             //電源オンから5分以上経過していたら遠距離フェーズへ
                                     fase=Fase::Ldistance;
                                     break;
+                                }else if(is_stationary(const Acceleration<Unit::m_s2>& line_acce)){                    //静止していたら遠距離フェーズへ
+                                    fase=Fase::Ldistance;
+                                    break;
                                 }
                             } else {
                                 break;

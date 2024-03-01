@@ -183,6 +183,8 @@ int main()
                                     sleep(1_s);
                                     motor.forward(0);
                                     break;
+                                } else {
+                                    fase=Fase::Ldistance;
                                 }
                                 auto bno_data = bno055.read();  // BNO055(9軸)から受信
                                 Acceleration<Unit::m_s2> gravity_acceleration = std::get<1>(bno_data);//重力加速度取得
@@ -202,8 +204,12 @@ int main()
                                     sleep(1_s);
                                     motor.left(0);
                                     break;
-                                }else if(absolute_time_diff_us(recent_successful, get_absolute_time()) > 120*1000*1000){
-                                    
+                                }else if(absolute_time_diff_us(recent_successful, get_absolute_time()) > 120*1000*1000){   //エラーが2分以上続いたら遠距離フェーズへ
+                                    fase=Fase::Ldistance;
+                                    break;
+                                }else if(absolute_time_diff_us(start_time, get_absolute_time())>300*1000*1000){             //電源オンから5分以上経過していたら遠距離フェーズへ
+                                    fase=Fase::Ldistance;
+                                    break;
                                 }
                             } else {
                                 break;

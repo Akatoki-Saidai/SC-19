@@ -153,7 +153,7 @@ throw std::runtime_error(f_err(__FILE__, __LINE__, "BME280 measurement value is 
     // measurement.altitude_1 = altitude0 + ((temperature0 + 273.15F) / 0.0065F) * (1 - std::pow((measurement.pressure / pressure0), (1.0F / 5.257F)));
     // measurement.altitude_2 = altitude0 + ((measurement.temperature + 273.15F) / 0.0065F) * (std::pow((pressure0 / measurement.pressure), 1.0F / 5.257F) -1.0F);
 
-    print("bme_read_data:%f,%f,%f\n", pressure_m, humidity_m/1024.0, temperature_m/100.0);
+    print("bme_read_data:%f,%f,%f\n", double(pressure_m), double(humidity_m/1024.0), double(temperature_m/100.0));
 
     return {pressure_Pa,humidity_percent,temperature_degC};
 

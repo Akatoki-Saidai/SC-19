@@ -425,7 +425,9 @@ int main()
                     {
                         try
                         {
-                            if(true)//ゴールがカメラの真ん中
+                            auto camera_data = spresense.camera();
+                            
+                            if(camera_data == Cam::Center)//ゴールがカメラの真ん中
                             {
                                 //少し進む
                                 motor.forward(1.0);
@@ -447,14 +449,14 @@ int main()
                                     }
                                 }
                             }
-                            else if(true)//ゴールがカメラの右
+                            else if(camera_data == Cam::Right)//ゴールがカメラの右
                             {
                                 motor.right(1.0); 
                                 sleep(1_s);
                                 motor.right(0); 
                                 break;
                             }
-                            else if(true)//ゴールがカメラの左
+                            else if(camera_data == Cam::Left)//ゴールがカメラの左
                             {
                                 motor.left(1.0); 
                                 sleep(1_s);

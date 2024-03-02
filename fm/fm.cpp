@@ -205,13 +205,11 @@ int main()
                                     motor.left(0);
                                     break;
                                 }
-                                if(absolute_time_diff_us(recent_successful, get_absolute_time()) > 120*1000*1000){   //エラーが2分以上続いたら遠距離フェーズへ
+                                if(absolute_time_diff_us(start_time, get_absolute_time())>300*1000*1000){             //電源オンから5分以上経過していたら遠距離フェーズへ
                                     fase=Fase::Ldistance;
                                     break;
-                                }else if(absolute_time_diff_us(start_time, get_absolute_time())>300*1000*1000){             //電源オンから5分以上経過していたら遠距離フェーズへ
-                                    fase=Fase::Ldistance;
-                                    break;
-                                }else if(is_stationary(const Acceleration<Unit::m_s2>& line_acce)){                    //静止していたら遠距離フェーズへ
+                                }
+                                if(is_stationary(std::get<0>(bno_data))){                    //静止していたら遠距離フェーズへ
                                     fase=Fase::Ldistance;
                                     break;
                                 }
@@ -223,9 +221,10 @@ int main()
                         {
                             print(e.what());
                             is_success = false;
-                            // もしエラーが出続けているなら
-                            if (absolute_time_diff_us(recent_successful, get_absolute_time()) > 60*1000*1000)
-                            {
+                            // もしエラーが出続けているなら                            
+                            if(absolute_time_diff_us(recent_successful, get_absolute_time()) > 120*1000*1000){   //エラーが2分以上続いたら遠距離フェーズへ
+                                fase=Fase::Ldistance;
+                                break;
                             }
                         }
                         break;  // 保険のbreak
@@ -393,16 +392,20 @@ int main()
                         {
                             print(e.what());
                             is_success = false;
-                            // もしエラーが出続けているなら
-                            if (absolute_time_diff_us(recent_successful, get_absolute_time()) > 60*1000*1000)
+                            // もしエラーがでるなら
+                            try
                             {
+                                motor.forward(1.0);  // とりあえず進んでみる
+                                sleep(5_s);
+                                motor.brake();
                             }
+                            catch(const std::exception& e){print(e.what());}                            
                         }
                         break;  // 保険のbreak
                     }
 
                     // ************************************************** //
-                    //                   遠距離フェーズ                    //
+                    //                   近距離フェーズ                    //
                     // ************************************************** //
                     case Fase::Sdistance:
                     {

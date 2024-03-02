@@ -39,7 +39,7 @@ Vector3<double> Rotation_clockwise_xy(Vector3<double> vec, Latitude<Unit::rad> R
 double distance_sphere(double t_lon,double t_lat,double m_lon,double m_lat){
     double cos_n = sin(t_lat)*sin(m_lat) + cos(t_lat)*cos(m_lat)*cos(t_lon - m_lon);//なす角のcos
     const double R = 6371.0;
-    double distance = R * acos(cos_n);
+    double distance = R * acos(cos_n) * 1000;
     return distance;
 }
 

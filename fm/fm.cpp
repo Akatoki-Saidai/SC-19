@@ -324,12 +324,15 @@ int main()
                             direction_angle_rad = atan2(direction_vector_2[1],direction_vector_2[0]);
 
                             printf("%f\n",direction_angle_rad);
-                            // direction_angle_rad = direction_angle_rad - PI;//正面がxの負の向きなので180°回転
-                            // if(direction_angle_rad < 0)
-                            // {
-                            //     direction_angle_rad += 2 * PI;
-                            // }
-                            direction_angle_rad = direction_angle_rad + PI;//正面がxの負の向きなので180°回転
+
+                            //front_vectorと呼べるものが(1,0,0)の場合
+                            if(direction_angle_rad < 0)
+                            {
+                                direction_angle_rad += 2 * PI;
+                            }
+
+                            //front_vectorと呼べるものが(-1,0,0)の場合
+                            // direction_angle_rad = direction_angle_rad + PI;//正面がxの負の向きなので180°回転
 
                             double direction_angle_degree = rad_to_deg(direction_angle_rad);
                             print("%f\n",direction_angle_degree);

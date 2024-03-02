@@ -173,6 +173,13 @@ int main()
                             Pressure<Unit::Pa> pressure = std::get<0>(bme_data);  // 気圧
                             Temperature<Unit::degC> temperature = std::get<2>(bme_data);  // 気温
                             Altitude<Unit::m> altitude(pressure, temperature);
+
+                            if(absolute_time_diff_us(start_time, get_absolute_time())>300*1000*1000){             //条件1：電源オンから5分以上経過　→遠距離フェーズへ
+                                    fase=Fase::Ldistance;
+                                    print("Shifts to the long distance phase under condition 2\n");  // 条件1で遠距離フェーズに移行します
+                                    break;
+                                }
+
                             if(altitude<5_m)//地面からの標高が5m以内
                             {
                                 sleep(10_s);//念のため待機しておく
@@ -183,9 +190,9 @@ int main()
                                     sleep(1_s);
                                     motor.forward(0);
                                     break;
-                                } else { //条件1：パラシュートが取れている　→遠距離フェーズへ
+                                } else { //条件2：パラシュートが取れている　→遠距離フェーズへ
                                     fase=Fase::Ldistance;
-                                    print("Shifts to the long distance phase under condition 1\n");  // 条件1で遠距離フェーズに移行します
+                                    print("Shifts to the long distance phase under condition 1\n");  // 条件2で遠距離フェーズに移行します
                                     break;
                                 }
                                 auto bno_data = bno055.read();  // BNO055(9軸)から受信
@@ -205,11 +212,6 @@ int main()
                                     motor.left(1.0); 
                                     sleep(1_s);
                                     motor.left(0);
-                                    break;
-                                }
-                                if(absolute_time_diff_us(start_time, get_absolute_time())>300*1000*1000){             //条件2：電源オンから5分以上経過　→遠距離フェーズへ
-                                    fase=Fase::Ldistance;
-                                    print("Shifts to the long distance phase under condition 2\n");  // 条件2で遠距離フェーズに移行します
                                     break;
                                 }
                                 if(is_stationary(std::get<0>(bno_data))){                    //条件3：静止　→遠距離フェーズへ

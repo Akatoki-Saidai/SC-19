@@ -674,7 +674,7 @@ template<class T> Altitude(const T& t) -> Altitude<Unit::m>;  // デフォルト
 template<>
 class Altitude<Unit::m> : public dimension::m
 {
-    inline static double _pressure0 = 1.01325;  // 基準気圧(Pa)
+    inline static double _pressure0 = 101325;  // 基準気圧(Pa)
     inline static double _temperature0 = 20.0;  // 基準温度(℃)
     inline static double _altitude0 = 0.0;  // 基準標高(m)
 public:
@@ -691,7 +691,7 @@ public:
         {return number();}
 
     //! @brief 気圧気温から標高を計算
-    static void set_origin(Pressure<Unit::Pa> pressure0=Pressure<Unit::Pa>(1013.25/hecto), Temperature<Unit::degC> temperature0=Temperature<Unit::degC>(20.0), Altitude<Unit::m> altitude0=Altitude<Unit::m>(0))
+    static void set_origin(Pressure<Unit::Pa> pressure0=Pressure<Unit::Pa>(1013.25*hecto), Temperature<Unit::degC> temperature0=Temperature<Unit::degC>(20.0), Altitude<Unit::m> altitude0=Altitude<Unit::m>(0))
     {
         _pressure0    = double(pressure0);
         _temperature0 = double(temperature0);

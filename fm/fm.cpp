@@ -178,6 +178,7 @@ int main()
                             Pressure<Unit::Pa> pressure = std::get<0>(bme_data);  // 気圧
                             Temperature<Unit::degC> temperature = std::get<2>(bme_data);  // 気温
                             Altitude<Unit::m> altitude(pressure, temperature);
+                            print("%f\n",double(altitude));
 
                             if(absolute_time_diff_us(start_time, get_absolute_time())>300*1000*1000){             //条件1：電源オンから5分以上経過　→遠距離フェーズへ
                                     fase=Fase::Ldistance;
@@ -358,7 +359,6 @@ int main()
                                 sleep_ms(1000);       
                                 motor.forward(0);
                                 sleep_ms(100);
-                                break;
                             }else if((direction_angle_degree) <135){
                                 printf("left\n");
                                 // left(0.5);
@@ -369,7 +369,6 @@ int main()
                                 sleep_ms(300);
                                 motor.left(0);
                                 sleep_ms(100);
-                                break;
                             }else if(direction_angle_degree < 180){
                                 printf("sharp_left\n");
                                 // left(0.5);
@@ -380,7 +379,6 @@ int main()
                                 sleep_ms(600);
                                 motor.left(0);
                                 sleep_ms(100);
-                                break;
                             }else if(direction_angle_degree > 225){
                                 printf("right\n");
                                 // right(0.5);
@@ -391,7 +389,6 @@ int main()
                                 sleep_ms(300);
                                 motor.right(0);
                                 sleep_ms(100);
-                                break;
                             }else{
                                 printf("sharp_right\n");
                                 // right(0.5);
@@ -402,7 +399,6 @@ int main()
                                 sleep_ms(600);
                                 motor.right(0);
                                 sleep_ms(100);
-                                break;
                             }
 
                             if(distance < 5) //条件1：ゴールとの距離が5ｍ未満　→近距離フェーズへ

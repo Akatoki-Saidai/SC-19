@@ -44,7 +44,7 @@ public:
                 adc_value[i] = _lux_adc.read();
             }
             uint16_t adc_m = median(adc_value[0], adc_value[1], adc_value[2]);
-            print("njl_read_data:%f\n", adc_m * 9);  // 9倍して単位がlxになるのは実験値
+            print("njl_read_data:%f\n", double(adc_m * 9));  // 9倍して単位がlxになるのは実験値
             return Illuminance<Unit::lx>(adc_m * 9);  // 9倍して単位がlxになるのは実験値
         }
 

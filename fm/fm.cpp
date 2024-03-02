@@ -80,7 +80,7 @@ int main()
         }
         catch(const std::exception& e){printf(e.what());}
 
-        fase = Fase::Ldistance; //?
+        fase = Fase::Wait;
 
         absolute_time_t recent_successful = get_absolute_time();  // エラーが出続けている時間を測るために使う．
         bool is_success = true;  // エラーが出ずに成功したか
@@ -118,7 +118,7 @@ int main()
                     {
                         try
                         {
-                            //照度によりキャリア展開検知&&自由落下　→落下フェーズへ
+                            //条件1：照度によりキャリア展開検知&&自由落下　→落下フェーズへ
                             auto njl_data = njl5513r.read();
                             auto bno_data = bno055.read();
                             if((njl_data>2500_lx)&&(is_free_fall(std::get<0>(bno_data), std::get<1>(bno_data))))
@@ -127,7 +127,7 @@ int main()
                                 print("Shifts to the falling phase under condition 1\n");  // 条件1で落下フェーズに移行します
                                 break;
                             }
-                            //開始から２分以上＆高度５ｍ以下　→落下フェーズへ
+                            //条件2：開始から２分以上＆高度５ｍ以下　→落下フェーズへ
                             auto bme_data = bme280.read();  // BME280(温湿圧)から受信
                             Pressure<Unit::Pa> pressure = std::get<0>(bme_data);  // 気圧
                             Temperature<Unit::degC> temperature = std::get<2>(bme_data);  // 気温
@@ -138,7 +138,7 @@ int main()
                                 print("Shifts to the falling phase under condition 2\n");  // 条件2で落下フェーズに移行します
                                 break;
                             }
-                            //開始から４分以上　→落下フェーズへ
+                            //条件3：開始から４分以上　→落下フェーズへ
                             if((absolute_time_diff_us(start_time, get_absolute_time())>240*1000*1000))
                             {
                                 fase=Fase::Fall;
@@ -151,7 +151,7 @@ int main()
                             print(e.what());
                             is_success = false;
                             // もしエラーが出続けているなら
-                            //エラー２分以上　→落下フェーズへ
+                            //条件4：エラー２分以上　→落下フェーズへ
                             if (absolute_time_diff_us(recent_successful, get_absolute_time()) > 120*1000*1000)
                             {
                                 fase=Fase::Fall;
@@ -183,10 +183,10 @@ int main()
                                     sleep(1_s);
                                     motor.forward(0);
                                     break;
-                                } else {
+                                } else { //条件1：パラシュートが取れている　→遠距離フェーズへ
                                     fase=Fase::Ldistance;
                                     print("Shifts to the long distance phase under condition 1\n");  // 条件1で遠距離フェーズに移行します
-                                    //break;
+                                    break;
                                 }
                                 auto bno_data = bno055.read();  // BNO055(9軸)から受信
                                 Acceleration<Unit::m_s2> gravity_acceleration = std::get<1>(bno_data);//重力加速度取得
@@ -207,12 +207,12 @@ int main()
                                     motor.left(0);
                                     break;
                                 }
-                                if(absolute_time_diff_us(start_time, get_absolute_time())>300*1000*1000){             //電源オンから5分以上経過していたら遠距離フェーズへ
+                                if(absolute_time_diff_us(start_time, get_absolute_time())>300*1000*1000){             //条件2：電源オンから5分以上経過　→遠距離フェーズへ
                                     fase=Fase::Ldistance;
                                     print("Shifts to the long distance phase under condition 2\n");  // 条件2で遠距離フェーズに移行します
                                     break;
                                 }
-                                if(is_stationary(std::get<0>(bno_data))){                    //静止していたら遠距離フェーズへ
+                                if(is_stationary(std::get<0>(bno_data))){                    //条件3：静止　→遠距離フェーズへ
                                     fase=Fase::Ldistance;
                                     print("Shifts to the long distance phase under condition 3\n");  // 条件3で遠距離フェーズに移行します
                                     break;
@@ -226,7 +226,7 @@ int main()
                             print(e.what());
                             is_success = false;
                             // もしエラーが出続けているなら                            
-                            if(absolute_time_diff_us(recent_successful, get_absolute_time()) > 120*1000*1000){   //エラーが2分以上続いたら遠距離フェーズへ
+                            if(absolute_time_diff_us(recent_successful, get_absolute_time()) > 120*1000*1000){   //条件4：エラーが2分以上続く　→遠距離フェーズへ
                                 fase=Fase::Ldistance;
                                 print("Shifts to the long distance phase under condition 4\n");  // 条件4で遠距離フェーズに移行します
                                 break;
@@ -390,6 +390,13 @@ int main()
                                 sleep_ms(600);
                                 motor.right(0);
                                 sleep_ms(100);
+                                break;
+                            }
+
+                            if(distance < 5) //条件1：ゴールとの距離が5ｍ未満　→近距離フェーズへ
+                            {
+                                fase=Fase::Sdistance;
+                                print("Shifts to the short distance phase under condition 1\n");  // 条件1で近距離フェーズに移行します
                                 break;
                             }
                         }

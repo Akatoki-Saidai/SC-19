@@ -86,6 +86,9 @@ int main()
         bool is_success = true;  // エラーが出ずに成功したか
 
         const absolute_time_t start_time = get_absolute_time();//開始時刻
+        led_pico.on();
+        led_red.off();
+        led_green.off();
 
     // ************************************************** //
     //                        loop                        //
@@ -167,7 +170,9 @@ int main()
                     case Fase::Fall:
                     {
                         try
-                        {
+                        {   
+                            led_red.off();
+                            led_green.on();
                             int separate;
                             auto bme_data = bme280.read();  // BME280(温湿圧)から受信
                             Pressure<Unit::Pa> pressure = std::get<0>(bme_data);  // 気圧
@@ -244,6 +249,8 @@ int main()
                     {
                         try
                         {
+                            led_green.off();
+                            led_red.on();
                             //------ちゃんと動くか確認するためのコード-----
                             auto bno_data = bno055.read();
                             auto gps_data = spresense.gps();
@@ -297,7 +304,7 @@ int main()
                                 // return distance_horizontal;
                             }
                             
-                            printf("%f\n",distance);
+                            print("%f\n",distance);
                             printf("%f\n",distance_vertical);
                             printf("%f\n",distance_horizontal);
                             
@@ -325,7 +332,7 @@ int main()
                             direction_angle_rad = direction_angle_rad + PI;//正面がxの負の向きなので180°回転
 
                             double direction_angle_degree = rad_to_deg(direction_angle_rad);
-                            printf("%f\n",direction_angle_degree);
+                            print("%f\n",direction_angle_degree);
                             //ここからdirection_angleをもとに機体を動かす
                             //一旦SC-17のコードを引っ張ってきたよ
                             //sleep_msよりsleep使ったほうがいい?
@@ -427,6 +434,8 @@ int main()
                     {
                         try
                         {
+                            led_red.on();
+                            led_green.on();
                             auto camera_data = spresense.camera();
                             
                             if(camera_data == Cam::Center)//ゴールがカメラの真ん中

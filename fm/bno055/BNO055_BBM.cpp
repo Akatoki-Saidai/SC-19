@@ -157,7 +157,7 @@ throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is 
     double d_magZ = milli * median(magZ[0], magZ[1], magZ[2]) / 16.00;
 
     double all_mag =std::sqrt(d_magX*d_magX + d_magY*d_magY + d_magZ*d_magZ);    
-    if (all_mag < 35*milli || 70*milli < all_mag)  // 日本は47mT～50mTくらい
+    if (all_mag < 25*milli || 80*milli < all_mag)  // 日本は47mT～50mTくらい
     {
 throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is abnormal. mag:%f, %f, %f", d_magX, d_magY, d_magZ));  // BNO055の測定値が異常です
     }

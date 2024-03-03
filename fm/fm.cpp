@@ -65,7 +65,7 @@ int main()
             try {std::cout << message << std::flush;} catch(const std::exception& e){printf(e.what());}
             try {flush.write(message);} catch(const std::exception& e){printf(e.what());}
             try {sd.write(message);} catch(const std::exception& e){printf(e.what());}
-            try {twelite.write(0x00, message);} catch(const std::exception& e){printf(e.what());}
+            try {twelite.write(0x78, message);} catch(const std::exception& e){printf(e.what());}
         };
         
         // 標高の基準となる気圧を設定
@@ -196,7 +196,6 @@ int main()
 
                             try
                             {
-                                int separate;
                                 auto bme_data = bme280.read();  // BME280(温湿圧)から受信
                                 Pressure<Unit::Pa> pressure = std::get<0>(bme_data);  // 気圧
                                 Temperature<Unit::degC> temperature = std::get<2>(bme_data);  // 気温

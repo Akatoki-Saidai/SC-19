@@ -137,7 +137,7 @@ std::tuple<Pressure<Unit::Pa>,Humidity<Unit::percent>,Temperature<Unit::degC>> B
 
     if (pressure_m < 900*100 || 1100*100 < pressure_m || humidity_m/1024 <= 0 || 100 <= humidity_m/1024 || temperature_m/100.0 < -20 || 50 < temperature_m/100.0)
     {
-throw std::runtime_error(f_err(__FILE__, __LINE__, "BME280 measurement value is abnormal"));  // BME280の測定値が異常です
+throw std::runtime_error(f_err(__FILE__, __LINE__, "BME280 measurement value is abnormal:%f,%f,%f", double(pressure_m), double(humidity_m/1024.0), double(temperature_m/100.0)));  // BME280の測定値が異常です
     }
 
     Pressure<Unit::Pa>pressure_Pa(pressure_m);

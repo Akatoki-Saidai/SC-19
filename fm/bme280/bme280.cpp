@@ -135,11 +135,6 @@ std::tuple<Pressure<Unit::Pa>,Humidity<Unit::percent>,Temperature<Unit::degC>> B
     humidity_m = compensate_humidity(humidity_m);
     temperature_m = compensate_temp(temperature_m);
 
-    if (pressure_m < 900*100 || 1100*100 < pressure_m || humidity_m/1024 <= 0 || 100 <= humidity_m/1024 || temperature_m/100.0 < -20 || 50 < temperature_m/100.0)
-    {
-throw std::runtime_error(f_err(__FILE__, __LINE__, "BME280 measurement value is abnormal:%f,%f,%f", double(pressure_m), double(humidity_m/1024.0), double(temperature_m/100.0)));  // BME280の測定値が異常です
-    }
-
     Pressure<Unit::Pa>pressure_Pa(pressure_m);
     Humidity<Unit::percent>humidity_percent(humidity_m/1024.0);
     Temperature<Unit::degC>temperature_degC(temperature_m/100.0);
@@ -153,7 +148,11 @@ throw std::runtime_error(f_err(__FILE__, __LINE__, "BME280 measurement value is 
     // measurement.altitude_1 = altitude0 + ((temperature0 + 273.15F) / 0.0065F) * (1 - std::pow((measurement.pressure / pressure0), (1.0F / 5.257F)));
     // measurement.altitude_2 = altitude0 + ((measurement.temperature + 273.15F) / 0.0065F) * (std::pow((pressure0 / measurement.pressure), 1.0F / 5.257F) -1.0F);
 
-    print("bme_read_data:%f,%f,%f\n", double(pressure_m), double(humidity_m/1024.0), double(temperature_m/100.0));
+    if (double(pressure_Pa) < 900*100 || 1100*100 < double(pressure_Pa) || double(humidity_percent) <= 0 || 100 <= double(humidity_percent) || double(temperature_degC) < -20 || 50 < double(temperature_degC))
+    {
+throw std::runtime_error(f_err(__FILE__, __LINE__, "BME280 measurement value is abnormal:%f,%f,%f", double(pressure_Pa), double(humidity_percent), double(temperature_degC)));  // BME280の測定値が異常です
+    }
+    print("bme_read_data:%f,%f,%f\n", double(pressure_Pa), double(humidity_percent), double(temperature_degC));
 
     return {pressure_Pa,humidity_percent,temperature_degC};
 

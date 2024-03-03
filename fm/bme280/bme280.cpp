@@ -22,7 +22,7 @@ BME280::BME280(const I2C& i2c) try :
     #endif
     try 
     {
-
+        sleep_ms(5);
         // this->i2c_no            = i2c_no;
         // this->sda_pin           = sda_pin;
         // this->scl_pin           = scl_pin;
@@ -123,7 +123,7 @@ std::tuple<Pressure<Unit::Pa>,Humidity<Unit::percent>,Temperature<Unit::degC>> B
     for (int i=0; i<3; ++i)
     {
         bme280_read_raw(&(humidity[i]), &(pressure[i]), &(temperature[i]));
-        sleep_ms(1);
+        sleep_ms(10);
     }
 
     // 中央値を求める

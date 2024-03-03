@@ -101,6 +101,7 @@ int main()
             {
                 try
                 {
+                    led_pico.on();
                     print("\nfase : %d\n", int(fase));  // フェーズを表示
                     spresense.time();  // タイムスタンプを表示
                     vsys.read();  // 電源電圧を表示
@@ -121,46 +122,53 @@ int main()
                     {
                         try
                         {
-                            //条件1：照度によりキャリア展開検知&&自由落下　→落下フェーズへ
-                            auto njl_data = njl5513r.read();
-                            auto bno_data = bno055.read();
-                            if((njl_data>2500_lx)&&(is_free_fall(std::get<0>(bno_data), std::get<1>(bno_data))))
+                            led_red.off();
+                            led_green.off();
+
+                            //条件1：開始から４分以上　→落下フェーズへ
+                            if((absolute_time_diff_us(start_time, get_absolute_time())>240*1000*1000))
                             {
                                 fase=Fase::Fall;
                                 print("Shifts to the falling phase under condition 1\n");  // 条件1で落下フェーズに移行します
                                 break;
                             }
-                            //条件2：開始から２分以上＆高度５ｍ以下　→落下フェーズへ
-                            auto bme_data = bme280.read();  // BME280(温湿圧)から受信
-                            Pressure<Unit::Pa> pressure = std::get<0>(bme_data);  // 気圧
-                            Temperature<Unit::degC> temperature = std::get<2>(bme_data);  // 気温
-                            Altitude<Unit::m> altitude(pressure, temperature);
-                            if((absolute_time_diff_us(start_time, get_absolute_time())>120*1000*1000)&&(altitude<5_m))
+                            //条件2：エラー２分以上　→落下フェーズへ
+                            if (absolute_time_diff_us(recent_successful, get_absolute_time()) > 120*1000*1000)
                             {
                                 fase=Fase::Fall;
                                 print("Shifts to the falling phase under condition 2\n");  // 条件2で落下フェーズに移行します
                                 break;
                             }
-                            //条件3：開始から４分以上　→落下フェーズへ
-                            if((absolute_time_diff_us(start_time, get_absolute_time())>240*1000*1000))
+                            try
                             {
-                                fase=Fase::Fall;
-                                print("Shifts to the falling phase under condition 3\n");  // 条件3で落下フェーズに移行します
-                                break;
+                                //条件3：開始から２分以上＆高度５ｍ以下　→落下フェーズへ
+                                auto bme_data = bme280.read();  // BME280(温湿圧)から受信
+                                Pressure<Unit::Pa> pressure = std::get<0>(bme_data);  // 気圧
+                                Temperature<Unit::degC> temperature = std::get<2>(bme_data);  // 気温
+                                Altitude<Unit::m> altitude(pressure, temperature);
+                                if((absolute_time_diff_us(start_time, get_absolute_time())>120*1000*1000)&&(altitude<5_m))
+                                {
+                                    fase=Fase::Fall;
+                                    print("Shifts to the falling phase under condition 3\n");  // 条件3で落下フェーズに移行します
+                                    break;
+                                }
                             }
-                        }
-                        catch(const std::exception& e)
-                        {
-                            print(e.what());
-                            is_success = false;
-                            // もしエラーが出続けているなら
-                            //条件4：エラー２分以上　→落下フェーズへ
-                            if (absolute_time_diff_us(recent_successful, get_absolute_time()) > 120*1000*1000)
+                            catch(const std::exception& e) { print(e.what()); is_success = false; led_pico.off(); }
+                            try
                             {
-                                fase=Fase::Fall;
-                                print("Shifts to the falling phase under condition 4\n");  // 条件4で落下フェーズに移行します
+                                //条件4：照度によりキャリア展開検知&&自由落下　→落下フェーズへ
+                                auto njl_data = njl5513r.read();
+                                auto bno_data = bno055.read();
+                                if((njl_data>2500_lx)&&(is_free_fall(std::get<0>(bno_data), std::get<1>(bno_data))))
+                                {
+                                    fase=Fase::Fall;
+                                    print("Shifts to the falling phase under condition 4\n");  // 条件4で落下フェーズに移行します
+                                    break;
+                                }
                             }
+                            catch(const std::exception& e) { print(e.what()); is_success = false; led_pico.off(); }
                         }
+                        catch(const std::exception& e) { print(e.what()); is_success = false; led_pico.off(); }
                         break;  // 保険のbreak
                     }
 
@@ -173,42 +181,64 @@ int main()
                         {   
                             led_red.off();
                             led_green.on();
-                            int separate;
-                            auto bme_data = bme280.read();  // BME280(温湿圧)から受信
-                            Pressure<Unit::Pa> pressure = std::get<0>(bme_data);  // 気圧
-                            Temperature<Unit::degC> temperature = std::get<2>(bme_data);  // 気温
-                            Altitude<Unit::m> altitude(pressure, temperature);
-                            print("%f\n",double(altitude));
 
-                            if(absolute_time_diff_us(start_time, get_absolute_time())>300*1000*1000){             //条件1：電源オンから5分以上経過　→遠距離フェーズへ
-                                    fase=Fase::Ldistance;
-                                    print("Shifts to the long distance phase under condition 2\n");  // 条件1で遠距離フェーズに移行します
-                                    break;
-                                }
-
-                            if(altitude<5_m)//地面からの標高が5m以内
+                            //条件1：電源オンから5分以上経過　→遠距離フェーズへ
+                            if(absolute_time_diff_us(start_time, get_absolute_time())>300*1000*1000)
                             {
-                                sleep(10_s);//念のため待機しておく
-                                separate=para_separate.read();
-                                if(separate!=1)//パラシュートが取れていない場合、動いてみる？
+                                fase=Fase::Ldistance;
+                                print("Shifts to the long distance phase under condition 1\n");  // 条件1で遠距離フェーズに移行します
+                            }
+                            //条件2：エラーが2分以上続く　→遠距離フェーズへ
+                            if(absolute_time_diff_us(recent_successful, get_absolute_time()) > 120*1000*1000){
+                                fase=Fase::Ldistance;
+                                print("Shifts to the long distance phase under condition 2\n");  // 条件2で遠距離フェーズに移行します
+                            }
+
+                            try
+                            {
+                                int separate;
+                                auto bme_data = bme280.read();  // BME280(温湿圧)から受信
+                                Pressure<Unit::Pa> pressure = std::get<0>(bme_data);  // 気圧
+                                Temperature<Unit::degC> temperature = std::get<2>(bme_data);  // 気温
+                                Altitude<Unit::m> altitude(pressure, temperature);
+                                print("altitude:%f\n",double(altitude));
+                                if(altitude<5_m)  //地面からの標高が5m以内
                                 {
+                                    auto bno_data = bno055.read();  // BNO055(9軸)から受信
+                                    //条件3：静止　→遠距離フェーズへ
+                                    if(is_stationary(std::get<0>(bno_data)))
+                                    {
+                                        fase=Fase::Ldistance;
+                                        print("Shifts to the long distance phase under condition 3\n");  // 条件3で遠距離フェーズに移行します
+                                    } else {
+                                        break;
+                                    }
+                                }
+                            }
+                            catch(const std::exception& e) { print(e.what()); is_success = false; led_pico.off(); }
+
+                            if (fase == Fase::Ldistance)
+                            {
+                                speaker.play_starwars();  //念のため待機しておく
+
+                                if(para_separate.read() == false)  //パラシュートが取れていない場合、動いてみる？
+                                {
+                                    print("para:toretenai\n");
                                     motor.forward(1.0);
                                     sleep(1_s);
+                                    motor.forward(-1.0);
+                                    sleep(1_s);
                                     motor.forward(0);
-                                    break;
-                                } else { //条件2：パラシュートが取れている　→遠距離フェーズへ
-                                    fase=Fase::Ldistance;
-                                    print("Shifts to the long distance phase under condition 1\n");  // 条件2で遠距離フェーズに移行します
-                                    break;
                                 }
+                                
                                 auto bno_data = bno055.read();  // BNO055(9軸)から受信
                                 Acceleration<Unit::m_s2> gravity_acceleration = std::get<1>(bno_data);//重力加速度取得
                                 //Z軸の重力加速度が正かどうかで機体の体制修正
                                 if(gravity_acceleration.z()<3_m_s2)//z軸が負なら正常
                                 {
-                                    fase=Fase::Ldistance;
-                                    break;
+                                    print("muki:atteru\n");
                                 } else {
+                                    print("muki:hantai\n");
                                     motor.forward(1.0);//じたばたして体制修正できるかな？
                                     sleep(1_s); 
                                     motor.forward(0);
@@ -218,28 +248,11 @@ int main()
                                     motor.left(1.0); 
                                     sleep(1_s);
                                     motor.left(0);
-                                    break;
                                 }
-                                if(is_stationary(std::get<0>(bno_data))){                    //条件3：静止　→遠距離フェーズへ
-                                    fase=Fase::Ldistance;
-                                    print("Shifts to the long distance phase under condition 3\n");  // 条件3で遠距離フェーズに移行します
-                                    break;
-                                }
-                            } else {
                                 break;
                             }
                         }
-                        catch(const std::exception& e)
-                        {
-                            print(e.what());
-                            is_success = false;
-                            // もしエラーが出続けているなら                            
-                            if(absolute_time_diff_us(recent_successful, get_absolute_time()) > 120*1000*1000){   //条件4：エラーが2分以上続く　→遠距離フェーズへ
-                                fase=Fase::Ldistance;
-                                print("Shifts to the long distance phase under condition 4\n");  // 条件4で遠距離フェーズに移行します
-                                break;
-                            }
-                        }
+                        catch(const std::exception& e) { print(e.what()); is_success = false; led_pico.off(); }
                         break;  // 保険のbreak
                     }
 
@@ -412,6 +425,7 @@ int main()
                         {
                             print(e.what());
                             is_success = false;
+                            led_pico.off();
                             // もしエラーがでるなら
                             try
                             {
@@ -481,16 +495,7 @@ int main()
                                 break;
                             }
                         }
-                        catch(const std::exception& e)
-                        {
-                            print(e.what());
-                            print(e.what());
-                            is_success = false;
-                            // もしエラーが出続けているなら
-                            if (absolute_time_diff_us(recent_successful, get_absolute_time()) > 60*1000*1000)
-                            {
-                            }
-                        }
+                        catch(const std::exception& e) { print(e.what()); is_success = false; led_pico.off(); }
                         break;  // 保険のbreak
                     }
 

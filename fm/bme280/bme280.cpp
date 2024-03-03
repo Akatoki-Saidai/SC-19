@@ -23,6 +23,10 @@ BME280::BME280(const I2C& i2c) try :
     try 
     {
         sleep_ms(5);
+
+        write_register(0xe0, 0xb6);  // 手動でリセットを実行
+        sleep_ms(5);
+
         // this->i2c_no            = i2c_no;
         // this->sda_pin           = sda_pin;
         // this->scl_pin           = scl_pin;

@@ -321,7 +321,9 @@ void CamCB(CamImage &img)
     Serial2.print(":Cam");
     I2Cprint(":Cam");
     
+    ledOn(PIN_LED2);
     uint8_t red_result = red_detect(img);
+    ledOff(PIN_LED2);
     Serial.println(red_result);
     Serial2.println(red_result);
     I2Cprint(red_result);
@@ -637,11 +639,12 @@ uint8_t red_detect(CamImage img) {
 
   // 分けた領域中の赤ピクセルのカウント
   uint8_t result = 0;
-  left_red = CountRedPixel(img, 1, center_begin - 1 );
-  Serial.print("Left: ");
-  Serial.println(left_red);
-  I2Cprint("Left: ");
-  I2Cprint(left_red);
+  // カメラが反対のため指示を反転
+  right_red = CountRedPixel(img, 1, center_begin - 1 );
+  Serial.print("Right: ");
+  Serial.println(right_red);
+  I2Cprint("Right: ");
+  I2Cprint(right_red);
   I2Cprint("\n");
   
   center_red = CountRedPixel(img, center_begin, right_begin - 1 );
@@ -651,11 +654,11 @@ uint8_t red_detect(CamImage img) {
   I2Cprint(center_red);
   I2Cprint("\n");
 
-  right_red = CountRedPixel(img, right_begin, img_width);
-  Serial.print("Right: ");
-  Serial.println(right_red);
-  I2Cprint("Right: ");
-  I2Cprint(right_red);
+  left_red = CountRedPixel(img, right_begin, img_width);
+  Serial.print("Left: ");
+  Serial.println(left_red);
+  I2Cprint("Left: ");
+  I2Cprint(left_red);
   I2Cprint("\n");
 
 
@@ -977,6 +980,9 @@ void loop(){
     case 1:
       // カメラループ
       if (Launch == 0){
+        ledOn(PIN_LED0);
+        ledOn(PIN_LED1);
+        ledOn(PIN_LED3);
         initCamera();
         delay(10);
         Serial.println("CameraStart");

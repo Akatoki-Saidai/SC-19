@@ -47,7 +47,7 @@ double distance_sphere(double t_lon,double t_lat,double m_lon,double m_lat){
 //! @brief 自由落下しているかを判定
 bool is_free_fall(const Acceleration<Unit::m_s2>& line_acce, const Acceleration<Unit::m_s2>& gravity)
 {
-    if ((line_acce + gravity).magnitude() < 4_m_s2)  // 全加速度の大きさが4m/s²以下なら，自由落下しているとみなす
+    if ((line_acce + gravity).magnitude() < 4_m_s2 && (sleep(0.5_s), (line_acce + gravity).magnitude() < 4_m_s2))  // 全加速度の大きさが4m/s²以下なら，自由落下しているとみなす
     {
         return true;
     } else {

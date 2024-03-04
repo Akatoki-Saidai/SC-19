@@ -135,7 +135,7 @@ void print(const std::string& format, Args... args) noexcept
 
 //! @brief 指定した時間 待機
 //! @param time 待機する時間 (100_ms のように入力)
-inline void sleep(Time<Unit::s> time) noexcept
+inline volatile void sleep(Time<Unit::s> time) noexcept
 {
     try
     {

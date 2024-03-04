@@ -198,7 +198,7 @@ throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is 
         throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is abnormal"));  // BNO055の測定値が異常です
     }
 
-    print("bno_read_data:%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", d_accelX, d_accelY, d_accelZ, d_grvX, d_grvY, d_grvZ, d_magX, d_magY, d_magZ, d_gyroX, d_gyroY, d_gyroZ);
+    print("accel:%f,%f,%f\ngrv:%f,%f,%f\nmag:%f,%f,%f\ngyro:%f,%f,%f\n", d_accelX, d_accelY, d_accelZ, d_grvX, d_grvY, d_grvZ, d_magX, d_magY, d_magZ, d_gyroX, d_gyroY, d_gyroZ);
 
     return {accel_vector,grav_vector,Mag_vector,gyro_vector};
 }

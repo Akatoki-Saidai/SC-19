@@ -156,7 +156,7 @@ std::tuple<Pressure<Unit::Pa>,Humidity<Unit::percent>,Temperature<Unit::degC>> B
     {
 throw std::runtime_error(f_err(__FILE__, __LINE__, "BME280 measurement value is abnormal:%f,%f,%f", double(pressure_Pa), double(humidity_percent), double(temperature_degC)));  // BME280の測定値が異常です
     }
-    print("bme_read_data:%f,%f,%f\n", double(pressure_Pa), double(humidity_percent), double(temperature_degC));
+    print("pres:%f\nhumi:%f\nbme_temp%f\n", double(pressure_Pa), double(humidity_percent), double(temperature_degC));
 
     return {pressure_Pa,humidity_percent,temperature_degC};
 

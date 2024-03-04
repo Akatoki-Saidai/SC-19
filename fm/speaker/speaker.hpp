@@ -25,6 +25,7 @@ public:
     Speaker(const Pin& pin);
     void play_starwars();
     void play_windows7();
+    void play_hogwarts();
 };
 
 }

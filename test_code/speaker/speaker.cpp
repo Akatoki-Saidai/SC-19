@@ -173,8 +173,82 @@ void play_windows7(){
 }
 
 
+void play_hogwarts(){
+    #ifndef NODEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
+    
+    //使用する音の周波数の宣言
+    const double sound_rest = 0;
+    // const double sound_A4 = 440;  // ラ
+    const double sound_B4 = 493.883;  // シ
+    const double sound_Ds5 = 622.254;  // レ#
+    const double sound_E5 = 659.255;  // ミ
+    const double sound_F5 = 698.456;  // ファ
+    const double sound_Fs5 = 739.989;  // ファ#
+    const double sound_G5 = 783.991;  // ソ
+    const double sound_A5 = 880.0;  // ラ
+    const double sound_B5 = 987.767;  // シ
+
+
+    const double hogwarts_bps = 141.0 / 60;
+    const double hogwarts_spb = 1 / hogwarts_bps;
+
+    // メロディーを配列で作成
+    const std::initializer_list<double> hogwarts_melody{ sound_B4, sound_E5, sound_E5, sound_G5, sound_Fs5, sound_Fs5, sound_E5, sound_E5, sound_B5, sound_A5, sound_A5, sound_Fs5, sound_Fs5, sound_rest, sound_E5, sound_E5, sound_G5, sound_Fs5, sound_Ds5, sound_Ds5, sound_F5, sound_B4 };
+
+    auto hogwarts_melody_now_itr =hogwarts_melody.begin();
+
+
+    for(uint8_t hogwarts_melody_order = 0; hogwarts_melody_order <= hogwarts_melody.size(); hogwarts_melody_order++){
+
+        double sound_start_clock = clock();
+        
+        double hogwarts_melody_now = *hogwarts_melody_now_itr;
+
+        if(hogwarts_melody_now == sound_rest){
+            pwm_set_gpio_level( PIN_Speaker_PWM, ( sound_rest ) );
+        }
+
+        else{
+            static const uint32_t Raspberry_pi_clock = 125000000;
+            static double speaker_duty = 0.50;
+
+            uint16_t speaker_pwm_wrap = (Raspberry_pi_clock / (hogwarts_melody_now * speaker_pwm_clkdiv)) - 1;
+
+            pwm_config_set_wrap( &speaker_pwm_slice_config, speaker_pwm_wrap );
+            pwm_init( speaker_pwm_slice_num, &speaker_pwm_slice_config, true );
+
+            pwm_set_gpio_level( PIN_Speaker_PWM, ( speaker_pwm_wrap * speaker_duty ) );
+        }
+        
+        
+        // 次の音
+        ++hogwarts_melody_now_itr;
+        
+        // 音の継続
+        if (hogwarts_melody_order == 16){   
+            while( (clock() - sound_start_clock) / CLOCKS_PER_SEC <= hogwarts_spb / 1.85){
+            }
+        }
+        else{
+            while( (clock() - sound_start_clock) / CLOCKS_PER_SEC <= hogwarts_spb){
+            }
+        }
+
+        // std::cout << (clock() - sound_start_clock) / CLOCKS_PER_SEC << std::endl;
+
+    }
+
+    // 演奏終了
+    pwm_set_gpio_level( PIN_Speaker_PWM, ( sound_rest ) );
+
+}
+
+
+
 int main(){
     speaker_init();
-    play_starwars();
+    play_hogwarts();
 }
 

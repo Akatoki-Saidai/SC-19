@@ -705,8 +705,8 @@ uint8_t red_detect(CamImage img) {
 
 void I2Cprint(const char* message){
   // Twe-liteのI2Cアドレス要確認
-  Wire.beginTransmission(0x70);
-  Wire.write(message);
+  Wire.beginTransmission(0x54);
+  Wire.write(message, strlen(message));
   Wire.endTransmission();
 
 }

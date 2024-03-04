@@ -122,6 +122,7 @@ int main()
                     {
                         try
                         {
+                            sleep_ms(100);//後から追加
                             led_red.off();
                             led_green.off();
 
@@ -354,7 +355,7 @@ int main()
                             //sleep_msよりsleep使ったほうがいい?
                             if(direction_angle_degree < 45 || direction_angle_degree > 315)
                             {
-                                printf("forward\n");
+                                print("forward\n");
                                 // forward(1);
                                 // sleep_ms(3000);
                                 // forward(0.6);
@@ -372,7 +373,7 @@ int main()
                                 motor.forward(0);
                                 sleep_ms(100);
                             }else if((direction_angle_degree) <135){
-                                printf("left\n");
+                                print("left\n");
                                 // left(0.5);
                                 // sleep_ms(300);
                                 // left(0);
@@ -382,7 +383,7 @@ int main()
                                 motor.left(0);
                                 sleep_ms(100);
                             }else if(direction_angle_degree < 180){
-                                printf("sharp_left\n");
+                                print("sharp_left\n");
                                 // left(0.5);
                                 // sleep_ms(600);
                                 // left(0);
@@ -392,7 +393,7 @@ int main()
                                 motor.left(0);
                                 sleep_ms(100);
                             }else if(direction_angle_degree > 225){
-                                printf("right\n");
+                                print("right\n");
                                 // right(0.5);
                                 // sleep_ms(300);
                                 // right(0);
@@ -402,7 +403,7 @@ int main()
                                 motor.right(0);
                                 sleep_ms(100);
                             }else{
-                                printf("sharp_right\n");
+                                print("sharp_right\n");
                                 // right(0.5);
                                 // sleep_ms(600);
                                 // right(0);
@@ -422,13 +423,13 @@ int main()
                         }
                         catch(const std::exception& e)
                         {
-                            print(e.what());
+                            print(f_err(__FILE__, __LINE__, e, "era-desu"));
                             is_success = false;
                             led_pico.off();
                             // もしエラーがでるなら
                             try
                             {
-                                motor.forward(1.0);  // とりあえず進んでみる
+                                motor.run(0.6, 1.0);  // とりあえず進んでみる
                                 sleep(5_s);
                                 motor.brake();
                             }

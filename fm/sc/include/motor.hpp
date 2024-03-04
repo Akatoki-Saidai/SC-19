@@ -104,7 +104,7 @@ public:
         #ifndef NODEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
-        run(speed, speed);
+        run(speed, -speed);
     }
 
     // 左に曲がる
@@ -114,7 +114,7 @@ public:
         #ifndef NODEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
-        run(0.0F, speed);
+        run(0.0F, -speed);
     }
 
     // 右に曲がる

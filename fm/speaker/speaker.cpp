@@ -62,7 +62,7 @@ void Speaker::play_starwars(){
     const double sound_C6 = 1046.502;
 
 
-    const double starwars_bps = 153.9 / 60;
+    const double starwars_bps = 163.9 / 60;
     const double starwars_spb = 1 / starwars_bps;
     // bpm = 153.9 原曲153.9bpm / 60秒 = 2.565bps
     // spb = 0.38986  2.565bpsの逆数: 4部音符ひとつ分の音の長さ(音の間隔)
@@ -201,7 +201,7 @@ void Speaker::play_hogwarts(){
     const double sound_B5 = 987.767;  // シ
 
 
-    const double hogwarts_bps = 141.0 / 60;
+    const double hogwarts_bps = 146.0 / 60;
     const double hogwarts_spb = 1 / hogwarts_bps;
 
     // メロディーを配列で作成

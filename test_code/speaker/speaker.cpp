@@ -57,13 +57,13 @@ void play_starwars(){
     const double sound_C6 = 1046.502;
 
 
-    const double starwars_bps = 153.9 / 60;
+    const double starwars_bps = 163.9 / 60;
     const double starwars_spb = 1 / starwars_bps;
     // bpm = 153.9 原曲153.9bpm / 60秒 = 2.565bps
     // spb = 0.38986  2.565bpsの逆数: 4部音符ひとつ分の音の長さ(音の間隔)
 
     // メロディーを配列で作成
-    const std::initializer_list<double> starwars_melody{sound_G4, sound_rest, sound_G4, sound_rest, sound_G4, sound_rest, sound_C5, sound_C5, sound_G5, sound_G5, sound_F5, sound_E5, sound_D5, sound_C6, sound_C6, sound_G5, sound_G5, sound_F5, sound_E5, sound_D5, sound_C6, sound_C6, sound_G5, sound_G5, sound_F5, sound_E5, sound_F5, sound_D5, sound_D5 };
+    const std::initializer_list<double> starwars_melody{ sound_C5, sound_C5, sound_G5, sound_G5, sound_F5, sound_E5, sound_D5, sound_C6, sound_C6, sound_G5, sound_G5, sound_F5, sound_E5, sound_D5, sound_C6, sound_C6, sound_G5, sound_G5, sound_F5, sound_E5, sound_F5, sound_D5, sound_D5 };
     // ソ(低) ソ(低) ソ(低)ドーソーファミレド(高)ーソーファミレド(高)ーソーファミファレー
     auto starwars_melody_now_itr =starwars_melody.begin();
 
@@ -105,15 +105,9 @@ void play_starwars(){
         starwars_melody_now_itr = ++starwars_melody_now_itr;
         
         // 音の継続
-        /*
-        if (starwars_melody_order == 2 || starwars_melody_order == 4){   
-            while( (clock() - sound_start_clock) / CLOCKS_PER_SEC <= starwars_spb / 8){
-            }
-        }*/
-        // else{
         while( (clock() - sound_start_clock) / CLOCKS_PER_SEC < starwars_spb){
         }
-
+        
         // std::cout << (clock() - sound_start_clock) / CLOCKS_PER_SEC << std::endl;
 
     }
@@ -192,7 +186,7 @@ void play_hogwarts(){
     const double sound_B5 = 987.767;  // シ
 
 
-    const double hogwarts_bps = 141.0 / 60;
+    const double hogwarts_bps = 146.0 / 60;
     const double hogwarts_spb = 1 / hogwarts_bps;
 
     // メロディーを配列で作成
@@ -321,7 +315,11 @@ void play_mario(){
 
 int main(){
     speaker_init();
+    play_starwars();
+    sleep_ms(1000);
     play_windows7();
+    sleep_ms(1000);
+    play_hogwarts();
     sleep_ms(1000);
     play_mario();
 }

@@ -92,7 +92,7 @@ int main()
             {
                 auto bno_data = bno055.read();
                 auto mag_data = std::get<2>(bno_data);
-                printf("non_calib_angle:%f, calib_anble:%f, calib:(%f,%f)\n", atan2(double(mag_data.y()), double(mag_data.x()))*180/pi, atan2(double(mag_data.y())+calib_y, double(mag_data.x())+calib_x)*180/pi, calib_x, calib_y);
+                printf("non_calib_angle:%f, calib_anble:%f, calib:(%f,%f)\n", atan2(double(mag_data.y()), double(mag_data.x()))*180/pi, atan2(double(mag_data.y())-calib_y, double(mag_data.x())-calib_x)*180/pi, calib_x, calib_y);
             }
             catch(const std::exception& e)
             {

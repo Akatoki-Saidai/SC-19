@@ -253,4 +253,8 @@ void Speaker::play_hogwarts(){
 
 }
 
+void Speaker::play_mario(){
+    
+}
+
 }

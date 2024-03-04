@@ -89,6 +89,7 @@ int main()
         led_pico.on();
         led_red.off();
         led_green.off();
+        speaker.play_windows7();
 
     // ************************************************** //
     //                        loop                        //
@@ -219,7 +220,7 @@ int main()
 
                             if (fase == Fase::Ldistance)
                             {
-                                speaker.play_starwars();  //念のため待機しておく
+                                speaker.play_hogwarts();  //念のため待機しておく
 
                                 if(para_separate.read() == false)  //パラシュートが取れていない場合、動いてみる？
                                 {
@@ -269,8 +270,8 @@ int main()
                             auto bno_data = bno055.read();
                             auto gps_data = spresense.gps();
                             MagneticFluxDensity<sc::Unit::T> magnetic = std::get<2>(bno_data);
-                            double t_lon = 139.606537;//ゴールの経度(自分たちで決めて書き換えてね)
-                            double t_lat = 35.864639;//ゴールの緯度
+                            double t_lon = 139.607348;//ゴールの経度(自分たちで決めて書き換えてね)
+                            double t_lat = 35.863522;//ゴールの緯度
                             double m_lon = double(std::get<1>(gps_data));//自分の経度(ここはGPSで手に入れたものが入るように書き換えて)
                             double m_lat = double(std::get<0>(gps_data));//自分の緯度
                             double t_lon_rad = deg_to_rad(t_lon);
@@ -418,6 +419,7 @@ int main()
                             {
                                 fase=Fase::Sdistance;
                                 print("Shifts to the short distance phase under condition 1\n");  // 条件1で近距離フェーズに移行します
+                                speaker.play_starwars();
                                 break;
                             }
                         }
@@ -466,6 +468,7 @@ int main()
                                 hcsr_data_average/=10.0;
                                 if(hcsr_data_average<0.2)//0.2m以内でゴール
                                 {
+                                    speaker.play_mario();
                                     print("goal\n");
                                     while(true)
                                     {

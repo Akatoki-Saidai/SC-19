@@ -26,6 +26,7 @@ public:
     void play_starwars();
     void play_windows7();
     void play_hogwarts();
+    void play_mario();
 };
 
 }

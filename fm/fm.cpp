@@ -366,55 +366,45 @@ int main()
                                 // forward(0);
                                 // sleep_ms(100);
                                 motor.forward(1.0);
-                                sleep_ms(3000);
-                                motor.forward(0.6);
-                                sleep_ms(1000);
-                                motor.forward(0.2);
-                                sleep_ms(1000);       
-                                motor.forward(0);
-                                sleep_ms(100);
+                                sleep(0.1_s);
+                                motor.stop();
                             }else if((direction_angle_degree) <135){
                                 print("left\n");
                                 // left(0.5);
                                 // sleep_ms(300);
                                 // left(0);
                                 // sleep_ms(100);
-                                motor.left(0.5);
-                                sleep_ms(300);
-                                motor.left(0);
-                                sleep_ms(100);
+                                motor.left(1.0);
+                                sleep(0.1_s);
+                                motor.stop();
                             }else if(direction_angle_degree < 180){
                                 print("sharp_left\n");
                                 // left(0.5);
                                 // sleep_ms(600);
                                 // left(0);
                                 // sleep_ms(100);
-                                motor.left(0.5);
-                                sleep_ms(600);
-                                motor.left(0);
-                                sleep_ms(100);
+                                motor.left(1.0);
+                                sleep(0.1_s);
+                                motor.stop();
                             }else if(direction_angle_degree > 225){
                                 print("right\n");
                                 // right(0.5);
                                 // sleep_ms(300);
                                 // right(0);
                                 // sleep_ms(100);
-                                motor.right(0.5);
-                                sleep_ms(300);
-                                motor.right(0);
-                                sleep_ms(100);
+                                motor.right(1.0);
+                                sleep(0.1_s);
+                                motor.stop();
                             }else{
                                 print("sharp_right\n");
                                 // right(0.5);
                                 // sleep_ms(600);
                                 // right(0);
                                 // sleep_ms(100);
-                                motor.right(0.5);
-                                sleep_ms(600);
-                                motor.right(0);
-                                sleep_ms(100);
+                                motor.right(1.0);
+                                sleep(0.1_s);
+                                motor.stop();
                             }
-
                             if(distance < 5) //条件1：ゴールとの距離が5ｍ未満　→近距離フェーズへ
                             {
                                 fase=Fase::Sdistance;
@@ -433,7 +423,7 @@ int main()
                             {
                                 motor.run(0.6, 1.0);  // とりあえず進んでみる
                                 sleep(5_s);
-                                motor.brake();
+                                motor.stop();
                             }
                             catch(const std::exception& e){print(e.what());}                            
                         }

@@ -127,6 +127,15 @@ public:
         run(speed, 0.0F);
     }
 
+    // 止まる
+    void stop() const
+    {
+        #ifndef NODEBUG
+            std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+        #endif
+        run(0.0F, 0.0F);
+    }
+
     // ブレーキをかける
     void brake() const
     {

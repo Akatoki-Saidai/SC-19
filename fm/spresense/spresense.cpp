@@ -53,7 +53,7 @@ void Spresense::read()
         {
             std::tm new_time;
             auto num_itr = _read_binary.begin()+start_index+4;
-            if ((end_index-start_index) == 18)
+            if ((end_index-start_index) == 19)
             {
                 new_time.tm_year = stoi(std::string(num_itr, num_itr+4)) - 1900;  // 1900からの経過年数
                 new_time.tm_mon = stoi(std::string(num_itr+4, num_itr+6)) - 1;  // 0 = 1月

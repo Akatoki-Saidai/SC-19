@@ -241,14 +241,14 @@ int main()
                                 } else {
                                     print("muki:hantai\n");
                                     motor.forward(1.0);//じたばたして体制修正できるかな？
-                                    sleep(1_s); 
-                                    motor.forward(0);
-                                    motor.right(1.0); 
-                                    sleep(1_s);
-                                    motor.right(0); 
-                                    motor.left(1.0); 
-                                    sleep(1_s);
-                                    motor.left(0);
+                                    sleep(5_s);
+                                    motor.stop();
+                                    if (std::get<1>(bno055.read()).z() < 3_m_s2)  // それでもまだ反対向きなら
+                                    {
+                                        motor.forward(1.0);  // もう一回
+                                        sleep(5_s);
+                                        motor.stop();
+                                    }
                                 }
                                 break;
                             }

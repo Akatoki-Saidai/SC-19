@@ -25,6 +25,7 @@ int main()
         double last_mag_x = 0.0;
         double last_mag_y = 0.0;
         double last_gyro_z = 0.0;
+        printf("angleが720°になるまで水平に回転させてください\n");
 
     // ************************************************** //
     //                        loop                        //
@@ -32,34 +33,37 @@ int main()
         while (true) 
         {
             try
-            {            
+            {
                 auto bno_data = bno055.read();
                 auto mag_data = std::get<2>(bno_data);
                 auto gyro_data = std::get<3>(bno_data);
 
-                if (std::abs(double(mag_data.x()) - last_mag_x) > 0.01)
+                if (std::abs(double(mag_data.x())) > 0.2)
                 {
                     printf("error1\n");
-                    last_mag_x = double(mag_data.x());
+                    last_mag_x = std::abs(double(mag_data.x()));
         continue;
+                } else {
+                    last_mag_x = std::abs(double(mag_data.x()));
                 }
-                last_mag_x = double(mag_data.x());
 
-                if (std::abs(double(mag_data.y()) - last_mag_y) > 0.01)
+                if (std::abs(double(mag_data.y())) > 0.2)
                 {
                     printf("error2\n");
-                    last_mag_y = double(mag_data.y());
+                    last_mag_y = std::abs(double(mag_data.y()));
         continue;
+                } else {
+                    last_mag_y = std::abs(double(mag_data.y()));
                 }
-                last_mag_y = double(mag_data.y());
 
-                if (std::abs(double(gyro_data.z()) - last_gyro_z) > 1.0)
+                if (std::abs(double(gyro_data.z())) > 4.0)
                 {
                     printf("error3\n");
-                    last_gyro_z = double(gyro_data.z());
+                    last_gyro_z = std::abs(double(gyro_data.z()));
         continue;
+                } else {
+                    last_gyro_z = std::abs(double(gyro_data.z()));
                 }
-                last_gyro_z = double(gyro_data.z());
 
                 angle += absolute_time_diff_us(last_time, get_absolute_time())*micro*double(gyro_data.z());
                 last_time = get_absolute_time();
@@ -92,6 +96,23 @@ int main()
             {
                 auto bno_data = bno055.read();
                 auto mag_data = std::get<2>(bno_data);
+                if (std::abs(double(mag_data.x())) > 0.2)
+                {
+                    printf("error1\n");
+                    last_mag_x = std::abs(double(mag_data.x()));
+        continue;
+                } else {
+                    last_mag_x = std::abs(double(mag_data.x()));
+                }
+
+                if (std::abs(double(mag_data.y())) > 0.2)
+                {
+                    printf("error2\n");
+                    last_mag_y = std::abs(double(mag_data.y()));
+        continue;
+                } else {
+                    last_mag_y = std::abs(double(mag_data.y()));
+                }
                 printf("non_calib_angle:%f, calib_anble:%f, calib:(%f,%f)\n", atan2(double(mag_data.y()), double(mag_data.x()))*180/pi, atan2(double(mag_data.y())-calib_y, double(mag_data.x())-calib_x)*180/pi, calib_x, calib_y);
             }
             catch(const std::exception& e)

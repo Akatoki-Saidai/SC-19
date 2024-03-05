@@ -106,7 +106,7 @@ std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity
     double d_accelY = median(accelY[0], accelY[1], accelY[2]) / 100.00;
     double d_accelZ = median(accelZ[0], accelZ[1], accelZ[2]) / 100.00;
 
-    if (std::abs(d_accelX) > 30 || std::abs(d_accelY) > 30 || std::abs(d_accelZ) > 30)
+    if (std::abs(d_accelX) > 50 || std::abs(d_accelY) > 50 || std::abs(d_accelZ) > 50)
     {
 throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is abnormal. accel:%f, %f, %f", d_accelX, d_accelY, d_accelZ));  // BNO055の測定値が異常です
     }
@@ -131,7 +131,7 @@ throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is 
     double d_grvY = median(grvY[0], grvY[1], grvY[2]) / 100.00;
     double d_grvZ = median(grvZ[0], grvZ[1], grvZ[2]) / 100.00;
 
-    if (std::abs(9.8 - std::sqrt(d_grvX*d_grvX + d_grvY*d_grvY + d_grvZ*d_grvZ)) > 0.1)
+    if (std::abs(9.8 - std::sqrt(d_grvX*d_grvX + d_grvY*d_grvY + d_grvZ*d_grvZ)) > 0.5)
     {
 throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is abnormal. grv:%f, %f, %f", d_grvX, d_grvY, d_grvZ));  // BNO055の測定値が異常です
     }
@@ -157,7 +157,7 @@ throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is 
     double d_magZ = milli * median(magZ[0], magZ[1], magZ[2]) / 16.00;
 
     double all_mag =std::sqrt(d_magX*d_magX + d_magY*d_magY + d_magZ*d_magZ);    
-    if (all_mag < 25*milli || 80*milli < all_mag)  // 日本は47mT～50mTくらい
+    if (0.5 < std::abs(all_mag))  // 日本は47mT～50mTくらい
     {
 throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is abnormal. mag:%f, %f, %f", d_magX, d_magY, d_magZ));  // BNO055の測定値が異常です
     }

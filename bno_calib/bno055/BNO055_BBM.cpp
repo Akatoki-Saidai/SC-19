@@ -91,16 +91,14 @@ std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity
     constexpr uint8_t accel_val = 0x28; // 線形加速度のメモリアドレス
 
     //線形加速度を読み取る
-    for (int i=0; i<3; ++i)
-    {
-        Binary accel = _i2c.read_memory(size_t(6), SlaveAddr(addr), MemoryAddr(accel_val));
+    // for (int i=0; i<3; ++i)
+    // {
+    //     Binary accel = _i2c.read_memory(size_t(6), SlaveAddr(addr), MemoryAddr(accel_val));
 
-        accelX[i] = ((accel[1]<<8) | accel[0]);
-        accelY[i] = ((accel[3]<<8) | accel[2]);
-        accelZ[i] = ((accel[5]<<8) | accel[4]);
-
-        sleep_ms(1);
-    }
+    //     accelX[i] = ((accel[1]<<8) | accel[0]);
+    //     accelY[i] = ((accel[3]<<8) | accel[2]);
+    //     accelZ[i] = ((accel[5]<<8) | accel[4]);
+    // }
 
     double d_accelX = median(accelX[0], accelX[1], accelX[2]) / 100.00;
     double d_accelY = median(accelY[0], accelY[1], accelY[2]) / 100.00;
@@ -116,16 +114,14 @@ std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity
     constexpr uint8_t grv_val = 0x2E; // 重力加速度のメモリアドレス
 
     //重力加速度
-    for (int i=0; i<3; ++i)
-    {
-        Binary grv = _i2c.read_memory(size_t(6), SlaveAddr(addr), MemoryAddr(grv_val));
+    // for (int i=0; i<3; ++i)
+    // {
+    //     Binary grv = _i2c.read_memory(size_t(6), SlaveAddr(addr), MemoryAddr(grv_val));
 
-        grvX[i] = ((grv[1]<<8) | grv[0]);
-        grvY[i] = ((grv[3]<<8) | grv[2]);
-        grvZ[i] = ((grv[5]<<8) | grv[4]);
-
-        sleep_ms(1);
-    }
+    //     grvX[i] = ((grv[1]<<8) | grv[0]);
+    //     grvY[i] = ((grv[3]<<8) | grv[2]);
+    //     grvZ[i] = ((grv[5]<<8) | grv[4]);
+    // }
 
     double d_grvX = median(grvX[0], grvX[1], grvX[2]) / 100.00;
     double d_grvY = median(grvY[0], grvY[1], grvY[2]) / 100.00;
@@ -190,13 +186,13 @@ std::tuple<Acceleration<Unit::m_s2>,Acceleration<Unit::m_s2>,MagneticFluxDensity
     AngularVelocity<Unit::rad_s>gyro_vector{dimension::rad_s(d_gyroX),dimension::rad_s(d_gyroY),dimension::rad_s(d_gyroZ)};
 
     // 測定値がおかしくなったら再び初期化
-    if (d_accelX==0 && d_accelY==0 && d_accelZ==0 && d_grvX==0 && d_grvY==0 && d_grvZ==0 && d_magX==0 && d_magY==0 && d_magZ==0 && d_gyroX==0 && d_gyroY==0 && d_gyroZ==0)
-    {
-        print("!!reinitialize BNO!!\n");  // BNOを再び初期化します
-        accel_init();
-        sleep(100_ms);
-        throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is abnormal"));  // BNO055の測定値が異常です
-    }
+    // if (d_accelX==0 && d_accelY==0 && d_accelZ==0 && d_grvX==0 && d_grvY==0 && d_grvZ==0 && d_magX==0 && d_magY==0 && d_magZ==0 && d_gyroX==0 && d_gyroY==0 && d_gyroZ==0)
+    // {
+    //     print("!!reinitialize BNO!!\n");  // BNOを再び初期化します
+    //     accel_init();
+    //     sleep(100_ms);
+    //     throw std::runtime_error(f_err(__FILE__, __LINE__, "BNO055 measurement value is abnormal"));  // BNO055の測定値が異常です
+    // }
 
     // print("accel:%f,%f,%f\ngrv:%f,%f,%f\nmag:%f,%f,%f\ngyro:%f,%f,%f\n", d_accelX, d_accelY, d_accelZ, d_grvX, d_grvY, d_grvZ, d_magX, d_magY, d_magZ, d_gyroX, d_gyroY, d_gyroZ);
 

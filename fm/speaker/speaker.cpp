@@ -68,12 +68,12 @@ void Speaker::play_starwars(){
     // spb = 0.38986  2.565bpsの逆数: 4部音符ひとつ分の音の長さ(音の間隔)
 
     // メロディーを配列で作成
-    const std::initializer_list<double> starwars_melody{sound_G4, sound_rest, sound_G4, sound_rest, sound_G4, sound_rest, sound_C5, sound_C5, sound_G5, sound_G5, sound_F5, sound_E5, sound_D5, sound_C6, sound_C6, sound_G5, sound_G5, sound_F5, sound_E5, sound_D5, sound_C6, sound_C6, sound_G5, sound_G5, sound_F5, sound_E5, sound_F5, sound_D5, sound_D5 };
-    // ソ(低) ソ(低) ソ(低)ドーソーファミレド(高)ーソーファミレド(高)ーソーファミファレー
+    const std::initializer_list<double> starwars_melody{sound_C5, sound_C5, sound_G5, sound_G5, sound_F5, sound_E5, sound_D5, sound_C6, sound_C6, sound_G5, sound_G5, sound_F5, sound_E5, sound_D5, sound_C6, sound_C6, sound_G5, sound_G5, sound_F5, sound_E5, sound_F5, sound_D5, sound_D5 };
+    // ドーソーファミレド(高)ーソーファミレド(高)ーソーファミファレー
     auto starwars_melody_now_itr =starwars_melody.begin();
 
 
-    for(uint8_t starwars_melody_order = 0; starwars_melody_order <= starwars_melody.size(); starwars_melody_order++){
+    for(uint8_t starwars_melody_order = 0; starwars_melody_order < starwars_melody.size(); starwars_melody_order++){
 
         double sound_start_clock = clock();
         

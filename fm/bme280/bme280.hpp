@@ -133,6 +133,8 @@ private:
     void        read_registers(uint8_t reg, uint8_t *buf, uint16_t len);
     /* This function reads the manufacturing assigned compensation parameters from the device */
     void        read_compensation_parameters(); 
+
+    void bme_init();
 };
 
 }

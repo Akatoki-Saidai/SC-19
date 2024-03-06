@@ -20,6 +20,19 @@ BME280::BME280(const I2C& i2c) try :
     #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
+
+    bme_init();
+}
+catch (const std::exception& e)
+{
+    print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
+}
+
+void BME280::bme_init()
+{
+    #ifndef NODEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     try 
     {
         sleep_ms(5);
@@ -78,7 +91,7 @@ BME280::BME280(const I2C& i2c) try :
             write_register(0xF2, 0x1); // Humidity oversampling register - going for x1
             write_register(0xF4, measurement_reg.get());// Set rest of oversampling modes and run mode to normal
 
-            read();  // 最初の測定は誤差が大きいので，ここで測定しておく
+            // read();  // 最初の測定は誤差が大きいので，ここで測定しておく
         }
         catch(const std::exception& e)
         {
@@ -91,10 +104,6 @@ BME280::BME280(const I2C& i2c) try :
     {
         print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n%s\n\n********************\n", __FILE__, __LINE__, e.what());
     }
-}
-catch (const std::exception& e)
-{
-    print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
 }
 
 // void BME280::set_origin(float _pressure0=1013.25, float _temperature0=20, float _altitude0=0){
@@ -151,6 +160,19 @@ std::tuple<Pressure<Unit::Pa>,Humidity<Unit::percent>,Temperature<Unit::degC>> B
     // // apply formula to retrieve altitude from air pressure
     // measurement.altitude_1 = altitude0 + ((temperature0 + 273.15F) / 0.0065F) * (1 - std::pow((measurement.pressure / pressure0), (1.0F / 5.257F)));
     // measurement.altitude_2 = altitude0 + ((measurement.temperature + 273.15F) / 0.0065F) * (std::pow((pressure0 / measurement.pressure), 1.0F / 5.257F) -1.0F);
+
+    static double last_pres;
+    static double last_hum;
+    static double last_temp;
+    if (last_pres==double(pressure_Pa) && last_hum==double(humidity_percent) && last_temp==double(temperature_degC))
+    {
+        print("!!reinitialize BME!!\n");  // BMEを再び初期化します
+        bme_init();  // 再度初期化
+        sleep_ms(100);
+    }
+    last_pres = double(pressure_Pa);
+    last_hum = double(humidity_percent);
+    last_temp = double(temperature_degC);
 
     if (double(pressure_Pa) < 900*100 || 1100*100 < double(pressure_Pa) || double(humidity_percent) <= 0 || 100 <= double(humidity_percent) || double(temperature_degC) < -20 || 50 < double(temperature_degC))
     {

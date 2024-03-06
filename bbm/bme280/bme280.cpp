@@ -20,8 +20,25 @@ BME280::BME280(const I2C& i2c) try :
     #ifndef NODEBUG
         std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
     #endif
+
+    bme_init();
+}
+catch (const std::exception& e)
+{
+    print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
+}
+
+void BME280::bme_init()
+{
+    #ifndef NODEBUG
+        std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
+    #endif
     try 
     {
+        sleep_ms(5);
+
+        write_register(0xe0, 0xb6);  // 手動でリセットを実行
+        sleep_ms(5);
 
         // this->i2c_no            = i2c_no;
         // this->sda_pin           = sda_pin;
@@ -74,7 +91,7 @@ BME280::BME280(const I2C& i2c) try :
             write_register(0xF2, 0x1); // Humidity oversampling register - going for x1
             write_register(0xF4, measurement_reg.get());// Set rest of oversampling modes and run mode to normal
 
-            read();  // 最初の測定は誤差が大きいので，ここで測定しておく
+            // read();  // 最初の測定は誤差が大きいので，ここで測定しておく
         }
         catch(const std::exception& e)
         {
@@ -87,10 +104,6 @@ BME280::BME280(const I2C& i2c) try :
     {
         print("\n********************\n\n<<!! INIT ERRPR !!>> in %s line %d\n%s\n\n********************\n", __FILE__, __LINE__, e.what());
     }
-}
-catch (const std::exception& e)
-{
-    print(f_err(__FILE__, __LINE__, e, "An initialization error occurred"));
 }
 
 // void BME280::set_origin(float _pressure0=1013.25, float _temperature0=20, float _altitude0=0){
@@ -123,7 +136,7 @@ std::tuple<Pressure<Unit::Pa>,Humidity<Unit::percent>,Temperature<Unit::degC>> B
     for (int i=0; i<3; ++i)
     {
         bme280_read_raw(&(humidity[i]), &(pressure[i]), &(temperature[i]));
-        sleep_ms(1);
+        sleep_ms(10);
     }
 
     // 中央値を求める
@@ -134,11 +147,6 @@ std::tuple<Pressure<Unit::Pa>,Humidity<Unit::percent>,Temperature<Unit::degC>> B
     pressure_m = compensate_pressure(pressure_m);
     humidity_m = compensate_humidity(humidity_m);
     temperature_m = compensate_temp(temperature_m);
-
-    if (pressure_m < 900*100 || 1100*100 < pressure_m || humidity_m/1024 <= 0 || 100 <= humidity_m/1024 || temperature_m/100.0 < -20 || 50 < temperature_m/100.0)
-    {
-throw std::runtime_error(f_err(__FILE__, __LINE__, "BME280 measurement value is abnormal"));  // BME280の測定値が異常です
-    }
 
     Pressure<Unit::Pa>pressure_Pa(pressure_m);
     Humidity<Unit::percent>humidity_percent(humidity_m/1024.0);
@@ -153,7 +161,24 @@ throw std::runtime_error(f_err(__FILE__, __LINE__, "BME280 measurement value is 
     // measurement.altitude_1 = altitude0 + ((temperature0 + 273.15F) / 0.0065F) * (1 - std::pow((measurement.pressure / pressure0), (1.0F / 5.257F)));
     // measurement.altitude_2 = altitude0 + ((measurement.temperature + 273.15F) / 0.0065F) * (std::pow((pressure0 / measurement.pressure), 1.0F / 5.257F) -1.0F);
 
-    print("bme_read_data:%f,%f,%f\n", pressure_m, humidity_m/1024.0, temperature_m/100.0);
+    static double last_pres;
+    static double last_hum;
+    static double last_temp;
+    if (last_pres==double(pressure_Pa) && last_hum==double(humidity_percent) && last_temp==double(temperature_degC))
+    {
+        print("!!reinitialize BME!!\n");  // BMEを再び初期化します
+        bme_init();  // 再度初期化
+        sleep_ms(100);
+    }
+    last_pres = double(pressure_Pa);
+    last_hum = double(humidity_percent);
+    last_temp = double(temperature_degC);
+
+    if (double(pressure_Pa) < 900*100 || 1100*100 < double(pressure_Pa) || double(humidity_percent) <= 0 || 100 <= double(humidity_percent) || double(temperature_degC) < -20 || 50 < double(temperature_degC))
+    {
+throw std::runtime_error(f_err(__FILE__, __LINE__, "BME280 measurement value is abnormal:%f,%f,%f", double(pressure_Pa), double(humidity_percent), double(temperature_degC)));  // BME280の測定値が異常です
+    }
+    print("pres:%f\nhumi:%f\nbme_temp%f\n", double(pressure_Pa), double(humidity_percent), double(temperature_degC));
 
     return {pressure_Pa,humidity_percent,temperature_degC};
 

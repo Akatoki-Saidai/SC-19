@@ -76,7 +76,10 @@ int main()
             auto b1 = bme280.read();
             sleep(1_ms);
             auto b2 = bme280.read();
-            Altitude<Unit::m>::set_origin(average(std::get<0>(b0), std::get<0>(b1), std::get<0>(b2)), average(std::get<2>(b0), std::get<2>(b1), std::get<2>(b2)));
+            const auto ave_pres = average(std::get<0>(b0), std::get<0>(b1), std::get<0>(b2));
+            const auto ave_temp = average(std::get<2>(b0), std::get<2>(b1), std::get<2>(b2));
+            Altitude<Unit::m>::set_origin(ave_pres, ave_temp);
+            print("set_origin:%f,%f\n", ave_pres, ave_temp);
         }
         catch(const std::exception& e){printf(e.what());}
 
@@ -376,7 +379,7 @@ int main()
                                 // sleep_ms(100);
                                 motor.forward(1.0);
                                 sleep(0.1_s);
-                                motor.stop();
+                                // motor.stop();
                             }else if((direction_angle_degree) <135){
                                 print("left\n");
                                 // left(0.5);
@@ -385,7 +388,7 @@ int main()
                                 // sleep_ms(100);
                                 motor.left(1.0);
                                 sleep(0.1_s);
-                                motor.stop();
+                                // motor.stop();
                             }else if(direction_angle_degree < 180){
                                 print("sharp_left\n");
                                 // left(0.5);
@@ -394,7 +397,7 @@ int main()
                                 // sleep_ms(100);
                                 motor.left(1.0);
                                 sleep(0.1_s);
-                                motor.stop();
+                                // motor.stop();
                             }else if(direction_angle_degree > 225){
                                 print("right\n");
                                 // right(0.5);
@@ -403,7 +406,7 @@ int main()
                                 // sleep_ms(100);
                                 motor.right(1.0);
                                 sleep(0.1_s);
-                                motor.stop();
+                                // motor.stop();
                             }else{
                                 print("sharp_right\n");
                                 // right(0.5);
@@ -412,11 +415,12 @@ int main()
                                 // sleep_ms(100);
                                 motor.right(1.0);
                                 sleep(0.1_s);
-                                motor.stop();
+                                // motor.stop();
                             }
                             if(distance < 5) //条件1：ゴールとの距離が5ｍ未満　→近距離フェーズへ
                             {
                                 fase=Fase::Sdistance;
+                                motor.stop();
                                 print("Shifts to the short distance phase under condition 1\n");  // 条件1で近距離フェーズに移行します
                                 speaker.play_starwars();
                                 break;

@@ -71,6 +71,7 @@ int main()
         // 標高の基準となる気圧を設定
         try
         {
+            try {bme280.read(); bme280.read();} catch(...) {}
             auto b0 = bme280.read();
             sleep(1_ms);
             auto b1 = bme280.read();
@@ -366,7 +367,7 @@ int main()
                             //ここからdirection_angleをもとに機体を動かす
                             //一旦SC-17のコードを引っ張ってきたよ
                             //sleep_msよりsleep使ったほうがいい?
-                            if(direction_angle_degree < 45 || direction_angle_degree > 315)
+                            if(direction_angle_degree < 30 || direction_angle_degree > 330)
                             {
                                 print("forward\n");
                                 // forward(1);

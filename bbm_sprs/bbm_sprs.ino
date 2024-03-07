@@ -316,22 +316,9 @@ void CamCB(CamImage &img)
     Serial.print(hdr);
     Serial.println();
     */
-
-    Serial.print(":Cam");
-    Serial2.print(":Cam");
-    I2Cprint(":Cam");
     
-    ledOn(PIN_LED2);
-    uint8_t red_result = red_detect(img);
-    ledOff(PIN_LED2);
-    Serial.println(red_result);
-    Serial2.println(red_result);
-    I2Cprint(red_result);
-    I2Cprint("\n");
-
-
     // 画像の転送(USB)
-    /*
+    
     if (Serial){
       digitalWrite(LED0, HIGH);
       Serial.flush();
@@ -339,7 +326,20 @@ void CamCB(CamImage &img)
       Serial.flush();
       digitalWrite(LED0, LOW);
     }
-    */
+
+    
+    ledOn(PIN_LED2);
+    uint8_t red_result = red_detect(img);
+    ledOff(PIN_LED2);
+    
+    Serial.print(":Cam");
+    Serial2.print(":Cam");
+    I2Cprint(":Cam");
+
+    Serial.println(red_result);
+    Serial2.println(red_result);
+    I2Cprint(red_result);
+    I2Cprint("\n");
 
   }
 
@@ -364,9 +364,10 @@ void initCamera(){
     CAM_IMAGE_PIX_FMT_RGB565,
     7
   );
-  if (err != CAM_ERR_SUCCESS)
+  while (err != CAM_ERR_SUCCESS)
   {
       printError(err);
+      err = theCamera.begin();
   }
 
   
@@ -639,6 +640,7 @@ uint8_t red_detect(CamImage img) {
 
   // 分けた領域中の赤ピクセルのカウント
   uint8_t result = 0;
+  
   // カメラが反対のため指示を反転
   right_red = CountRedPixel(img, 1, center_begin - 1 );
   Serial.print("Right: ");
@@ -665,14 +667,21 @@ uint8_t red_detect(CamImage img) {
   Serial.print("Red object: ");
   I2Cprint("Red object: ");
 
-  if (right_red == left_red || right_red == center_red || left_red == center_red){
+  if((right_red == 0) && (center_red == 0) && (left_red == 0)){
+    Serial.println("Requiring reset value");
+    I2Cprint("Requiring reset value");
+    result = 4;
+  }
+  else if (right_red == left_red || right_red == center_red || left_red == center_red){
     Serial.println("Failed judgement");
     I2Cprint("Failed judgement\n");
+    Watchdog.kick();
     result = 4;
   }
   else if ((left_red + center_red + right_red) <= 10){
     Serial.println("Not found");
     I2Cprint("Not found\n");
+    Watchdog.kick();
     result = 4;
   }
   else if (left_red == max(max(left_red, center_red), right_red)){
@@ -857,7 +866,7 @@ void setup(){
 
   // カメラ起動状態
   Launch = false;
-  phase = 0;
+  phase = 1;
 
   Watchdog.begin();
 
@@ -865,23 +874,25 @@ void setup(){
 
 void loop(){
 
-  // UART受信
-  if (Serial2.available() > 0){
-    pico_message = Serial2.readStringUntil('\n'); 
-    
-    Serial.print("UART: ");
-    Serial.println(pico_message);
-    // I2Cprint("UART: ");
-    // I2Cprint(pico_message\n);
-
-  }
-  
-  if (pico_message == "CameraStart"){
-    phase = 1;
-  }
 
   switch(phase){
     case 0:
+
+    // UART受信
+      if (Serial2.available() > 0){
+        pico_message = Serial2.readStringUntil('\n');
+        
+        Serial.print("UART: ");
+        Serial.println(pico_message);
+        // I2Cprint("UART: ");
+        // I2Cprint(pico_message\n);
+
+        if (pico_message == "CameraStart"){
+          phase = 1;
+        }
+      }
+
+
       // GPSループ
       static int LoopCount = 0;
       static int LastPrintMin = 0;
@@ -985,9 +996,9 @@ void loop(){
         ledOn(PIN_LED3);
         initCamera();
         delay(10);
-        Serial.println("CameraStart");
-        I2Cprint("CameraStart\n");
-        Watchdog.start(5000);
+        // Serial.println("CameraStart");
+        // I2Cprint("CameraStart\n");
+        Watchdog.start(10000);
 
         theCamera.startStreaming(true, CamCB);
 

@@ -132,6 +132,7 @@ int main()
                             {
                                 fase=Fase::Fall;
                                 print("Shifts to the falling phase under condition 1\n");  // 条件1で落下フェーズに移行します
+                                recent_successful = get_absolute_time();
                                 break;
                             }
                             //条件2：エラー２分以上　→落下フェーズへ
@@ -139,6 +140,7 @@ int main()
                             {
                                 fase=Fase::Fall;
                                 print("Shifts to the falling phase under condition 2\n");  // 条件2で落下フェーズに移行します
+                                recent_successful = get_absolute_time();
                                 break;
                             }
                             try
@@ -152,6 +154,7 @@ int main()
                                 {
                                     fase=Fase::Fall;
                                     print("Shifts to the falling phase under condition 3\n");  // 条件3で落下フェーズに移行します
+                                    recent_successful = get_absolute_time();
                                     break;
                                 }
                             }
@@ -165,6 +168,7 @@ int main()
                                 {
                                     fase=Fase::Fall;
                                     print("Shifts to the falling phase under condition 4\n");  // 条件4で落下フェーズに移行します
+                                    recent_successful = get_absolute_time();
                                     break;
                                 }
                             }
@@ -189,11 +193,13 @@ int main()
                             {
                                 fase=Fase::Ldistance;
                                 print("Shifts to the long distance phase under condition 1\n");  // 条件1で遠距離フェーズに移行します
+                                recent_successful = get_absolute_time();
                             }
                             //条件2：エラーが2分以上続く　→遠距離フェーズへ
                             if(absolute_time_diff_us(recent_successful, get_absolute_time()) > 120*1000*1000){
                                 fase=Fase::Ldistance;
                                 print("Shifts to the long distance phase under condition 2\n");  // 条件2で遠距離フェーズに移行します
+                                recent_successful = get_absolute_time();
                             }
 
                             try
@@ -211,6 +217,7 @@ int main()
                                     {
                                         fase=Fase::Ldistance;
                                         print("Shifts to the long distance phase under condition 3\n");  // 条件3で遠距離フェーズに移行します
+                                        recent_successful = get_absolute_time();
                                     } else {
                                         break;
                                     }
@@ -230,6 +237,8 @@ int main()
                                     motor.forward(-1.0);
                                     sleep(1_s);
                                     motor.forward(0);
+                                } else {
+                                    print("para:toreteiru\n");
                                 }
                                 
                                 auto bno_data = bno055.read();  // BNO055(9軸)から受信
@@ -270,8 +279,8 @@ int main()
                             auto bno_data = bno055.read();
                             auto gps_data = spresense.gps();
                             MagneticFluxDensity<sc::Unit::T> magnetic = std::get<2>(bno_data);
-                            double t_lon = 139.607348;//ゴールの経度(自分たちで決めて書き換えてね)
-                            double t_lat = 35.863522;//ゴールの緯度
+                            double t_lon = 130.903474;//ゴールの経度(自分たちで決めて書き換えてね)
+                            double t_lat = 30.413975;//ゴールの緯度
                             double m_lon = double(std::get<1>(gps_data));//自分の経度(ここはGPSで手に入れたものが入るように書き換えて)
                             double m_lat = double(std::get<0>(gps_data));//自分の緯度
                             double t_lon_rad = deg_to_rad(t_lon);
@@ -421,7 +430,7 @@ int main()
                             // もしエラーがでるなら
                             try
                             {
-                                motor.run(0.6, 1.0);  // とりあえず進んでみる
+                                motor.run(1.0, 1.0);  // とりあえず進んでみる
                                 sleep(5_s);
                                 motor.stop();
                             }
@@ -445,6 +454,7 @@ int main()
                             
                             if(camera_data == Cam::Center)//ゴールがカメラの真ん中
                             {
+                                print("ca:center\n");
                                 //少し進む
                                 motor.forward(1.0);
                                 sleep(1_s);
@@ -468,6 +478,7 @@ int main()
                             }
                             else if(camera_data == Cam::Right)//ゴールがカメラの右
                             {
+                                print("cam;right\n");
                                 motor.right(1.0); 
                                 sleep(1_s);
                                 motor.right(0); 
@@ -475,6 +486,7 @@ int main()
                             }
                             else if(camera_data == Cam::Left)//ゴールがカメラの左
                             {
+                                print("cam:left\n");
                                 motor.left(1.0); 
                                 sleep(1_s);
                                 motor.left(0); 
@@ -482,6 +494,7 @@ int main()
                             }
                             else//ゴールがみつからない
                             {
+                                print("cam:none\n");
                                 motor.right(1.0); 
                                 sleep(1_s);
                                 motor.right(0); 

@@ -459,7 +459,7 @@ int main()
                             
                             if(camera_data == Cam::Center)//ゴールがカメラの真ん中
                             {
-                                print("ca:center\n");
+                                print("cam:center\n");
                                 //少し進む
                                 motor.forward(1.0);
                                 sleep(1_s);
@@ -483,7 +483,7 @@ int main()
                             }
                             else if(camera_data == Cam::Right)//ゴールがカメラの右
                             {
-                                print("cam;right\n");
+                                print("cam:right\n");
                                 motor.right(1.0); 
                                 sleep(1_s);
                                 motor.right(0); 

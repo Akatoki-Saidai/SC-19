@@ -61,7 +61,7 @@ void Spresense::read()
                 new_time.tm_hour = stoi(std::string(num_itr+8, num_itr+10));  // 時
                 new_time.tm_min = stoi(std::string(num_itr+10, num_itr+12));  // 分
                 new_time.tm_sec = stoi(std::string(num_itr+12, num_itr+14));  // 秒
-                if (2020 < new_time.tm_year && new_time.tm_year < 2050)
+                if (2020 < (new_time.tm_year+1900) && (new_time.tm_year+1900) < 2050)
                 {
                     _time = new_time;
                     _time_update = get_absolute_time();

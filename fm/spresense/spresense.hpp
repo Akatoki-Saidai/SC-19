@@ -16,7 +16,9 @@ enum class Cam
 {
     Left = 1,
     Center,
-    Right
+    Right,
+    NotFound,
+    Reset
 };
 
 class Spresense 

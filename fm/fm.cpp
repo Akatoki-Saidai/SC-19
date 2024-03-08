@@ -104,12 +104,12 @@ int main()
         {
             try
             {
+                try {led_pico.on(); } catch(...) {}
+                print("\nfase : %d\n", int(fase));  // フェーズを表示
+                try {spresense.time();} catch(...){}  // タイムスタンプを表示
+                try {vsys.read();} catch(...){}  // 電源電圧を表示
                 try
                 {
-                    led_pico.on();
-                    print("\nfase : %d\n", int(fase));  // フェーズを表示
-                    spresense.time();  // タイムスタンプを表示
-                    vsys.read();  // 電源電圧を表示
                     if (is_success)  // もし，前回のループがうまくいったなら
                     {
                         recent_successful = get_absolute_time();
@@ -217,7 +217,7 @@ int main()
                                 {
                                     auto bno_data = bno055.read();  // BNO055(9軸)から受信
                                     //条件3：静止　→遠距離フェーズへ
-                                    if(is_stationary(std::get<0>(bno_data)))
+                                    if(is_stationary(std::get<0>(bno_data), std::get<3>(bno_data)))
                                     {
                                         fase=Fase::Ldistance;
                                         print("Shifts to the long distance phase under condition 3\n");  // 条件3で遠距離フェーズに移行します
@@ -282,15 +282,19 @@ int main()
                             //------ちゃんと動くか確認するためのコード-----
                             auto bno_data = bno055.read();
                             auto gps_data = spresense.gps();
-                            MagneticFluxDensity<sc::Unit::T> magnetic = std::get<2>(bno_data);
-                            double t_lon = 130.903474;//ゴールの経度(自分たちで決めて書き換えてね)
-                            double t_lat = 30.413975;//ゴールの緯度
+                            double t_lon = 130.9038662;//ゴールの経度(自分たちで決めて書き換えてね)
+                            double t_lat = 30.4139514;//ゴールの緯度
                             double m_lon = double(std::get<1>(gps_data));//自分の経度(ここはGPSで手に入れたものが入るように書き換えて)
                             double m_lat = double(std::get<0>(gps_data));//自分の緯度
+                            // double t_lon = 130.9576844;//ゴールの経度(自分たちで決めて書き換えてね)
+                            // double t_lat = 30.3750261;//ゴールの緯度
+                            // double m_lon = 130.9576844;//自分の経度(ここはGPSで手に入れたものが入るように書き換えて)
+                            // double m_lat = 30.3750261;//自分の緯度
                             double t_lon_rad = deg_to_rad(t_lon);
                             double t_lat_rad = deg_to_rad(t_lat);
                             double m_lon_rad = deg_to_rad(m_lon);
                             double m_lat_rad = deg_to_rad(m_lat);
+                            MagneticFluxDensity<sc::Unit::T> magnetic = std::get<2>(bno_data);
                             //-------------------------------------------
 
                             //機体の正面のベクトルを作る.ただし、bnoの都合上、後ろがxの正の向きで左がyの正の向き、下がzの正の向きとなっている
@@ -418,7 +422,7 @@ int main()
                                 sleep(0.1_s);
                                 // motor.stop();
                             }
-                            if(distance < 5) //条件1：ゴールとの距離が5ｍ未満　→近距離フェーズへ
+                            if(distance < 3.0) //条件1：ゴールとの距離が5ｍ未満　→近距離フェーズへ
                             {
                                 fase=Fase::Sdistance;
                                 motor.stop();
@@ -435,9 +439,14 @@ int main()
                             // もしエラーがでるなら
                             try
                             {
-                                motor.run(1.0, 1.0);  // とりあえず進んでみる
-                                sleep(5_s);
+                                motor.left(1.0);  // とりあえず進んでみる
+                                sleep(0.3_s);
                                 motor.stop();
+                                sleep(3_s);
+                                motor.right(1.0);
+                                sleep(0.3_s);
+                                motor.stop();
+                                sleep(3_s);
                             }
                             catch(const std::exception& e){print(e.what());}                            
                         }
@@ -459,19 +468,19 @@ int main()
                             
                             if(camera_data == Cam::Center)//ゴールがカメラの真ん中
                             {
-                                print("cam:center\n");
                                 //少し進む
-                                motor.forward(1.0);
-                                sleep(1_s);
-                                motor.forward(0);
+                                // motor.forward(1.0);
+                                // sleep(1_s);
+                                // motor.forward(0);
                                 //超音波でゴール検知　→ゴール    
-                                double hcsr_data_average = 0;
-                                for(int i=0;i<10;++i)//超音波の値の平均
-                                {
-                                    hcsr_data_average += double(hcsr04.read());
-                                }
-                                hcsr_data_average/=10.0;
-                                if(hcsr_data_average<0.2)//0.2m以内でゴール
+                                // double hcsr_data_average = 0;
+                                // for(int i=0;i<10;++i)//超音波の値の平均
+                                // {
+                                //     hcsr_data_average += double(hcsr04.read());
+                                // }
+                                // hcsr_data_average/=10.0;
+
+                                if(hcsr04.read() < 0.2_m)//0.2m以内でゴール
                                 {
                                     speaker.play_mario();
                                     print("goal\n");
@@ -483,26 +492,23 @@ int main()
                             }
                             else if(camera_data == Cam::Right)//ゴールがカメラの右
                             {
-                                print("cam:right\n");
                                 motor.right(1.0); 
-                                sleep(1_s);
-                                motor.right(0); 
+                                sleep(0.1_s);
+                                // motor.right(0); 
                                 break;
                             }
                             else if(camera_data == Cam::Left)//ゴールがカメラの左
                             {
-                                print("cam:left\n");
                                 motor.left(1.0); 
-                                sleep(1_s);
-                                motor.left(0); 
+                                sleep(0.1_s);
+                                // motor.left(0); 
                                 break;
                             }
                             else//ゴールがみつからない
                             {
-                                print("cam:none\n");
-                                motor.right(1.0); 
-                                sleep(1_s);
-                                motor.right(0); 
+                                motor.stop(); 
+                                sleep(0.1_s);
+                                // motor.right(0); 
                                 break;
                             }
                         }
@@ -512,34 +518,34 @@ int main()
                             is_success = false;
                             led_pico.off();
                             // もしエラーが出続けているなら超音波センサだけ使う
-                            if (absolute_time_diff_us(recent_successful, get_absolute_time()) > 60*1000*1000)
-                            {
-                                double hcsr_data_average = 0;
-                                for(int i=0;i<10;++i)//超音波の値の平均
-                                {
-                                    hcsr_data_average += double(hcsr04.read());
-                                }
-                                hcsr_data_average/=10.0;
-                                if(5.0>hcsr_data_average&&hcsr_data_average>0.2){       //0.2m以上の時は前に進む
-                                    motor.forward(1.0);
-                                    sleep(0.5_s);
-                                    break;
-                                }
-                                else if(hcsr_data_average<0.2)//0.2m以内でゴール
-                                {
-                                    print("goal\n");
-                                    while(true)
-                                    {
-                                        ;
-                                    }
-                                    break;
-                                }
-                                else{                       //ゴールが見つからない時は右に曲がる
-                                    motor.right(1.0);
-                                    sleep(0.5_s);
-                                    break;
-                                }
-                            }
+                            // if (absolute_time_diff_us(recent_successful, get_absolute_time()) > 60*1000*1000)
+                            // {
+                            //     double hcsr_data_average = 0;
+                            //     for(int i=0;i<10;++i)//超音波の値の平均
+                            //     {
+                            //         hcsr_data_average += double(hcsr04.read());
+                            //     }
+                            //     hcsr_data_average/=10.0;
+                            //     if(5.0>hcsr_data_average&&hcsr_data_average>0.2){       //0.2m以上の時は前に進む
+                            //         motor.forward(1.0);
+                            //         sleep(0.5_s);
+                            //         break;
+                            //     }
+                            //     else if(hcsr_data_average<0.2)//0.2m以内でゴール
+                            //     {
+                            //         print("goal\n");
+                            //         while(true)
+                            //         {
+                            //             ;
+                            //         }
+                            //         break;
+                            //     }
+                            //     else{                       //ゴールが見つからない時は右に曲がる
+                            //         motor.right(1.0);
+                            //         sleep(0.5_s);
+                            //         break;
+                            //     }
+                            // }
                         }
                         break;  // 保険のbreak
                     }

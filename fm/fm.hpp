@@ -56,9 +56,9 @@ bool is_free_fall(const Acceleration<Unit::m_s2>& line_acce, const Acceleration<
 }
 
 //! @brief 静止しているかを判定
-bool is_stationary(const Acceleration<Unit::m_s2>& line_acce)
+bool is_stationary(const Acceleration<Unit::m_s2>& line_acce, const AngularVelocity<Unit::rad_s>& gyro)
 {
-    if (line_acce.magnitude() < 0.8_m_s2 && (sleep(1_s), (line_acce.magnitude() < 0.8_m_s2)))  // 線形加速度の大きさが0.8以下なら，静止しているとみなす
+    if ((line_acce.magnitude()<0.8_m_s2 && gyro.magnitude()<0.5_rad_s) && (sleep(0.5_s), (line_acce.magnitude()<0.8_m_s2 && gyro.magnitude()<0.5_rad_s)) && (sleep(0.5_s), (line_acce.magnitude()<0.8_m_s2 && gyro.magnitude()<0.5_rad_s)))  // 線形加速度の大きさが0.8以下なら，静止しているとみなす
     {
         return true;
     } else {

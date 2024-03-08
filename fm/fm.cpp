@@ -506,7 +506,41 @@ int main()
                                 break;
                             }
                         }
-                        catch(const std::exception& e) { print(e.what()); is_success = false; led_pico.off(); }
+                        catch(const std::exception& e)
+                        {
+                            print(e.what());
+                            is_success = false;
+                            led_pico.off();
+                            // もしエラーが出続けているなら超音波センサだけ使う
+                            if (absolute_time_diff_us(recent_successful, get_absolute_time()) > 60*1000*1000)
+                            {
+                                double hcsr_data_average = 0;
+                                for(int i=0;i<10;++i)//超音波の値の平均
+                                {
+                                    hcsr_data_average += double(hcsr04.read());
+                                }
+                                hcsr_data_average/=10.0;
+                                if(5.0>hcsr_data_average&&hcsr_data_average>0.2){       //0.2m以上の時は前に進む
+                                    motor.forward(1.0);
+                                    sleep(0.5_s);
+                                    break;
+                                }
+                                else if(hcsr_data_average<0.2)//0.2m以内でゴール
+                                {
+                                    print("goal\n");
+                                    while(true)
+                                    {
+                                        ;
+                                    }
+                                    break;
+                                }
+                                else{                       //ゴールが見つからない時は右に曲がる
+                                    motor.right(1.0);
+                                    sleep(0.5_s);
+                                    break;
+                                }
+                            }
+                        }
                         break;  // 保険のbreak
                     }
 

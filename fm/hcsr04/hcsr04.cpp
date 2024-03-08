@@ -47,34 +47,45 @@ Length<Unit::m> HCSR04::read()
     #endif
     int temperature=20,humidity=60;
     static double old_distance;
-    double distance;
-    // trigger
-    // gpio_put(28, 1);
-    _out_pin.on();
-    busy_wait_us(12);
-    // gpio_put(28, 0);
-    _out_pin.off();
+    double distance[3];
 
-    // wait
-    busy_wait_ms(100);
-
-    if (absolute_time_diff_us(get_absolute_time(), dn_edge_time) > 100*1000)
+    for (int i=0; i<3; ++i)
     {
-        throw std::runtime_error(f_err(__FILE__, __LINE__, "Distance measurement failed"));  // 距離の測定に失敗しました
-    }
-    
-    distance=((331.4+(0.606*temperature)+(0.0124*humidity))*(dtime*milli/2.0)*milli);
+        // trigger
+        // gpio_put(28, 1);
+        _out_pin.on();
+        busy_wait_us(12);
+        // gpio_put(28, 0);
+        _out_pin.off();
 
-    // 前回と全く同じ値だったら測定に失敗したとみなす
-    if (old_distance == distance)
-    {
-        throw std::runtime_error(f_err(__FILE__, __LINE__, "Distance measurement failed"));  // 距離の測定に失敗しました
-    }
-    old_distance = distance;
+        // wait
+        busy_wait_ms(86);
 
-    print("hcsr_read_data:%f\n", distance);
+        if (absolute_time_diff_us(get_absolute_time(), dn_edge_time) > 100*1000)
+        {
+            throw std::runtime_error(f_err(__FILE__, __LINE__, "Distance measurement failed"));  // 距離の測定に失敗しました
+        }
+        
+        distance[i]=((331.4+(0.606*temperature)+(0.0124*humidity))*(dtime*milli/2.0)*milli);
+
+        // 前回と全く同じ値だったら測定に失敗したとみなす
+        if (old_distance == distance[i])
+        {
+            throw std::runtime_error(f_err(__FILE__, __LINE__, "Distance measurement failed"));  // 距離の測定に失敗しました
+        }
+        old_distance = distance[i];
+
+        if (distance[i] > 12.0)
+        {
+            throw std::runtime_error(f_err(__FILE__, __LINE__, "Distance measurement failed"));  // 距離の測定に失敗しました
+        }
+    }
+
+    double distance_med = median(distance[0], distance[1], distance[2]);
+
+    print("hcsr_read_data:%f\n", distance_med);
     
-    return Length<Unit::m>(distance);
+    return Length<Unit::m>(distance_med);
 }
 
 

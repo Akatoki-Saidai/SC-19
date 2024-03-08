@@ -478,13 +478,13 @@ uint16_t CountRedPixel(CamImage img, uint16_t zone_begin, uint16_t zone_end){
       // Serial.println("rgbmax = rgbmin");
     }
     else if (rgbmax == red_treat){
-      hue = 60 * ((green_treat - red_treat) / (rgbmax - rgbmin));
+      hue = (60 * ((green_treat - red_treat) / (rgbmax - rgbmin)));
     }
     else if (rgbmax == green_treat){
-      hue = 60 * ((blue_treat - green_treat) / (rgbmax - rgbmin)) + 120;
+      hue = (60 * ((blue_treat - green_treat) / (rgbmax - rgbmin))) + 120;
     }
     else if (rgbmax == blue_treat){
-      hue = 60 * ((red_treat - blue_treat) / rgbmax - rgbmin) + 240;
+      hue = (60 * ((red_treat - blue_treat) / (rgbmax - rgbmin))) + 240;
     }
     else{
       Serial.println("Unexpected error occured while caluculate HSV");
@@ -496,10 +496,10 @@ uint16_t CountRedPixel(CamImage img, uint16_t zone_begin, uint16_t zone_end){
     float sat = (rgbmax - rgbmin) / rgbmax;
     float val = rgbmax;
     
-    float hue_min = 340.0;
-    float hue_max = 20.0;
-    float sat_min = 0.70;
-    float val_min = 0.;
+    float hue_min = 342.0;
+    float hue_max = 19.0;
+    float sat_min = 0.67;
+    float val_min = 0.64;
     // 338 22 0.46 0.41
 
     if (((hue <= hue_max) && (sat >= sat_min) && (val >= val_min)) || ((hue >= hue_min) && (sat >= sat_min) && (val >= val_min))){
@@ -631,7 +631,7 @@ uint8_t red_detect(CamImage img) {
 
   // 領域分け
   uint16_t img_width = img.getWidth();
-  uint16_t center_begin = ( ( img_width / 2 ) - (img_width / 6) ) + 1;
+  uint16_t center_begin = ((img_width / 2) - (img_width / 6)) + 1;
   uint16_t right_begin = (img_width / 2) + (img_width / 6);
   
   uint16_t left_red;
@@ -642,14 +642,14 @@ uint8_t red_detect(CamImage img) {
   uint8_t result = 0;
   
   // カメラが反対のため指示を反転
-  right_red = CountRedPixel(img, 1, center_begin - 1 );
+  right_red = CountRedPixel(img, 1, center_begin - 1);
   Serial.print("Right: ");
   Serial.println(right_red);
   I2Cprint("Right: ");
   I2Cprint(right_red);
   I2Cprint("\n");
   
-  center_red = CountRedPixel(img, center_begin, right_begin - 1 );
+  center_red = CountRedPixel(img, center_begin, right_begin - 1);
   Serial.print("Center: ");
   Serial.println(center_red);
   I2Cprint("Center: ");
@@ -670,7 +670,7 @@ uint8_t red_detect(CamImage img) {
   if((right_red == 0) && (center_red == 0) && (left_red == 0)){
     Serial.println("Requiring reset value");
     I2Cprint("Requiring reset value");
-    result = 4;
+    result = 5;
   }
   else if (right_red == left_red || right_red == center_red || left_red == center_red){
     Serial.println("Failed judgement");
@@ -678,7 +678,7 @@ uint8_t red_detect(CamImage img) {
     Watchdog.kick();
     result = 4;
   }
-  else if ((left_red + center_red + right_red) <= 500){
+  else if ((left_red + center_red + right_red) <= 200){
     Serial.println("Not found");
     I2Cprint("Not found\n");
     Watchdog.kick();
@@ -889,6 +889,7 @@ void loop(){
 
         if (pico_message == "CameraStart"){
           phase = 1;
+          break;
         }
       }
 

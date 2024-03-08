@@ -496,10 +496,10 @@ uint16_t CountRedPixel(CamImage img, uint16_t zone_begin, uint16_t zone_end){
     float sat = (rgbmax - rgbmin) / rgbmax;
     float val = rgbmax;
     
-    float hue_min = 338.0;
-    float hue_max = 22.0;
-    float sat_min = 0.46;
-    float val_min = 0.41;
+    float hue_min = 340.0;
+    float hue_max = 20.0;
+    float sat_min = 0.70;
+    float val_min = 0.;
     // 338 22 0.46 0.41
 
     if (((hue <= hue_max) && (sat >= sat_min) && (val >= val_min)) || ((hue >= hue_min) && (sat >= sat_min) && (val >= val_min))){
@@ -631,8 +631,8 @@ uint8_t red_detect(CamImage img) {
 
   // 領域分け
   uint16_t img_width = img.getWidth();
-  uint16_t center_begin = ( ( img_width / 2 ) - (img_width / 8) ) + 1;
-  uint16_t right_begin = (img_width / 2) + (img_width / 8);
+  uint16_t center_begin = ( ( img_width / 2 ) - (img_width / 6) ) + 1;
+  uint16_t right_begin = (img_width / 2) + (img_width / 6);
   
   uint16_t left_red;
   uint16_t center_red;
@@ -678,7 +678,7 @@ uint8_t red_detect(CamImage img) {
     Watchdog.kick();
     result = 4;
   }
-  else if ((left_red + center_red + right_red) <= 10){
+  else if ((left_red + center_red + right_red) <= 500){
     Serial.println("Not found");
     I2Cprint("Not found\n");
     Watchdog.kick();

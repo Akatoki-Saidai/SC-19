@@ -131,8 +131,8 @@ int main()
                             led_red.off();
                             led_green.off();
 
-                            //条件1：開始から４分以上　→落下フェーズへ
-                            if((absolute_time_diff_us(start_time, get_absolute_time())>240*1000*1000))
+                            //条件1：開始から10分以上　→落下フェーズへ
+                            if((absolute_time_diff_us(start_time, get_absolute_time())>13*60*1000*1000))
                             {
                                 fase=Fase::Fall;
                                 print("Shifts to the falling phase under condition 1\n");  // 条件1で落下フェーズに移行します
@@ -140,7 +140,7 @@ int main()
                                 break;
                             }
                             //条件2：エラー２分以上　→落下フェーズへ
-                            if (absolute_time_diff_us(recent_successful, get_absolute_time()) > 120*1000*1000)
+                            if (absolute_time_diff_us(recent_successful, get_absolute_time()) > 11*60*1000*1000)
                             {
                                 fase=Fase::Fall;
                                 print("Shifts to the falling phase under condition 2\n");  // 条件2で落下フェーズに移行します
@@ -154,7 +154,8 @@ int main()
                                 Pressure<Unit::Pa> pressure = std::get<0>(bme_data);  // 気圧
                                 Temperature<Unit::degC> temperature = std::get<2>(bme_data);  // 気温
                                 Altitude<Unit::m> altitude(pressure, temperature);
-                                if((absolute_time_diff_us(start_time, get_absolute_time())>120*1000*1000)&&(altitude<5_m))
+                                print("altitude:%f\n", double(altitude));
+                                if((absolute_time_diff_us(start_time, get_absolute_time())>7*60*1000*1000)&&(altitude<5_m))
                                 {
                                     fase=Fase::Fall;
                                     print("Shifts to the falling phase under condition 3\n");  // 条件3で落下フェーズに移行します
@@ -168,7 +169,7 @@ int main()
                                 //条件4：照度によりキャリア展開検知&&自由落下　→落下フェーズへ
                                 auto njl_data = njl5513r.read();
                                 auto bno_data = bno055.read();
-                                if((njl_data>2500_lx)&&(is_free_fall(std::get<0>(bno_data), std::get<1>(bno_data))))
+                                if((njl_data>4500_lx)&&(is_free_fall(std::get<0>(bno_data), std::get<1>(bno_data))))
                                 {
                                     fase=Fase::Fall;
                                     print("Shifts to the falling phase under condition 4\n");  // 条件4で落下フェーズに移行します
@@ -193,14 +194,14 @@ int main()
                             led_green.on();
 
                             //条件1：電源オンから5分以上経過　→遠距離フェーズへ
-                            if(absolute_time_diff_us(start_time, get_absolute_time())>300*1000*1000)
+                            if(absolute_time_diff_us(start_time, get_absolute_time())>16*60*1000*1000)
                             {
                                 fase=Fase::Ldistance;
                                 print("Shifts to the long distance phase under condition 1\n");  // 条件1で遠距離フェーズに移行します
                                 recent_successful = get_absolute_time();
                             }
                             //条件2：エラーが2分以上続く　→遠距離フェーズへ
-                            if(absolute_time_diff_us(recent_successful, get_absolute_time()) > 120*1000*1000){
+                            if(absolute_time_diff_us(recent_successful, get_absolute_time()) > 3*60*1000*1000){
                                 fase=Fase::Ldistance;
                                 print("Shifts to the long distance phase under condition 2\n");  // 条件2で遠距離フェーズに移行します
                                 recent_successful = get_absolute_time();
@@ -233,17 +234,17 @@ int main()
                             {
                                 speaker.play_hogwarts();  //念のため待機しておく
 
-                                if(para_separate.read() == false)  //パラシュートが取れていない場合、動いてみる？
-                                {
-                                    print("para:toretenai\n");
-                                    motor.forward(1.0);
-                                    sleep(1_s);
-                                    motor.forward(-1.0);
-                                    sleep(1_s);
-                                    motor.forward(0);
-                                } else {
-                                    print("para:toreteiru\n");
-                                }
+                                // if(para_separate.read() == false)  //パラシュートが取れていない場合、動いてみる？
+                                // {
+                                //     print("para:toretenai\n");
+                                //     motor.forward(1.0);
+                                //     sleep(1_s);
+                                //     motor.forward(-1.0);
+                                //     sleep(1_s);6
+                                //     motor.forward(0);
+                                // } else {
+                                //     print("para:toreteiru\n");
+                                // }
                                 
                                 auto bno_data = bno055.read();  // BNO055(9軸)から受信
                                 Acceleration<Unit::m_s2> gravity_acceleration = std::get<1>(bno_data);//重力加速度取得
@@ -282,8 +283,10 @@ int main()
                             //------ちゃんと動くか確認するためのコード-----
                             auto bno_data = bno055.read();
                             auto gps_data = spresense.gps();
-                            double t_lon = 130.9038662;//ゴールの経度(自分たちで決めて書き換えてね)
-                            double t_lat = 30.4139514;//ゴールの緯度
+                            // double t_lon = 130.9600102;//ゴールの経度 (google)
+                            // double t_lat = 30.3742469;//ゴールの緯度 (google)
+                            double t_lon = 130.95994488;//ゴールの経度(自分たちで決めて書き換えてね)
+                            double t_lat = 30.37427937;//ゴールの緯度
                             double m_lon = double(std::get<1>(gps_data));//自分の経度(ここはGPSで手に入れたものが入るように書き換えて)
                             double m_lat = double(std::get<0>(gps_data));//自分の緯度
                             // double t_lon = 130.9576844;//ゴールの経度(自分たちで決めて書き換えてね)
@@ -440,11 +443,11 @@ int main()
                             try
                             {
                                 motor.left(1.0);  // とりあえず進んでみる
-                                sleep(0.3_s);
+                                sleep(0.4_s);
                                 motor.stop();
                                 sleep(3_s);
                                 motor.right(1.0);
-                                sleep(0.3_s);
+                                sleep(0.4_s);
                                 motor.stop();
                                 sleep(3_s);
                             }
@@ -512,41 +515,7 @@ int main()
                                 break;
                             }
                         }
-                        catch(const std::exception& e)
-                        {
-                            print(e.what());
-                            is_success = false;
-                            led_pico.off();
-                            // もしエラーが出続けているなら超音波センサだけ使う
-                            // if (absolute_time_diff_us(recent_successful, get_absolute_time()) > 60*1000*1000)
-                            // {
-                            //     double hcsr_data_average = 0;
-                            //     for(int i=0;i<10;++i)//超音波の値の平均
-                            //     {
-                            //         hcsr_data_average += double(hcsr04.read());
-                            //     }
-                            //     hcsr_data_average/=10.0;
-                            //     if(5.0>hcsr_data_average&&hcsr_data_average>0.2){       //0.2m以上の時は前に進む
-                            //         motor.forward(1.0);
-                            //         sleep(0.5_s);
-                            //         break;
-                            //     }
-                            //     else if(hcsr_data_average<0.2)//0.2m以内でゴール
-                            //     {
-                            //         print("goal\n");
-                            //         while(true)
-                            //         {
-                            //             ;
-                            //         }
-                            //         break;
-                            //     }
-                            //     else{                       //ゴールが見つからない時は右に曲がる
-                            //         motor.right(1.0);
-                            //         sleep(0.5_s);
-                            //         break;
-                            //     }
-                            // }
-                        }
+                        catch(const std::exception& e) { print(e.what()); is_success = false; led_pico.off(); }
                         break;  // 保険のbreak
                     }
 

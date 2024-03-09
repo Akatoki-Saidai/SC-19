@@ -93,7 +93,7 @@ public:
         #ifndef NODEBUG
             std::cout << "\t [ func " << __FILE__ << " : " << __LINE__ << " ] " << std::endl; 
         #endif
-        constexpr double keisuu = 0.9;  // ちょっと推進力を落とす
+        constexpr double keisuu = 1.0;  // ちょっと推進力を落とす
         _left_motor.run(left_speed * keisuu);
         _right_motor.run(right_speed * keisuu);
     }

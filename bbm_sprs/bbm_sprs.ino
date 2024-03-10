@@ -496,10 +496,10 @@ uint16_t CountRedPixel(CamImage img, uint16_t zone_begin, uint16_t zone_end){
     float sat = (rgbmax - rgbmin) / rgbmax;
     float val = rgbmax;
     
-    float hue_min = 342.0;
+    float hue_min = 337.0;
     float hue_max = 19.0;
-    float sat_min = 0.67;
-    float val_min = 0.64;
+    float sat_min = 0.65;
+    float val_min = 0.48;
     // 338 22 0.46 0.41
 
     if (((hue <= hue_max) && (sat >= sat_min) && (val >= val_min)) || ((hue >= hue_min) && (sat >= sat_min) && (val >= val_min))){
@@ -678,7 +678,7 @@ uint8_t red_detect(CamImage img) {
     Watchdog.kick();
     result = 4;
   }
-  else if ((left_red + center_red + right_red) <= 200){
+  else if ((left_red <= 140) && (center_red <= 140) && (right_red <= 140)){
     Serial.println("Not found");
     I2Cprint("Not found\n");
     Watchdog.kick();
@@ -866,7 +866,7 @@ void setup(){
 
   // カメラ起動状態
   Launch = false;
-  phase = 1;
+  phase = 0;
 
   Watchdog.begin();
 
@@ -999,7 +999,7 @@ void loop(){
         delay(10);
         // Serial.println("CameraStart");
         // I2Cprint("CameraStart\n");
-        Watchdog.start(10000);
+        Watchdog.start(5000);
 
         theCamera.startStreaming(true, CamCB);
 
